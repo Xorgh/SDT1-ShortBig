@@ -36,6 +36,6 @@ TransactionType <<enum>>
 
 - StockPriceHistory
   - private final UUID id [PK]
-  - private final String symbol [FK]
+  - private final String stockSymbol [FK]
   - private final double price
   - private final LocalDateTime timestamp

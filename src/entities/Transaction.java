@@ -16,6 +16,7 @@ public class Transaction
   private final double fee;
   private final LocalDateTime timestamp;
 
+//  new object
   public Transaction(UUID portfolioId, String stockSymbol, TransactionType type, int quantity,
       double pricePerShare, double totalAmount, double fee, LocalDateTime timestamp)
   {
@@ -30,19 +31,12 @@ public class Transaction
     this.timestamp = timestamp;
   }
 
-  public Transaction(UUID id, UUID portfolioId, String stockSymbol, TransactionType type, int quantity,
-      double pricePerShare, double totalAmount, double fee, LocalDateTime timestamp)
-  {
-    this.id = id;
-    this.portfolioId = portfolioId;
-    this.stockSymbol = stockSymbol;
-    this.type = type;
-    this.quantity = quantity;
-    this.pricePerShare = pricePerShare;
-    this.totalAmount = totalAmount;
-    this.fee = fee;
-    this.timestamp = timestamp;
-  }
+////  Loaded object
+  //  public Transaction(UUID id)
+  //  {
+  //    this.id = id;
+  //  // TODO How to load data
+  //  }
 
   //  TODO Getters/Setters og andre metoder
 }

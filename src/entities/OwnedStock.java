@@ -9,6 +9,7 @@ public class OwnedStock
     private final String stockSymbol;
     private int numberOfShares;
 
+//    new object
   public OwnedStock(UUID portfolioId, String stockSymbol, int numberOfShares)
   {
     id = UUID.randomUUID();
@@ -17,13 +18,12 @@ public class OwnedStock
     this.numberOfShares = numberOfShares;
   }
 
-  public OwnedStock(UUID id, UUID portfolioId, String stockSymbol, int numberOfShares)
-  {
-    this.id = id;
-    this.portfolioId = portfolioId;
-    this.stockSymbol = stockSymbol;
-    this.numberOfShares = numberOfShares;
-  }
+////  loaded object
+//  public OwnedStock(UUID id)
+//  {
+//    this.id = id;
+////    TODO how to load objects
+//  }
 
 //  TODO Getters/Setters og andre metoder
 }

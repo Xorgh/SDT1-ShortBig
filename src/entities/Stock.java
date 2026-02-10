@@ -7,11 +7,21 @@ public class Stock
   private double currentPrice;
   private StockState currentState;
 
-  public Stock(String symbol, String name)
+  //  new object
+  public Stock(String symbol, String name, double currentPrice, StockState currentState)
   {
     this.symbol = symbol;
     this.name = name;
+    this.currentPrice = currentPrice;
+    this.currentState = currentState;
   }
 
-//  TODO How do we initialize currentPrice and state
+//  //  loaded object
+//  public Stock(String symbol)
+//  {
+//    this.symbol = symbol;
+//    //  TODO how to load objects
+//  }
+
+  //  TODO How do we initialize currentPrice and state
 }

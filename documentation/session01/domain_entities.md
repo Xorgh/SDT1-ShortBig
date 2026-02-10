@@ -3,8 +3,6 @@
 - Portfolio
   - private final UUID id [PK]
   - private double currentBalance
-  - private ArrayList<UUID> ownedStockIds [FK]
-  - private ArrayList<UUID> transactionIds [FK]
   
 - Transaction
   - private final UUID id [PK]
@@ -23,7 +21,7 @@ TransactionType <<enum>>
   
 - OwnedStock
   - private final UUID id [PK]
-  - private UUID portfolioId [FK]
+  - private final UUID portfolioId [FK]
   - private final String stockSymbol [FK]
   - private final int numberOfShares
   
@@ -35,8 +33,9 @@ TransactionType <<enum>>
 
 - StockState  <<enum>>
   
+
 - StockPriceHistory
   - private final UUID id [PK]
   - private final String symbol [FK]
-  - private final int price
+  - private final double price
   - private final LocalDateTime timestamp

@@ -19,10 +19,29 @@ public class StockPriceHistory
     this.timestamp = timestamp;
   }
 
-  ////  loaded object
-  //  public StockPriceHistory(UUID id)
-  //  {
-  //    this.id = id;
-  //  TODO how to load objects.
-  //  }
+  public UUID getId()
+  {
+    return id;
+  }
+
+  public String getStockSymbol()
+  {
+    return stockSymbol;
+  }
+
+  public double getPrice()
+  {
+    return price;
+  }
+
+  public LocalDateTime getTimestamp()
+  {
+    return timestamp;
+  }
+
+  @Override public String toString()
+  {
+    return "StockPriceHistory{" + "id=" + id + ", stockSymbol='" + stockSymbol + '\'' + ", price=" + price
+        + ", timestamp=" + timestamp + '}';
+  }
 }

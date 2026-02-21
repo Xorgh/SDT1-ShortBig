@@ -2,5 +2,8 @@ package entities;
 
 public enum StockState
 {
-//  TODO make up stockstates
+  STABLE,
+  FALLING,
+  RISING,
+  BANKRUPT
 }

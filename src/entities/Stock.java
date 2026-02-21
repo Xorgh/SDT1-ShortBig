@@ -16,12 +16,43 @@ public class Stock
     this.currentState = currentState;
   }
 
-//  //  loaded object
-//  public Stock(String symbol)
-//  {
-//    this.symbol = symbol;
-//    //  TODO how to load objects
-//  }
+  public String getSymbol()
+  {
+    return symbol;
+  }
 
-  //  TODO How do we initialize currentPrice and state
+  public String getName()
+  {
+    return name;
+  }
+
+  public double getCurrentPrice()
+  {
+    return currentPrice;
+  }
+
+  public void setCurrentPrice(double currentPrice)
+  {
+    this.currentPrice = currentPrice;
+  }
+
+  public StockState getCurrentState()
+  {
+    return currentState;
+  }
+
+  public void setCurrentState(StockState currentState)
+  {
+    this.currentState = currentState;
+  }
+
+  @Override
+  public String toString() {
+    return "Stock{" +
+        "symbol='" + symbol + '\'' +
+        ", name='" + name + '\'' +
+        ", currentPrice=" + currentPrice +
+        ", currentState=" + currentState +
+        '}';
+  }
 }

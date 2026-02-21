@@ -18,12 +18,47 @@ public class OwnedStock
     this.numberOfShares = numberOfShares;
   }
 
-////  loaded object
-//  public OwnedStock(UUID id)
-//  {
-//    this.id = id;
-////    TODO how to load objects
-//  }
+// loaded object
+  public OwnedStock(UUID id, UUID portfolioId, String stockSymbol, int numberOfShares)
+  {
+    this.id = id;
+    this.portfolioId = portfolioId;
+    this.stockSymbol = stockSymbol;
+    this.numberOfShares = numberOfShares;
+  }
 
-//  TODO Getters/Setters og andre metoder
+  @Override
+  public String toString() {
+    return "OwnedStock{" +
+        "id=" + id +
+        ", portfolioId=" + portfolioId +
+        ", stockSymbol='" + stockSymbol + '\'' +
+        ", numberOfShares=" + numberOfShares +
+        '}';
+  }
+
+  public UUID getId()
+  {
+    return id;
+  }
+
+  public UUID getPortfolioId()
+  {
+    return portfolioId;
+  }
+
+  public String getStockSymbol()
+  {
+    return stockSymbol;
+  }
+
+  public int getNumberOfShares()
+  {
+    return numberOfShares;
+  }
+
+  public void setNumberOfShares(int numberOfShares)
+  {
+    this.numberOfShares = numberOfShares;
+  }
 }

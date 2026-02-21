@@ -19,6 +19,23 @@ public class Portfolio
     this.currentBalance = currentBalance;
   }
 
-  //  TODO Getters/Setters og andre metoder
-  //  TODO How to load data
+  public UUID getId()
+  {
+    return id;
+  }
+
+  public double getCurrentBalance()
+  {
+    return currentBalance;
+  }
+
+  public void setCurrentBalance(double currentBalance)
+  {
+    this.currentBalance = currentBalance;
+  }
+
+  @Override public String toString()
+  {
+    return "Portfolio{" + "id=" + id + ", currentBalance=" + currentBalance + '}';
+  }
 }

@@ -4,7 +4,11 @@ package shared.logging;
 
 public class Logger
 {
-  private static Logger instance;
+  // Without volatile, the JVM can reorder instructions. Thread A might see
+  // a partially constructed Logger instance.
+  // Volatile ensures that when Thread B reads instance,
+  // it sees the fully initialized object that Thread A created
+  private static volatile Logger instance;
   private LogOutput output;
 
   private Logger()

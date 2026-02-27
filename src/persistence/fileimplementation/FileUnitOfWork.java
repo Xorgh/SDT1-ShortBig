@@ -2,6 +2,8 @@ package persistence.fileimplementation;
 
 import entities.*;
 import persistence.interfaces.UnitOfWork;
+import shared.logging.LogLevel;
+import shared.logging.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +16,7 @@ import java.util.UUID;
 public class FileUnitOfWork implements UnitOfWork
 {
   private final String directoryPath;
+  private final Logger logger = Logger.getInstance();
 
   private List<OwnedStock> ownedStocks;
   private List<Portfolio> portfolios;
@@ -43,7 +46,8 @@ public class FileUnitOfWork implements UnitOfWork
     }
     catch (IOException e)
     {
-      throw new RuntimeException("Failed to read file: " + filePath, e);
+      logger.log(LogLevel.ERROR, e + " - Failed to read file. Filepath: " + filePath);
+      return result; // Return empty list on error
     }
   }
 
@@ -61,11 +65,38 @@ public class FileUnitOfWork implements UnitOfWork
     List<OwnedStock> result = new ArrayList<>();
     for (String[] parts : readAndParseLinesFromFile(getOwnedStockFilePath()))
     {
-      OwnedStock ownedStock = new OwnedStock(UUID.fromString(parts[0]), UUID.fromString(parts[1]), parts[2],
-          Integer.parseInt(parts[3]));
+      OwnedStock ownedStock = new OwnedStock(
+          UUID.fromString(parts[0]),
+          UUID.fromString(parts[1]),
+          parts[2],
+          Integer.parseInt(parts[3])
+      );
       result.add(ownedStock);
     }
     return result;
+  }
+
+  private void saveOwnedStocksToFile()
+  {
+    List<String> lines = new ArrayList<>();
+    for (OwnedStock ownedStock : getOwnedStocks())
+    {
+      String line = String.join("|",
+          ownedStock.getId().toString(),
+          ownedStock.getPortfolioId().toString(),
+          ownedStock.getStockSymbol(),
+          String.valueOf(ownedStock.getNumberOfShares())
+      );
+      lines.add(line);
+    }
+    try
+    {
+      Files.write(Paths.get(getOwnedStockFilePath()), lines);
+    }
+    catch (IOException e)
+    {
+      logger.log(LogLevel.ERROR,e + " Failed to write owned stocks file");
+    }
   }
 
   public List<Portfolio> getPortfolios()
@@ -84,10 +115,34 @@ public class FileUnitOfWork implements UnitOfWork
     List<Portfolio> result = new ArrayList<>();
     for (String[] parts : readAndParseLinesFromFile(getPortfolioFilePath()))
     {
-      Portfolio portfolio = new Portfolio(UUID.fromString(parts[0]), Double.parseDouble(parts[1]));
+      Portfolio portfolio = new Portfolio(
+          UUID.fromString(parts[0]),
+          Double.parseDouble(parts[1])
+      );
       result.add(portfolio);
     }
     return result;
+  }
+
+  private void savePortfoliosToFile()
+  {
+    List<String> lines = new ArrayList<>();
+    for (Portfolio portfolio : getPortfolios())
+    {
+      String line = String.join("|",
+          portfolio.getId().toString(),
+          String.valueOf(portfolio.getCurrentBalance())
+      );
+      lines.add(line);
+    }
+    try
+    {
+      Files.write(Paths.get(getPortfolioFilePath()), lines);
+    }
+    catch (IOException e)
+    {
+      logger.log(LogLevel.ERROR,e + " Failed to write portfolio file");
+    }
   }
 
   public List<Stock> getStocks()
@@ -104,10 +159,38 @@ public class FileUnitOfWork implements UnitOfWork
     List<Stock> result = new ArrayList<>();
     for (String[] parts : readAndParseLinesFromFile(getStockFilePath()))
     {
-      Stock stock = new Stock(parts[0], parts[1], Double.parseDouble(parts[2]), StockState.valueOf(parts[3]));
+      Stock stock = new Stock(
+          parts[0],
+          parts[1],
+          Double.parseDouble(parts[2]),
+          StockState.valueOf(parts[3])
+      );
       result.add(stock);
     }
     return result;
+  }
+
+  private void saveStocksToFile()
+  {
+    List<String> lines = new ArrayList<>();
+    for (Stock stock : getStocks())
+    {
+      String line = String.join("|",
+          stock.getSymbol(),
+          stock.getName(),
+          String.valueOf(stock.getCurrentPrice()),
+          stock.getCurrentState().name()
+      );
+      lines.add(line);
+    }
+    try
+    {
+      Files.write(Paths.get(getStockFilePath()), lines);
+    }
+    catch (IOException e)
+    {
+      logger.log(LogLevel.ERROR,e + " Failed to write stocks file");
+    }
   }
 
   public List<StockPriceHistory> getStockPriceHistoryList()
@@ -126,11 +209,38 @@ public class FileUnitOfWork implements UnitOfWork
     List<StockPriceHistory> result = new ArrayList<>();
     for (String[] parts : readAndParseLinesFromFile(getStockPriceHistoryFilePath()))
     {
-      StockPriceHistory history = new StockPriceHistory(UUID.fromString(parts[0]), parts[1], Double.parseDouble(parts[2]),
-          LocalDateTime.parse(parts[3]));
+      StockPriceHistory history = new StockPriceHistory(
+          UUID.fromString(parts[0]),
+          parts[1],
+          Double.parseDouble(parts[2]),
+          LocalDateTime.parse(parts[3])
+      );
       result.add(history);
     }
     return result;
+  }
+
+  private void saveStockPriceHistoryToFile()
+  {
+    List<String> lines = new ArrayList<>();
+    for (StockPriceHistory history : getStockPriceHistoryList())
+    {
+      String line = String.join("|",
+          history.getId().toString(),
+          history.getStockSymbol(),
+          String.valueOf(history.getPrice()),
+          history.getTimestamp().toString()
+      );
+      lines.add(line);
+    }
+    try
+    {
+      Files.write(Paths.get(getStockPriceHistoryFilePath()), lines);
+    }
+    catch (IOException e)
+    {
+      logger.log(LogLevel.ERROR,e + " Failed to write StockPriceHistory file");
+    }
   }
 
   public List<Transaction> getTransactions()
@@ -165,6 +275,34 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
+  private void saveTransactionToFile()
+  {
+    List<String> lines = new ArrayList<>();
+    for (Transaction transaction : getTransactions())
+    {
+      String line = String.join("|",
+          transaction.getId().toString(),
+          transaction.getPortfolioId().toString(),
+          transaction.getStockSymbol(),
+          transaction.getType().name(),
+          String.valueOf(transaction.getQuantity()),
+          String.valueOf(transaction.getPricePerShare()),
+          String.valueOf(transaction.getTotalAmount()),
+          String.valueOf(transaction.getFee()),
+          transaction.getTimestamp().toString()
+      );
+      lines.add(line);
+    }
+    try
+    {
+      Files.write(Paths.get(getTransactionFilePath()), lines);
+    }
+    catch (IOException e)
+    {
+      logger.log(LogLevel.ERROR,e + " Failed to write transaction file");
+    }
+  }
+
   private String getOwnedStockFilePath()
   {
     return directoryPath + "ownedstocks.txt";
@@ -197,7 +335,11 @@ public class FileUnitOfWork implements UnitOfWork
 
   @Override public void commit()
   {
-
+    if (ownedStocks != null) saveOwnedStocksToFile();
+    if (portfolios != null) savePortfoliosToFile();
+    if (stocks != null) saveStocksToFile();
+    if (stockPriceHistoryList != null) saveStockPriceHistoryToFile();
+    if (transactions != null) saveTransactionToFile();
     resetLists();
   }
 
@@ -214,7 +356,4 @@ public class FileUnitOfWork implements UnitOfWork
     stocks = null;
     transactions = null;
   }
-
-
-//  TODO implement save to files.
 }

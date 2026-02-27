@@ -27,10 +27,10 @@ public class FileUnitOfWork implements UnitOfWork
   public FileUnitOfWork(String directoryPath)
   {
     this.directoryPath = directoryPath;
-    FileStorageInitializer.ensureFilesExist(directoryPath);
+    FileStorageInitializer.initializeFile(directoryPath);
   }
 
-  private List<String[]> readAndParseLinesFromFile(String filePath)
+  private List<String[]> readAndParseLines(String filePath)
   {
     List<String[]> result = new ArrayList<>();
     try
@@ -55,15 +55,15 @@ public class FileUnitOfWork implements UnitOfWork
   {
     if (ownedStocks == null)
     {
-      ownedStocks = loadOwnedStocksFromFile();
+      ownedStocks = loadOwnedStocks();
     }
     return ownedStocks;
   }
 
-  private List<OwnedStock> loadOwnedStocksFromFile()
+  private List<OwnedStock> loadOwnedStocks()
   {
     List<OwnedStock> result = new ArrayList<>();
-    for (String[] parts : readAndParseLinesFromFile(getOwnedStockFilePath()))
+    for (String[] parts : readAndParseLines(getOwnedStockFilePath()))
     {
       OwnedStock ownedStock = new OwnedStock(
           UUID.fromString(parts[0]),
@@ -76,7 +76,7 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
-  private void saveOwnedStocksToFile()
+  private void saveOwnedStocks()
   {
     List<String> lines = new ArrayList<>();
     for (OwnedStock ownedStock : getOwnedStocks())
@@ -104,16 +104,16 @@ public class FileUnitOfWork implements UnitOfWork
     {
       if (portfolios == null)
       {
-        portfolios = loadPortfoliosFromFile();
+        portfolios = loadPortfolios();
       }
       return portfolios;
     }
   }
 
-  private List<Portfolio> loadPortfoliosFromFile()
+  private List<Portfolio> loadPortfolios()
   {
     List<Portfolio> result = new ArrayList<>();
-    for (String[] parts : readAndParseLinesFromFile(getPortfolioFilePath()))
+    for (String[] parts : readAndParseLines(getPortfolioFilePath()))
     {
       Portfolio portfolio = new Portfolio(
           UUID.fromString(parts[0]),
@@ -124,7 +124,7 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
-  private void savePortfoliosToFile()
+  private void savePortfolios()
   {
     List<String> lines = new ArrayList<>();
     for (Portfolio portfolio : getPortfolios())
@@ -149,15 +149,15 @@ public class FileUnitOfWork implements UnitOfWork
   {
     if (stocks == null)
     {
-      stocks = loadStocksFromFile();
+      stocks = loadStocks();
     }
     return stocks;
   }
 
-  private List<Stock> loadStocksFromFile()
+  private List<Stock> loadStocks()
   {
     List<Stock> result = new ArrayList<>();
-    for (String[] parts : readAndParseLinesFromFile(getStockFilePath()))
+    for (String[] parts : readAndParseLines(getStockFilePath()))
     {
       Stock stock = new Stock(
           parts[0],
@@ -170,7 +170,7 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
-  private void saveStocksToFile()
+  private void saveStocks()
   {
     List<String> lines = new ArrayList<>();
     for (Stock stock : getStocks())
@@ -198,16 +198,16 @@ public class FileUnitOfWork implements UnitOfWork
     {
       if (stockPriceHistoryList == null)
       {
-        stockPriceHistoryList = loadStockPriceHistoryFromFile();
+        stockPriceHistoryList = loadStockPriceHistory();
       }
       return stockPriceHistoryList;
     }
   }
 
-  private List<StockPriceHistory> loadStockPriceHistoryFromFile()
+  private List<StockPriceHistory> loadStockPriceHistory()
   {
     List<StockPriceHistory> result = new ArrayList<>();
-    for (String[] parts : readAndParseLinesFromFile(getStockPriceHistoryFilePath()))
+    for (String[] parts : readAndParseLines(getStockPriceHistoryFilePath()))
     {
       StockPriceHistory history = new StockPriceHistory(
           UUID.fromString(parts[0]),
@@ -220,7 +220,7 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
-  private void saveStockPriceHistoryToFile()
+  private void saveStockPriceHistory()
   {
     List<String> lines = new ArrayList<>();
     for (StockPriceHistory history : getStockPriceHistoryList())
@@ -248,16 +248,16 @@ public class FileUnitOfWork implements UnitOfWork
     {
       if (transactions == null)
       {
-        transactions = loadTransactionsFromFile();
+        transactions = loadTransactions();
       }
       return transactions;
     }
   }
 
-  private List<Transaction> loadTransactionsFromFile()
+  private List<Transaction> loadTransactions()
   {
     List<Transaction> result = new ArrayList<>();
-    for (String[] parts : readAndParseLinesFromFile(getTransactionFilePath()))
+    for (String[] parts : readAndParseLines(getTransactionFilePath()))
     {
       Transaction transaction = new Transaction(
           UUID.fromString(parts[0]),
@@ -275,7 +275,7 @@ public class FileUnitOfWork implements UnitOfWork
     return result;
   }
 
-  private void saveTransactionToFile()
+  private void saveTransaction()
   {
     List<String> lines = new ArrayList<>();
     for (Transaction transaction : getTransactions())
@@ -335,11 +335,11 @@ public class FileUnitOfWork implements UnitOfWork
 
   @Override public void commit()
   {
-    if (ownedStocks != null) saveOwnedStocksToFile();
-    if (portfolios != null) savePortfoliosToFile();
-    if (stocks != null) saveStocksToFile();
-    if (stockPriceHistoryList != null) saveStockPriceHistoryToFile();
-    if (transactions != null) saveTransactionToFile();
+    if (ownedStocks != null) saveOwnedStocks();
+    if (portfolios != null) savePortfolios();
+    if (stocks != null) saveStocks();
+    if (stockPriceHistoryList != null) saveStockPriceHistory();
+    if (transactions != null) saveTransaction();
     resetLists();
   }
 

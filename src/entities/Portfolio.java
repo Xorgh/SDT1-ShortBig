@@ -29,9 +29,9 @@ public class Portfolio
     return currentBalance;
   }
 
-  public void setCurrentBalance(double currentBalance)
+  public void setCurrentBalance(double newBalance)
   {
-    this.currentBalance = currentBalance;
+    this.currentBalance = newBalance;
   }
 
   @Override public String toString()

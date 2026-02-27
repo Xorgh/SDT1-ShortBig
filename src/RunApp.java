@@ -1,5 +1,6 @@
 import entities.*;
 import persistence.fileimplementation.*;
+import persistence.interfaces.*;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
@@ -13,11 +14,12 @@ public class RunApp
   FileUnitOfWork uow = new FileUnitOfWork("data/test/");
 
   // Initialize DAOs
-  StockFileDAO stockDAO = new StockFileDAO(uow);
-  PortfolioFileDAO portfolioDAO = new PortfolioFileDAO(uow);
-  OwnedStockFileDAO ownedStockDAO = new OwnedStockFileDAO(uow);
-  TransactionFileDAO transactionDAO = new TransactionFileDAO(uow);
-  StockPriceHistoryFileDAO historyDAO = new StockPriceHistoryFileDAO(uow);
+  StockDAO stockDAO = new StockFileDAO(uow);
+  PortfolioDAO portfolioDAO = new PortfolioFileDAO(uow);
+  OwnedStockDAO ownedStockDAO = new OwnedStockFileDAO(uow);
+  TransactionDAO transactionDAO = new TransactionFileDAO(uow);
+  StockPriceHistoryDAO historyDAO = new StockPriceHistoryFileDAO(uow);
+
 
   // Begin transaction
   uow.begin();
@@ -54,11 +56,11 @@ public class RunApp
 
   // Reload and verify persistence
   FileUnitOfWork verifyUow = new FileUnitOfWork("data/test/");
-  StockFileDAO verifyStockDAO = new StockFileDAO(verifyUow);
-  PortfolioFileDAO verifyPortfolioDAO = new PortfolioFileDAO(verifyUow);
-  OwnedStockFileDAO verifyOwnedStockDAO = new OwnedStockFileDAO(verifyUow);
-  TransactionFileDAO verifyTransactionDAO = new TransactionFileDAO(verifyUow);
-  StockPriceHistoryFileDAO verifyHistoryDAO = new StockPriceHistoryFileDAO(verifyUow);
+  StockDAO verifyStockDAO = new StockFileDAO(verifyUow);
+  PortfolioDAO verifyPortfolioDAO = new PortfolioFileDAO(verifyUow);
+  OwnedStockDAO verifyOwnedStockDAO = new OwnedStockFileDAO(verifyUow);
+  TransactionDAO verifyTransactionDAO = new TransactionFileDAO(verifyUow);
+  StockPriceHistoryDAO verifyHistoryDAO = new StockPriceHistoryFileDAO(verifyUow);
 
   logger.log(LogLevel.INFO, "--- Verifying persisted data via DAOs ---");
   System.out.println("All Stocks: " + verifyStockDAO.getAll());

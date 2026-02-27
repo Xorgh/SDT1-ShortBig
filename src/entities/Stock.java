@@ -31,9 +31,9 @@ public class Stock
     return currentPrice;
   }
 
-  public void setCurrentPrice(double currentPrice)
+  public void setCurrentPrice(double newPrice)
   {
-    this.currentPrice = currentPrice;
+    this.currentPrice = newPrice;
   }
 
   public StockState getCurrentState()
@@ -41,9 +41,9 @@ public class Stock
     return currentState;
   }
 
-  public void setCurrentState(StockState currentState)
+  public void setCurrentState(StockState newState)
   {
-    this.currentState = currentState;
+    this.currentState = newState;
   }
 
   @Override

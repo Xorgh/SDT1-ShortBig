@@ -13,7 +13,7 @@ public class FileStorageInitializer
 {
   private static final Logger logger = Logger.getInstance();
 
-  public static void ensureFilesExist(String directoryPath)
+  public static void initializeFile(String directoryPath)
   {
     List<String> files = List.of(directoryPath + "ownedstocks.txt", directoryPath + "portfolio.txt",
         directoryPath + "stocks.txt", directoryPath + "stockpricehistories.txt", directoryPath + "transactions.txt");

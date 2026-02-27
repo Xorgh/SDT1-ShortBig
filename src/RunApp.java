@@ -1,5 +1,5 @@
 import entities.*;
-import persistence.fileimplementation.FileUnitOfWork;
+import persistence.fileimplementation.*;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
@@ -7,73 +7,64 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class RunApp
+{public static void main(String[] args)
 {
-  public static void main(String[] args)
-  {
-    Logger logger = Logger.getInstance();
-    FileUnitOfWork fileUnitOfWork = new FileUnitOfWork("data/test/");
+  Logger logger = Logger.getInstance();
+  FileUnitOfWork uow = new FileUnitOfWork("data/test/");
 
-    // Test: Modify data and commit
-    fileUnitOfWork.begin();
+  // Initialize DAOs
+  StockFileDAO stockDAO = new StockFileDAO(uow);
+  PortfolioFileDAO portfolioDAO = new PortfolioFileDAO(uow);
+  OwnedStockFileDAO ownedStockDAO = new OwnedStockFileDAO(uow);
+  TransactionFileDAO transactionDAO = new TransactionFileDAO(uow);
+  StockPriceHistoryFileDAO historyDAO = new StockPriceHistoryFileDAO(uow);
 
-    // Add a new stock
-    fileUnitOfWork.getStocks().add(new Stock("TEST", "Test Company", 99.99, StockState.STABLE));
+  // Begin transaction
+  uow.begin();
 
-    // Add a new portfolio
-    UUID portfolioId = UUID.randomUUID();
-    fileUnitOfWork.getPortfolios().add(new Portfolio(portfolioId, 5000.0));
+  // Test DAO create operations
+  stockDAO.create(new Stock("DAO1", "DAO Test Stock", 50.0, StockState.STABLE));
 
-    // Add an owned stock
-    fileUnitOfWork.getOwnedStocks().add(new OwnedStock(UUID.randomUUID(), portfolioId, "TEST", 10));
+  UUID portfolioId = UUID.randomUUID();
+  portfolioDAO.create(new Portfolio(portfolioId, 10000.0));
 
-    // Add a transaction
-    fileUnitOfWork.getTransactions().add(new Transaction(
-        UUID.randomUUID(),
-        portfolioId,
-        "TEST",
-        TransactionType.BUY,
-        10,
-        99.99,
-        999.95,
-        0.05,
-        LocalDateTime.now()
-    ));
+  UUID ownedStockId = UUID.randomUUID();
+  ownedStockDAO.create(new OwnedStock(ownedStockId, portfolioId, "DAO1", 20));
 
-    // Add stock price history
-    fileUnitOfWork.getStockPriceHistoryList().add(new StockPriceHistory(
-        UUID.randomUUID(),
-        "TEST",
-        99.99,
-        LocalDateTime.now()
-    ));
+  UUID transactionId = UUID.randomUUID();
+  transactionDAO.create(new Transaction(
+      transactionId, portfolioId, "DAO1", TransactionType.BUY,
+      20, 50.0, 1000.0, 0.10, LocalDateTime.now()
+  ));
 
-    // Commit changes to files
-    fileUnitOfWork.commit();
-    logger.log(LogLevel.INFO, "Data saved successfully");
+  UUID historyId = UUID.randomUUID();
+  historyDAO.create(new StockPriceHistory(historyId, "DAO1", 50.0, LocalDateTime.now()));
 
-    // Reload and verify
-    FileUnitOfWork verifyUow = new FileUnitOfWork("data/test/");
-    logger.log(LogLevel.INFO, "--- Verifying saved data ---");
+  // Test DAO read operations
+  logger.log(LogLevel.INFO, "--- Testing DAO reads before commit ---");
+  System.out.println("Stock by symbol: " + stockDAO.getBySymbol("DAO1"));
+  System.out.println("Portfolio by id: " + portfolioDAO.getById(portfolioId));
+  System.out.println("OwnedStock by id: " + ownedStockDAO.getById(ownedStockId));
+  System.out.println("Transaction by id: " + transactionDAO.getById(transactionId));
+  System.out.println("History by id: " + historyDAO.getById(historyId));
 
-    for (Stock stock : verifyUow.getStocks())
-    {
-      System.out.println("Stock: " + stock);
-    }
-    for (Portfolio portfolio : verifyUow.getPortfolios())
-    {
-      System.out.println("Portfolio: " + portfolio);
-    }
-    for (OwnedStock ownedStock : verifyUow.getOwnedStocks())
-    {
-      System.out.println("OwnedStock: " + ownedStock);
-    }
-    for (Transaction transaction : verifyUow.getTransactions())
-    {
-      System.out.println("Transaction: " + transaction);
-    }
-    for (StockPriceHistory history : verifyUow.getStockPriceHistoryList())
-    {
-      System.out.println("StockPriceHistory: " + history);
-    }
-  }
+  // Commit to files
+  uow.commit();
+  logger.log(LogLevel.INFO, "Data committed to files");
+
+  // Reload and verify persistence
+  FileUnitOfWork verifyUow = new FileUnitOfWork("data/test/");
+  StockFileDAO verifyStockDAO = new StockFileDAO(verifyUow);
+  PortfolioFileDAO verifyPortfolioDAO = new PortfolioFileDAO(verifyUow);
+  OwnedStockFileDAO verifyOwnedStockDAO = new OwnedStockFileDAO(verifyUow);
+  TransactionFileDAO verifyTransactionDAO = new TransactionFileDAO(verifyUow);
+  StockPriceHistoryFileDAO verifyHistoryDAO = new StockPriceHistoryFileDAO(verifyUow);
+
+  logger.log(LogLevel.INFO, "--- Verifying persisted data via DAOs ---");
+  System.out.println("All Stocks: " + verifyStockDAO.getAll());
+  System.out.println("All Portfolios: " + verifyPortfolioDAO.getAll());
+  System.out.println("All OwnedStocks: " + verifyOwnedStockDAO.getAll());
+  System.out.println("All Transactions: " + verifyTransactionDAO.getAll());
+  System.out.println("All History: " + verifyHistoryDAO.getAll());
+}
 }

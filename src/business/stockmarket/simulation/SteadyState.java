@@ -1,6 +1,5 @@
 package business.stockmarket.simulation;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SteadyState implements LiveStockState

@@ -25,6 +25,18 @@ public class LiveStock
     logger.log(LogLevel.INFO, String.format("[%s] Initialized at %.2f", symbol, currentPrice));
   }
 
+  public LiveStock(String symbol, double currentPrice, LiveStockState currentState)
+  {
+    this.symbol = symbol;
+    this.currentPrice = currentPrice;
+    this.currentState = currentState;
+    this.consecutiveTicksInState = 0;
+    // TODO last current tick lost when reloading, do I care?
+    this.transitionManager = new TransitionManager();
+
+    logger.log(LogLevel.INFO, String.format("[%s] Loaded at %.2f", symbol, currentPrice));
+  }
+
   public void updatePrice()
   {
     double previousPrice = currentPrice;

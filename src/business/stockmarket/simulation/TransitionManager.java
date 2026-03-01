@@ -169,3 +169,4 @@ public class TransitionManager
 }
 
 
+// TODO Improve Stock simulation - Skewed towards growing it seems at the moment.

@@ -21,13 +21,19 @@ public enum AppConfig
 {
   INSTANCE;
 
+  // General configuration
   private final int startingBalance;
   private final double transactionFee;
   private final int updateFrequencyInMs;
   private final double stockResetValue;
+
+  // Price volatility probabilities
   private final double reversePriceChangeChance;
   private final double rapidPriceChangeChance;
   private final double defaultPriceChangeChance;
+
+  // Bankruptcy
+  private final int bankruptStateTimeoutTicks;
 
   // State transition configuration
   private final double stateTransitionIncrementPerTick;
@@ -51,17 +57,23 @@ public enum AppConfig
 
   AppConfig()
   {
+    // General configuration
     this.startingBalance = 10000;
     this.transactionFee = 0.05;
     this.updateFrequencyInMs = 1000;
     this.stockResetValue = 100.0;
+
+    // Price volatility probabilities
     this.reversePriceChangeChance = 0.05;
     this.rapidPriceChangeChance = 0.05;
     this.defaultPriceChangeChance = 1 - ( reversePriceChangeChance + rapidPriceChangeChance);
 
+    // Bankruptcy configuration
+    this.bankruptStateTimeoutTicks = 20;
+
     // State transition configuration
-    this.stateTransitionIncrementPerTick = 0.05;
-    this.maxConsecutiveTicksBeforeForceTransition = 10;
+    this.stateTransitionIncrementPerTick = 0.10;
+    this.maxConsecutiveTicksBeforeForceTransition = 5;
 
     // Base probabilities for Steady state (80% stay, 10% growing, 10% declining)
     this.steadyToSteadyBase = 0.80;
@@ -167,5 +179,10 @@ public enum AppConfig
   public double getDecliningToGrowingBase()
   {
     return decliningToGrowingBase;
+  }
+
+  public int getBankruptStateTimeoutTicks()
+  {
+    return bankruptStateTimeoutTicks;
   }
 }

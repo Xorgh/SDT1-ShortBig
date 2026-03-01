@@ -1,14 +1,13 @@
 package business.stockmarket.simulation;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SteadyState implements LiveStockState
 {
-  private static final Random random = new Random();
-
   @Override public double calculatePriceChange()
   {
-    double change = (random.nextDouble() * 2-1) / 100; // +- 0.01
+    double change = (ThreadLocalRandom.current().nextDouble() * 2-1) / 100; // +- 0.01
     return change;
   }
 

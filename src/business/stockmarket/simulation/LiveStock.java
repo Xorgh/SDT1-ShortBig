@@ -30,7 +30,7 @@ public class LiveStock
     {
       currentPrice = 0;
       setState(new BankruptState());
-      return;
+      // Don't return early - let state transition logic handle timeout
     }
 
     // Increment consecutive ticks counter
@@ -43,6 +43,12 @@ public class LiveStock
     if (newState.getClass() != currentState.getClass())
     {
       setState(newState);
+
+      // Reset price when transitioning to ResetState
+      if (newState instanceof ResetState)
+      {
+        currentPrice = AppConfig.INSTANCE.getStockResetValue();
+      }
     }
   }
 

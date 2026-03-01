@@ -3,11 +3,10 @@ package business.stockmarket.simulation;
 import shared.configuration.AppConfig;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TransitionManager
 {
-  private static final Random random = new Random();
-
   /**
    * Determines the next state based on current state and consecutive ticks.
    * Probabilities increase for transitioning out as consecutive ticks accumulate.
@@ -19,10 +18,20 @@ public class TransitionManager
    */
   public LiveStockState getNextState(LiveStockState currentState, int consecutiveTicks)
   {
-    // Bankrupt and Reset states don't transition
-    if (currentState instanceof BankruptState || currentState instanceof ResetState)
+    // Handle BankruptState timeout
+    if (currentState instanceof BankruptState)
     {
-      return currentState;
+      if (consecutiveTicks >= AppConfig.INSTANCE.getBankruptStateTimeoutTicks())
+      {
+        return new ResetState();
+      }
+      return currentState; // Stay bankrupt until timeout
+    }
+
+    // ResetState doesn't transition
+    if (currentState instanceof ResetState)
+    {
+      return new SteadyState();
     }
 
     // Calculate adjustment based on consecutive ticks
@@ -61,7 +70,7 @@ public class TransitionManager
     if (currentState instanceof SteadyState)
     {
       // 50/50 split between Growing and Declining
-      return random.nextDouble() < 0.5 ? new GrowingState() : new DecliningState();
+      return ThreadLocalRandom.current().nextDouble() < 0.5 ? new GrowingState() : new DecliningState();
     }
     else if (currentState instanceof GrowingState || currentState instanceof DecliningState)
     {
@@ -86,7 +95,7 @@ public class TransitionManager
     double growingProbability = AppConfig.INSTANCE.getSteadyToGrowingBase() + halfAdjustment;
     double decliningProbability = AppConfig.INSTANCE.getSteadyToDecliningBase() + halfAdjustment;
 
-    double roll = random.nextDouble();
+    double roll = ThreadLocalRandom.current().nextDouble();
 
     if (roll < stayProbability)
     {
@@ -114,7 +123,7 @@ public class TransitionManager
     double steadyProbability = AppConfig.INSTANCE.getGrowingToSteadyBase() + adjustment;
     double decliningProbability = AppConfig.INSTANCE.getGrowingToDecliningBase();
 
-    double roll = random.nextDouble();
+    double roll = ThreadLocalRandom.current().nextDouble();
 
     if (roll < stayProbability)
     {
@@ -142,7 +151,7 @@ public class TransitionManager
     double steadyProbability = AppConfig.INSTANCE.getDecliningToSteadyBase() + adjustment;
     double growingProbability = AppConfig.INSTANCE.getDecliningToGrowingBase();
 
-    double roll = random.nextDouble();
+    double roll = ThreadLocalRandom.current().nextDouble();
 
     if (roll < stayProbability)
     {

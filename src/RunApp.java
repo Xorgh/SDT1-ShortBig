@@ -3,6 +3,7 @@ import persistence.fileimplementation.*;
 import persistence.interfaces.*;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
+import business.stockmarket.simulation.LiveStock;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class RunApp
   uow.begin();
 
   // Test DAO create operations
-  stockDAO.create(new Stock("DAO1", "DAO Test Stock", 50.0, StockState.STABLE));
+  stockDAO.create(new Stock("DAO1", "DAO Test Stock", 50.0, StockState.STEADY));
 
   UUID portfolioId = UUID.randomUUID();
   portfolioDAO.create(new Portfolio(portfolioId, 10000.0));
@@ -68,5 +69,27 @@ public class RunApp
   System.out.println("All OwnedStocks: " + verifyOwnedStockDAO.getAll());
   System.out.println("All Transactions: " + verifyTransactionDAO.getAll());
   System.out.println("All History: " + verifyHistoryDAO.getAll());
+
+  // Test TransitionManager and LiveStock state transitions
+  logger.log(LogLevel.INFO, "--- Testing TransitionManager ---");
+  LiveStock testStock = new LiveStock("TEST");
+
+  System.out.println("\nSimulating 20 price updates to observe state transitions:");
+  for (int i = 0; i < 20; i++)
+  {
+    String beforeState = testStock.getStateName();
+    int ticksBefore = testStock.getConsecutiveTicksInState();
+    double priceBefore = testStock.getCurrentPrice();
+
+    testStock.updatePrice();
+
+    String afterState = testStock.getStateName();
+    int ticksAfter = testStock.getConsecutiveTicksInState();
+    double priceAfter = testStock.getCurrentPrice();
+
+    String transition = beforeState.equals(afterState) ? "" : " -> TRANSITIONED to " + afterState;
+    System.out.printf("Tick %2d: %-15s | Ticks: %2d | Price: $%.2f -> $%.2f%s%n",
+        i + 1, beforeState, ticksBefore, priceBefore, priceAfter, transition);
+  }
 }
 }

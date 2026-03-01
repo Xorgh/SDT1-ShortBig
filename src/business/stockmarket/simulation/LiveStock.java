@@ -4,39 +4,58 @@ import shared.configuration.AppConfig;
 
 public class LiveStock
 {
-  private String symbol;
-//  private someStateObject currentState;
+  private final String symbol;
+  private LiveStockState currentState;
   private double currentPrice;
+  private int consecutiveTicksInState;
+  private final TransitionManager transitionManager;
 
   public LiveStock(String symbol)
   {
     this.symbol = symbol;
     this.currentPrice = AppConfig.INSTANCE.getStockResetValue();
-//    this.currentState = someDefaultState;
+    this.currentState = new SteadyState();
+    this.consecutiveTicksInState = 0;
+    this.transitionManager = new TransitionManager();
   }
 
   public void updatePrice()
   {
-    double priceChange = currentState.calculatePriceChange(this);
+    // Calculate and apply price change
+    double priceChange = currentState.calculatePriceChange();
+    currentPrice += currentPrice * priceChange;
 
-    currentPrice += priceChange;
-
+    // Check for bankruptcy
     if(currentPrice <= 0)
     {
       currentPrice = 0;
-      setState(SomeStateObject bankrup);
+      setState(new BankruptState());
+      return;
+    }
+
+    // Increment consecutive ticks counter
+    consecutiveTicksInState++;
+
+    // Check for state transition
+    LiveStockState newState = transitionManager.getNextState(currentState, consecutiveTicksInState);
+
+    // If state changed, update and reset counter
+    if (newState.getClass() != currentState.getClass())
+    {
+      setState(newState);
     }
   }
 
   // default access modifier for package privacy
-  void setState(SomeStateObject object)
+  void setState(LiveStockState state)
   {
-    currentState = object;
+    currentState = state;
+    consecutiveTicksInState = 0; // Reset counter when state changes
   }
 
   public String getStateName()
   {
-    return currentState.toString();
+    return currentState.getName();
   }
 
   public String getSymbol()
@@ -47,5 +66,10 @@ public class LiveStock
   public double getCurrentPrice()
   {
     return currentPrice;
+  }
+
+  public int getConsecutiveTicksInState()
+  {
+    return consecutiveTicksInState;
   }
 }

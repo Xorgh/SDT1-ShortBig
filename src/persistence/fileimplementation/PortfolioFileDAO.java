@@ -1,7 +1,6 @@
 package persistence.fileimplementation;
 
 import entities.Portfolio;
-import entities.Stock;
 import persistence.interfaces.PortfolioDAO;
 
 import java.util.List;
@@ -34,10 +33,11 @@ public class PortfolioFileDAO implements PortfolioDAO
   @Override public void update(Portfolio portfolio)
   {
     Portfolio existing = getById(portfolio.getId());
-    if (existing != null)
+    if (existing == null)
     {
-      existing.setCurrentBalance(portfolio.getCurrentBalance());
+      throw new IllegalArgumentException("Portfolio with id " + portfolio.getId() + " not found");
     }
+    existing.setCurrentBalance(portfolio.getCurrentBalance());
   }
 
   @Override public void delete(UUID id)

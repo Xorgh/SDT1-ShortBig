@@ -2,6 +2,7 @@ package persistence.fileimplementation;
 
 import entities.Stock;
 import persistence.interfaces.StockDAO;
+
 import java.util.List;
 
 public class StockFileDAO implements StockDAO
@@ -31,11 +32,12 @@ public class StockFileDAO implements StockDAO
   @Override public void update(Stock stock)
   {
     Stock existing = getBySymbol(stock.getSymbol());
-    if (existing != null)
+    if (existing == null)
     {
-      existing.setCurrentPrice(stock.getCurrentPrice());
-      existing.setCurrentState(stock.getCurrentState());
+      throw new IllegalArgumentException("Stock with symbol " + stock.getSymbol() + " not found");
     }
+    existing.setCurrentPrice(stock.getCurrentPrice());
+    existing.setCurrentState(stock.getCurrentState());
   }
 
   @Override public void delete(String symbol)

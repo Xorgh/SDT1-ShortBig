@@ -32,10 +32,11 @@ public class OwnedStockFileDAO implements OwnedStockDAO
   @Override public void update(OwnedStock ownedStock)
   {
     OwnedStock existing = getById(ownedStock.getId());
-    if (existing != null)
+    if (existing == null)
     {
-      existing.setNumberOfShares(ownedStock.getNumberOfShares());
+      throw new IllegalArgumentException("OwnedStock with id " + ownedStock.getId() + " not found");
     }
+    existing.setNumberOfShares(ownedStock.getNumberOfShares());
   }
 
   @Override public void delete(UUID id)

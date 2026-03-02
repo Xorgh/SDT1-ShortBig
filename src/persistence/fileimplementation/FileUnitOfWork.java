@@ -326,14 +326,12 @@ public class FileUnitOfWork implements UnitOfWork
     return directoryPath + "transactions.txt";
   }
 
-  @Override public void begin()
+  @Override public synchronized void begin()
   {
     resetLists();
   }
 
-
-//  TODO Assignment 3 feedback: Skulle den her have været synkroniseret somehow?
-  @Override public void commit()
+  @Override public synchronized void commit()
   {
     if (ownedStocks != null) saveOwnedStocks();
     if (portfolios != null) savePortfolios();
@@ -343,7 +341,7 @@ public class FileUnitOfWork implements UnitOfWork
     resetLists();
   }
 
-  @Override public void rollback()
+  @Override public synchronized void rollback()
   {
     resetLists();
   }

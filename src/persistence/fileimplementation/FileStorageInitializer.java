@@ -11,11 +11,11 @@ import java.util.List;
 
 // TODO Assignment 3 feedback: Har du overvejet hvorfor den her klasse er public? Eller om det kunne begrænses lidt mere?
 
-public class FileStorageInitializer
+class FileStorageInitializer
 {
   private static final Logger logger = Logger.getInstance();
 
-  public static void initializeFile(String directoryPath)
+  static void initializeFile(String directoryPath)
   {
     List<String> files = List.of(directoryPath + "ownedstocks.txt", directoryPath + "portfolio.txt",
         directoryPath + "stocks.txt", directoryPath + "stockpricehistories.txt", directoryPath + "transactions.txt");

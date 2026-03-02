@@ -19,11 +19,11 @@ public class RunApp
     // Test Real-Time Threaded Market Ticker
     testRealTimeMarket(logger, 480);
 
-//    // Test LiveStock State Machine
-//    testStateMachine(logger, 100);
-//
-//    // Existing DAO tests
-//    testDAOOperations(logger);
+    //    // Test LiveStock State Machine
+    //    testStateMachine(logger, 100);
+    //
+    //    // Existing DAO tests
+    //    testDAOOperations(logger);
   }
 
   private static void testRealTimeMarket(Logger logger, int secondsToRun)
@@ -46,9 +46,12 @@ public class RunApp
     logger.log(LogLevel.INFO, "Market ticker running. Press Ctrl+C to stop.\n");
 
     // Let it run for 30 seconds for testing
-    try {
+    try
+    {
       Thread.sleep(msTorun);
-    } catch (InterruptedException e) {
+    }
+    catch (InterruptedException e)
+    {
       Thread.currentThread().interrupt();
     }
 
@@ -56,11 +59,9 @@ public class RunApp
     logger.log(LogLevel.INFO, "\n=== Final Stock States ===");
     for (LiveStock stock : market.getAllLiveStocks())
     {
-      logger.log(LogLevel.INFO, String.format("%s: $%.2f (%s, %d ticks)",
-          stock.getSymbol(),
-          stock.getCurrentPrice(),
-          stock.getStateName(),
-          stock.getConsecutiveTicksInState()));
+      logger.log(LogLevel.INFO,
+          String.format("%s: $%.2f (%s, %d ticks)", stock.getSymbol(), stock.getCurrentPrice(), stock.getStateName(),
+              stock.getConsecutiveTicksInState()));
     }
 
     // Stop the ticker
@@ -74,11 +75,7 @@ public class RunApp
     logger.log(LogLevel.INFO, "=== Testing LiveStock State Machine ===");
 
     // Create test stocks
-    LiveStock[] stocks = {
-        new LiveStock("AAPL"),
-        new LiveStock("GOOG"),
-        new LiveStock("MSFT")
-    };
+    LiveStock[] stocks = {new LiveStock("AAPL"), new LiveStock("GOOG"), new LiveStock("MSFT")};
 
     // Run simulation
     logger.log(LogLevel.INFO, "Running 50-tick simulation with 3 stocks...\n");
@@ -93,9 +90,12 @@ public class RunApp
       }
 
       // Add small delay to make output readable (optional)
-      try {
+      try
+      {
         Thread.sleep(50);
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e)
+      {
         Thread.currentThread().interrupt();
       }
     }
@@ -104,11 +104,9 @@ public class RunApp
     logger.log(LogLevel.INFO, "\n=== Final Stock States ===");
     for (LiveStock stock : stocks)
     {
-      logger.log(LogLevel.INFO, String.format("%s: $%.2f (%s, %d ticks)",
-          stock.getSymbol(),
-          stock.getCurrentPrice(),
-          stock.getStateName(),
-          stock.getConsecutiveTicksInState()));
+      logger.log(LogLevel.INFO,
+          String.format("%s: $%.2f (%s, %d ticks)", stock.getSymbol(), stock.getCurrentPrice(), stock.getStateName(),
+              stock.getConsecutiveTicksInState()));
     }
 
     logger.log(LogLevel.INFO, "\n");
@@ -138,10 +136,9 @@ public class RunApp
     ownedStockDAO.create(new OwnedStock(ownedStockId, portfolioId, "DAO1", 20));
 
     UUID transactionId = UUID.randomUUID();
-    transactionDAO.create(new Transaction(
-        transactionId, portfolioId, "DAO1", TransactionType.BUY,
-        20, 50.0, 1000.0, 0.10, LocalDateTime.now()
-    ));
+    transactionDAO.create(
+        new Transaction(transactionId, portfolioId, "DAO1", TransactionType.BUY, 20, 50.0, 1000.0, 0.10,
+            LocalDateTime.now()));
 
     UUID historyId = UUID.randomUUID();
     historyDAO.create(new StockPriceHistory(historyId, "DAO1", 50.0, LocalDateTime.now()));
@@ -173,4 +170,12 @@ public class RunApp
     System.out.println("All Transactions: " + verifyTransactionDAO.getAll());
     System.out.println("All History: " + verifyHistoryDAO.getAll());
   }
+
+  //  TODO Assignment 3 feedback: Du har brugt composition fra DAO til UoW.. Er det faktisk korrekt? Kan to DAOs ikke bruge den samme UoW? Ellers får du svært ved at håndtere transactions korrekt, tænker jeg.
+  //
+  //Generelt kan du godt udelade private metoder fra klasse diagrammet. Det er ofte bare støj, og interne impl detaljer. Det kan være du kigger på koden igen og refakturerer noget fælles kode ud i en private hjælpe metode. Du har ikke ændret klassens "public interface", i.e. public metoder, men klassediagrammet skal alligevel opdateres.
+  //I sjældne tilfælde kan private metoder være relevant, men jeg har ikke lige et godt eksempel.
+  //Du må gerne beholde dem. Du kan også spare lidt tid fremover.
+
+  // TODO Assignment 3 feedback:
 }

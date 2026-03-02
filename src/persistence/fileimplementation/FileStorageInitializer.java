@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+// TODO Assignment 3 feedback: Har du overvejet hvorfor den her klasse er public? Eller om det kunne begrænses lidt mere?
+
 public class FileStorageInitializer
 {
   private static final Logger logger = Logger.getInstance();

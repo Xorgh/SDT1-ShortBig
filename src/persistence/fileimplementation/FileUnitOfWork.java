@@ -245,13 +245,11 @@ public class FileUnitOfWork implements UnitOfWork
 
   public List<Transaction> getTransactions()
   {
+    if (transactions == null)
     {
-      if (transactions == null)
-      {
-        transactions = loadTransactions();
-      }
-      return transactions;
+      transactions = loadTransactions();
     }
+    return transactions;
   }
 
   private List<Transaction> loadTransactions()
@@ -333,6 +331,8 @@ public class FileUnitOfWork implements UnitOfWork
     resetLists();
   }
 
+
+//  TODO Assignment 3 feedback: Skulle den her have været synkroniseret somehow?
   @Override public void commit()
   {
     if (ownedStocks != null) saveOwnedStocks();

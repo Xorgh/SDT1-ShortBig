@@ -177,5 +177,4 @@ public class RunApp
   //I sjældne tilfælde kan private metoder være relevant, men jeg har ikke lige et godt eksempel.
   //Du må gerne beholde dem. Du kan også spare lidt tid fremover.
 
-  // TODO Assignment 3 feedback:
 }

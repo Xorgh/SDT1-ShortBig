@@ -171,10 +171,8 @@ public class RunApp
     System.out.println("All History: " + verifyHistoryDAO.getAll());
   }
 
-  //  TODO Assignment 3 feedback: Du har brugt composition fra DAO til UoW.. Er det faktisk korrekt? Kan to DAOs ikke bruge den samme UoW? Ellers får du svært ved at håndtere transactions korrekt, tænker jeg.
-  //
-  //Generelt kan du godt udelade private metoder fra klasse diagrammet. Det er ofte bare støj, og interne impl detaljer. Det kan være du kigger på koden igen og refakturerer noget fælles kode ud i en private hjælpe metode. Du har ikke ændret klassens "public interface", i.e. public metoder, men klassediagrammet skal alligevel opdateres.
-  //I sjældne tilfælde kan private metoder være relevant, men jeg har ikke lige et godt eksempel.
-  //Du må gerne beholde dem. Du kan også spare lidt tid fremover.
+  //  TODO Assignment 3 feedback: Generelt kan du godt udelade private metoder fra klasse diagrammet. Det er ofte bare støj, og interne impl detaljer. Det kan være du kigger på koden igen og refakturerer noget fælles kode ud i en private hjælpe metode. Du har ikke ændret klassens "public interface", i.e. public metoder, men klassediagrammet skal alligevel opdateres.
+  //  TODO Assignment 3 feedback: I sjældne tilfælde kan private metoder være relevant, men jeg har ikke lige et godt eksempel.
+  //  TODO Assignment 3 feedback: Du må gerne beholde dem. Du kan også spare lidt tid fremover.
 
 }

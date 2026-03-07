@@ -39,7 +39,6 @@ public class MarketTickerThread extends Thread
       try
       {
         // Update all stocks in the market
-        uow.begin();
         logger.log(LogLevel.DEBUG, String.format("--- Tick %d ---", currentTick));
         stockMarket.updateAllLiveStocks();
         currentTick++;

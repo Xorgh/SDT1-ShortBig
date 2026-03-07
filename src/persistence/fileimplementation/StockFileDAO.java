@@ -16,6 +16,13 @@ public class StockFileDAO implements StockDAO
 
   @Override public void create(Stock stock)
   {
+    Stock existing = getBySymbol(stock.getSymbol());
+    if (existing != null)
+    {
+      existing.setCurrentPrice(stock.getCurrentPrice());
+      existing.setCurrentState(stock.getCurrentState());
+      return;
+    }
     uow.getStocks().add(stock);
   }
 

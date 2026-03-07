@@ -10,17 +10,13 @@ import persistence.interfaces.StockPriceHistoryDAO;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-public class StockPriceListenerService
+public class StockListenerService
 {
   private StockDAO stockDAO;
   private StockPriceHistoryDAO priceHistoryDAO;
   private Logger logger = Logger.getInstance();
 
-  public StockPriceListenerService(StockDAO stockDAO, StockPriceHistoryDAO priceHistoryDAO)
+  public StockListenerService(StockDAO stockDAO, StockPriceHistoryDAO priceHistoryDAO)
   {
     this.stockDAO = stockDAO;
     this.priceHistoryDAO = priceHistoryDAO;

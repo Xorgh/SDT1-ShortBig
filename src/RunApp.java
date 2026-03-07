@@ -1,4 +1,4 @@
-import business.services.StockPriceListenerService;
+import business.services.StockListenerService;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
 import entities.*;
@@ -37,7 +37,7 @@ public class RunApp
     uow.commit();
 
     // Create StockPriceListenerService and inject DAOs
-    StockPriceListenerService stockPriceListener = new StockPriceListenerService(stockDAO, historyDAO);
+    StockListenerService stockPriceListener = new StockListenerService(stockDAO, historyDAO);
 
     // Create StockMarket
     StockMarket stockMarket = StockMarket.INSTANCE;

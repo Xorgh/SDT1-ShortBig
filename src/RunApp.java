@@ -47,7 +47,7 @@ public class RunApp
     stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
 
     // Test Real-Time Threaded Market Ticker
-    testRealTimeMarket(uow, logger, stockMarket, 30);
+    testRealTimeMarket(uow, logger, stockMarket, 10);
 
     //    // Test LiveStock State Machine
     //    testStateMachine(logger, 100);

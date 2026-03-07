@@ -58,6 +58,7 @@ public class MarketTickerThread extends Thread
       catch (Exception e)
       {
         logger.log(LogLevel.ERROR, "Error in market ticker: " + e.getMessage());
+        uow.rollback();
       }
     }
 

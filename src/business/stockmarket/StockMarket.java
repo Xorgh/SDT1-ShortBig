@@ -1,7 +1,9 @@
 package business.stockmarket;
 
+import business.events.StockBankruptcyEvent;
 import business.events.StockPriceUpdateEvent;
 import business.events.StockStateUpdateEvent;
+import business.stockmarket.simulation.BankruptState;
 import business.stockmarket.simulation.LiveStock;
 import business.stockmarket.simulation.LiveStockState;
 import business.utility.StockStateMapper;
@@ -24,6 +26,7 @@ public enum StockMarket
   // Observer Pattern implementation - Lambdas only
   public final List<Consumer<StockPriceUpdateEvent>> onStockPriceChange = new ArrayList<>();
   public final List<Consumer<StockStateUpdateEvent>> onStockStateChange = new ArrayList<>();
+  public final List<Consumer<StockBankruptcyEvent>> onStockBankruptcy = new ArrayList<>();
 
   private List<LiveStock> liveStocks;
 
@@ -65,6 +68,13 @@ public enum StockMarket
       
       Double newPrice = liveStock.getCurrentPrice();
       LiveStockState newState = liveStock.getCurrentState();
+
+      // Check for bankruptcy, and fire event
+      if(newState instanceof BankruptState)
+      {
+        StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
+        onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
+      }
       
       // create new price event(DTO)
       StockPriceUpdateEvent newPriceUpdateEvent =
@@ -76,7 +86,7 @@ public enum StockMarket
       {
         StockStateUpdateEvent newStateUpdateEvent =
             new StockStateUpdateEvent(stockSymbol, oldLiveStockState, newState);
-        onStockStateChange.forEach((listener -> listener.accept(newStateUpdateEvent)));
+        onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
       }
 
       // Notify price listeners

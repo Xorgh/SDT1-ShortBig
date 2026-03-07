@@ -1,3 +1,4 @@
+import business.services.StockBankruptService;
 import business.services.StockListenerService;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
@@ -36,8 +37,9 @@ public class RunApp
     // Commit to File
     uow.commit();
 
-    // Create StockPriceListenerService and inject DAOs
+    // Create Services and inject DAOs
     StockListenerService stockPriceListener = new StockListenerService(stockDAO, historyDAO);
+    StockBankruptService stockBankruptService = new StockBankruptService(ownedStockDAO);
 
     // Create StockMarket
     StockMarket stockMarket = StockMarket.INSTANCE;
@@ -45,6 +47,7 @@ public class RunApp
     // Register listeners
     stockMarket.onStockPriceChange.add(stockPriceListener::handlePriceChange);
     stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
+    stockMarket.onStockBankruptcy.add(stockBankruptService::handleBankruptcy);
 
     // Test Real-Time Threaded Market Ticker
     testRealTimeMarket(uow, logger, stockMarket, 10);

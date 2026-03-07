@@ -10,6 +10,7 @@ public interface OwnedStockDAO
   void create(OwnedStock ownedStock);
   OwnedStock getById(UUID id);
   List<OwnedStock> getAll();
+  List<OwnedStock> getAllByStockSymbol(String stockSymbol);
   void update(OwnedStock ownedStock);
   void delete(UUID id);
 }

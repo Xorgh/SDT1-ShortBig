@@ -1,3 +1,4 @@
+import business.services.StockPriceListenerService;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
 import entities.*;
@@ -16,8 +17,34 @@ public class RunApp
   {
     Logger logger = Logger.getInstance();
 
+    // Test observer pattern
+
+    FileUnitOfWork uow = new FileUnitOfWork("data/test/");
+
+    // Initialize DAOs
+    StockDAO stockDAO = new StockFileDAO(uow);
+    PortfolioDAO portfolioDAO = new PortfolioFileDAO(uow);
+    OwnedStockDAO ownedStockDAO = new OwnedStockFileDAO(uow);
+    TransactionDAO transactionDAO = new TransactionFileDAO(uow);
+    StockPriceHistoryDAO historyDAO = new StockPriceHistoryFileDAO(uow);
+
+    // Create test stocks
+    stockDAO.create(new Stock("AAPL", "Apple", 100, StockState.STEADY));
+    stockDAO.create(new Stock("GOOG", "Google", 100, StockState.STEADY));
+    stockDAO.create(new Stock("MSFT", "Microsoft", 100, StockState.STEADY));
+
+    // Create StockPriceListenerService and inject DAOs
+    StockPriceListenerService stockPriceListener = new StockPriceListenerService(stockDAO, historyDAO);
+
+    // Create StockMarket
+    StockMarket stockMarket = StockMarket.INSTANCE;
+
+    // Register listeners
+    stockMarket.onStockPriceChange.add(stockPriceListener::handlePriceChange);
+    stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
+
     // Test Real-Time Threaded Market Ticker
-    testRealTimeMarket(logger, 480);
+    testRealTimeMarket(logger, stockMarket, 480);
 
     //    // Test LiveStock State Machine
     //    testStateMachine(logger, 100);
@@ -26,18 +53,16 @@ public class RunApp
     //    testDAOOperations(logger);
   }
 
-  private static void testRealTimeMarket(Logger logger, int secondsToRun)
+
+  private static void testRealTimeMarket(Logger logger, StockMarket stockMarket, int secondsToRun)
   {
     logger.log(LogLevel.INFO, "=== Testing Real-Time Market Ticker ===");
     int msTorun = secondsToRun * 1000;
 
-    // Create StockMarket
-    StockMarket market = StockMarket.INSTANCE;
-
     // Add stocks
-    market.addNewLiveStock("AAPL");
-    market.addNewLiveStock("GOOG");
-    market.addNewLiveStock("MSFT");
+    stockMarket.addNewLiveStock("AAPL");
+    stockMarket.addNewLiveStock("GOOG");
+    stockMarket.addNewLiveStock("MSFT");
 
     // Create and start ticker thread
     MarketTickerThread ticker = new MarketTickerThread();
@@ -57,7 +82,7 @@ public class RunApp
 
     // Summary
     logger.log(LogLevel.INFO, "\n=== Final Stock States ===");
-    for (LiveStock stock : market.getAllLiveStocks())
+    for (LiveStock stock : stockMarket.getAllLiveStocks())
     {
       logger.log(LogLevel.INFO,
           String.format("%s: $%.2f (%s, %d ticks)", stock.getSymbol(), stock.getCurrentPrice(), stock.getStateName(),

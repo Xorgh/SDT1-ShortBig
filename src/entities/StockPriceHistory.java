@@ -19,6 +19,17 @@ public class StockPriceHistory
     this.timestamp = timestamp;
   }
 
+  // created from a price update
+  // TODO update class diagram with new constructor.
+
+  public StockPriceHistory(String stockSymbol, double price)
+  {
+    this.id = UUID.randomUUID();
+    this.stockSymbol = stockSymbol;
+    this.price = price;
+    this.timestamp = LocalDateTime.now();
+  }
+
   public UUID getId()
   {
     return id;

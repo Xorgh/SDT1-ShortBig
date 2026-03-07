@@ -12,6 +12,12 @@ public class LiveStock
   private LiveStockState currentState;
   private double currentPrice;
   private int consecutiveTicksInState;
+
+  public LiveStockState getCurrentState()
+  {
+    return currentState;
+  }
+
   private final TransitionManager transitionManager;
 
   public LiveStock(String symbol)

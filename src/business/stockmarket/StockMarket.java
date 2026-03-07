@@ -26,6 +26,7 @@ public enum StockMarket
   // Observer Pattern implementation - Lambdas only
   public final List<Consumer<StockPriceUpdateEvent>> onStockPriceChange = new ArrayList<>();
   public final List<Consumer<StockStateUpdateEvent>> onStockStateChange = new ArrayList<>();
+  // TODO update class diagram
   public final List<Consumer<StockBankruptcyEvent>> onStockBankruptcy = new ArrayList<>();
 
   private List<LiveStock> liveStocks;

@@ -34,4 +34,6 @@ public class StockBankruptService
     ownedStockList.forEach(ownedStock -> ownedStock.setNumberOfShares(0));
 
   }
+
+  // TODO update class diagram
 }

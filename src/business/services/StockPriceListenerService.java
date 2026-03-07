@@ -43,14 +43,14 @@ public class StockPriceListenerService
   public void handlePriceChange(StockPriceUpdateEvent event)
   {
     Stock stock = stockDAO.getBySymbol(event.stockSymbol());
-
+    double newPrice = event.newPrice();
     if(stock == null)
     {
       logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
       return;
     }
 
-    stock.setCurrentPrice(event.newPrice());
+    stock.setCurrentPrice(newPrice);
 
     stockDAO.update(stock);
     logStockPriceHistory(event);

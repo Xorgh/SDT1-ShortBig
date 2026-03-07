@@ -3,6 +3,7 @@ package business.stockmarket.simulation;
 import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
+import shared.utility.MathUtil;
 
 public class LiveStock
 {
@@ -34,7 +35,7 @@ public class LiveStock
   public LiveStock(String symbol, double currentPrice, LiveStockState currentState)
   {
     this.symbol = symbol;
-    this.currentPrice = currentPrice;
+    this.currentPrice = MathUtil.Round(currentPrice);
     this.currentState = currentState;
     this.consecutiveTicksInState = 0;
     // TODO last current tick lost when reloading, do I care?
@@ -50,6 +51,7 @@ public class LiveStock
     // Calculate and apply price change
     double priceChange = currentState.calculatePriceChange();
     currentPrice += currentPrice * priceChange;
+    currentPrice = MathUtil.Round(currentPrice);
 
     // Log price change
     logger.log(LogLevel.DEBUG, String.format("[%s] %.2f → %.2f (%+.2f%%) | %s (tick %d)",

@@ -33,6 +33,9 @@ public class RunApp
     stockDAO.create(new Stock("GOOG", "Google", 100, StockState.STEADY));
     stockDAO.create(new Stock("MSFT", "Microsoft", 100, StockState.STEADY));
 
+    // Commit to File
+    uow.commit();
+
     // Create StockPriceListenerService and inject DAOs
     StockPriceListenerService stockPriceListener = new StockPriceListenerService(stockDAO, historyDAO);
 
@@ -44,7 +47,7 @@ public class RunApp
     stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
 
     // Test Real-Time Threaded Market Ticker
-    testRealTimeMarket(logger, stockMarket, 480);
+    testRealTimeMarket(uow, logger, stockMarket, 30);
 
     //    // Test LiveStock State Machine
     //    testStateMachine(logger, 100);
@@ -54,7 +57,7 @@ public class RunApp
   }
 
 
-  private static void testRealTimeMarket(Logger logger, StockMarket stockMarket, int secondsToRun)
+  private static void testRealTimeMarket(UnitOfWork uow, Logger logger, StockMarket stockMarket, int secondsToRun)
   {
     logger.log(LogLevel.INFO, "=== Testing Real-Time Market Ticker ===");
     int msTorun = secondsToRun * 1000;
@@ -65,7 +68,7 @@ public class RunApp
     stockMarket.addNewLiveStock("MSFT");
 
     // Create and start ticker thread
-    MarketTickerThread ticker = new MarketTickerThread();
+    MarketTickerThread ticker = new MarketTickerThread(uow);
     ticker.start();
 
     logger.log(LogLevel.INFO, "Market ticker running. Press Ctrl+C to stop.\n");

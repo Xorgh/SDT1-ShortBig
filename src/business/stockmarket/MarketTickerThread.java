@@ -12,11 +12,9 @@ public class MarketTickerThread extends Thread
   private final int updateFrequency;
   private volatile boolean running;
   private int currentTick;
-  private UnitOfWork uow;
 
-  public MarketTickerThread(UnitOfWork uow)
+  public MarketTickerThread()
   {
-    this.uow = uow;
     this.stockMarket = StockMarket.INSTANCE;
     this.logger = Logger.getInstance();
     this.updateFrequency = AppConfig.INSTANCE.getUpdateFrequencyInMs();
@@ -42,7 +40,6 @@ public class MarketTickerThread extends Thread
         logger.log(LogLevel.DEBUG, String.format("--- Tick %d ---", currentTick));
         stockMarket.updateAllLiveStocks();
         currentTick++;
-        uow.commit();
 
         // Sleep for the configured update frequency
         Thread.sleep(updateFrequency);
@@ -50,14 +47,12 @@ public class MarketTickerThread extends Thread
       catch (InterruptedException e)
       {
         logger.log(LogLevel.WARNING, "Market ticker thread interrupted");
-        uow.rollback();
         Thread.currentThread().interrupt();
         break;
       }
       catch (Exception e)
       {
         logger.log(LogLevel.ERROR, "Error in market ticker: " + e.getMessage());
-        uow.rollback();
       }
     }
 

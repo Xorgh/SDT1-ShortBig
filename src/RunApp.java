@@ -45,7 +45,7 @@ public class RunApp
     StockAlertService stockAlertService = new StockAlertService();
     StockResetService stockResetService = new StockResetService();
 
-    // Create StockMarket
+    // Create StockMarket reference
     StockMarket stockMarket = StockMarket.INSTANCE;
 
     // Register listeners
@@ -53,6 +53,7 @@ public class RunApp
     stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
     stockMarket.onStockBankruptcy.add(stockBankruptService::handleBankruptcy);
     stockMarket.onStockBankruptcy.add(stockAlertService::handleBankruptcyAlert);
+    stockMarket.onStockReset.add(stockResetService::handleStockReset);
     stockMarket.onStockReset.add(stockAlertService::handleStockResetAlert);
 
     // Test Real-Time Threaded Market Ticker

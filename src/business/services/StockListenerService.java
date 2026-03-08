@@ -7,42 +7,56 @@ import entities.Stock;
 import entities.StockPriceHistory;
 import persistence.interfaces.StockDAO;
 import persistence.interfaces.StockPriceHistoryDAO;
+import persistence.interfaces.UnitOfWork;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
+import java.util.List;
+
 public class StockListenerService
 {
+  private UnitOfWork uow;
+  private Logger logger = Logger.getInstance();
   private StockDAO stockDAO;
   private StockPriceHistoryDAO priceHistoryDAO;
-  private Logger logger = Logger.getInstance();
 
-  public StockListenerService(StockDAO stockDAO, StockPriceHistoryDAO priceHistoryDAO)
+
+  public StockListenerService(UnitOfWork uow, StockDAO stockDAO, StockPriceHistoryDAO priceHistoryDAO)
   {
+    this.uow = uow;
     this.stockDAO = stockDAO;
     this.priceHistoryDAO = priceHistoryDAO;
   }
 
   public void handleStateChange(StockStateUpdateEvent event)
   {
+    uow.begin();
+
     Stock stock = stockDAO.getBySymbol(event.stockSymbol());
 
     if(stock == null)
     {
       logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
+      uow.rollback();
       return;
     }
 
     stock.setCurrentState(StockStateMapper.toStockState(event.newLiveStockState()));
     stockDAO.update(stock);
+
+    uow.commit();
   }
 
   public void handlePriceChange(StockPriceUpdateEvent event)
   {
+    uow.begin();
     Stock stock = stockDAO.getBySymbol(event.stockSymbol());
     double newPrice = event.newPrice();
+
     if(stock == null)
     {
       logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
+      uow.rollback();
       return;
     }
 
@@ -50,6 +64,8 @@ public class StockListenerService
 
     stockDAO.update(stock);
     logStockPriceHistory(event);
+
+    uow.commit();
   }
 
   private void logStockPriceHistory(StockPriceUpdateEvent event)

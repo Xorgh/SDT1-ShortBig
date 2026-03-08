@@ -63,11 +63,11 @@ public enum StockMarket
       String stockSymbol = liveStock.getSymbol();
       
       LiveStockState oldLiveStockState = liveStock.getCurrentState();
-      Double oldPrice = liveStock.getCurrentPrice();
+      double oldPrice = liveStock.getCurrentPrice();
       
       liveStock.updatePrice();
       
-      Double newPrice = liveStock.getCurrentPrice();
+      double newPrice = liveStock.getCurrentPrice();
       LiveStockState newState = liveStock.getCurrentState();
 
       // Check for bankruptcy, and fire event
@@ -76,6 +76,8 @@ public enum StockMarket
         StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
         onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
       }
+
+      // TODO Should bankruptcy events be fired every time we hit an instanceof 'BankruptState' or only when it's changed to this state?
       
       // create new price event(DTO)
       StockPriceUpdateEvent newPriceUpdateEvent =

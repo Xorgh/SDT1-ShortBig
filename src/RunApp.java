@@ -1,5 +1,7 @@
+import business.services.StockAlertService;
 import business.services.StockBankruptService;
 import business.services.StockListenerService;
+import business.services.StockResetService;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
 import entities.*;
@@ -37,9 +39,11 @@ public class RunApp
     // Commit to File
     uow.commit();
 
-    // Create Services and inject DAOs
-    StockListenerService stockPriceListener = new StockListenerService(stockDAO, historyDAO);
-    StockBankruptService stockBankruptService = new StockBankruptService(ownedStockDAO);
+    // Create Services and inject UoW and DAOs
+    StockListenerService stockPriceListener = new StockListenerService(uow, stockDAO, historyDAO);
+    StockBankruptService stockBankruptService = new StockBankruptService(uow, ownedStockDAO);
+    StockAlertService stockAlertService = new StockAlertService();
+    StockResetService stockResetService = new StockResetService();
 
     // Create StockMarket
     StockMarket stockMarket = StockMarket.INSTANCE;
@@ -48,6 +52,8 @@ public class RunApp
     stockMarket.onStockPriceChange.add(stockPriceListener::handlePriceChange);
     stockMarket.onStockStateChange.add(stockPriceListener::handleStateChange);
     stockMarket.onStockBankruptcy.add(stockBankruptService::handleBankruptcy);
+    stockMarket.onStockBankruptcy.add(stockAlertService::handleBankruptcyAlert);
+    stockMarket.onStockReset.add(stockAlertService::handleStockResetAlert);
 
     // Test Real-Time Threaded Market Ticker
     testRealTimeMarket(uow, logger, stockMarket, 10);
@@ -71,7 +77,7 @@ public class RunApp
     stockMarket.addNewLiveStock("MSFT");
 
     // Create and start ticker thread
-    MarketTickerThread ticker = new MarketTickerThread(uow);
+    MarketTickerThread ticker = new MarketTickerThread();
     ticker.start();
 
     logger.log(LogLevel.INFO, "Market ticker running. Press Ctrl+C to stop.\n");

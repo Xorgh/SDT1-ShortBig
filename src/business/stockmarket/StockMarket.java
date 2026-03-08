@@ -2,10 +2,13 @@ package business.stockmarket;
 
 import business.events.StockBankruptcyEvent;
 import business.events.StockPriceUpdateEvent;
+import business.events.StockResetEvent;
 import business.events.StockStateUpdateEvent;
+import business.services.StockResetService;
 import business.stockmarket.simulation.BankruptState;
 import business.stockmarket.simulation.LiveStock;
 import business.stockmarket.simulation.LiveStockState;
+import business.stockmarket.simulation.ResetState;
 import business.utility.StockStateMapper;
 import entities.Stock;
 import entities.StockState;
@@ -28,15 +31,14 @@ public enum StockMarket
   public final List<Consumer<StockStateUpdateEvent>> onStockStateChange = new ArrayList<>();
   // TODO update class diagram
   public final List<Consumer<StockBankruptcyEvent>> onStockBankruptcy = new ArrayList<>();
+  public final List<Consumer<StockResetEvent>> onStockReset = new ArrayList<>();
 
   private List<LiveStock> liveStocks;
-
 
   StockMarket()
   {
     liveStocks = new ArrayList<>();
   }
-
 
   public void addNewLiveStock(String stockSymbol)
   {
@@ -61,35 +63,38 @@ public enum StockMarket
     for (LiveStock liveStock : liveStocks)
     {
       String stockSymbol = liveStock.getSymbol();
-      
+
       LiveStockState oldLiveStockState = liveStock.getCurrentState();
       double oldPrice = liveStock.getCurrentPrice();
-      
+
       liveStock.updatePrice();
-      
+
       double newPrice = liveStock.getCurrentPrice();
       LiveStockState newState = liveStock.getCurrentState();
+
+      // Check for StockReset and fire event
+      if (newState instanceof ResetState)
+      {
+        StockResetEvent newResetEvent = new StockResetEvent(stockSymbol);
+        onStockReset.forEach(listener -> listener.accept(newResetEvent));
+      }
 
       // Check for bankruptcy, and fire event
       // TODO Should bankruptcy events be fired every time we hit an instanceof 'BankruptState' or only when it's changed to this state?
       //
-      if(newState instanceof BankruptState)
+      if (newState instanceof BankruptState)
       {
         StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
         onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
       }
 
-
       // create new price event(DTO)
-      StockPriceUpdateEvent newPriceUpdateEvent =
-          new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
-      
+      StockPriceUpdateEvent newPriceUpdateEvent = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
 
       // Compare old and new state, if changed notify listeners.
-      if(!oldLiveStockState.equals(newState))
+      if (!oldLiveStockState.equals(newState))
       {
-        StockStateUpdateEvent newStateUpdateEvent =
-            new StockStateUpdateEvent(stockSymbol, oldLiveStockState, newState);
+        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldLiveStockState, newState);
         onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
       }
 

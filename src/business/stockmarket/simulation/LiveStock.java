@@ -32,7 +32,7 @@ public class LiveStock
   {
     this.symbol = symbol;
     this.currentPrice = MathUtil.Round(currentPrice);
-    this.currentState = StockStateMapper.toLiveStockState(currentState);;
+    this.currentState = StockStateMapper.toLiveStockState(currentState);
     this.consecutiveTicksInState = 0;
     // TODO last current tick lost when reloading, do I care?
     this.transitionManager = new TransitionManager();
@@ -82,14 +82,6 @@ public class LiveStock
       logger.log(LogLevel.INFO, String.format("[%s] %s → %s",
           symbol, oldState, newState.getName()));
 
-      // Reset price when transitioning to ResetState
-      if (newState instanceof ResetState)
-      {
-        // TODO rework price calculation.
-//        newState.calculatePriceChange();
-        logger.log(LogLevel.INFO, String.format("[%s] RESET - Price restored to %.2f",
-            symbol, currentPrice));
-      }
     }
   }
 

@@ -15,11 +15,6 @@ public class LiveStock
   private double currentPrice;
   private int consecutiveTicksInState;
 
-  public LiveStockState getCurrentState()
-  {
-    return currentState;
-  }
-
   private final TransitionManager transitionManager;
 
   public LiveStock(String symbol)
@@ -110,6 +105,10 @@ public class LiveStock
   {
     return currentState.getName();
   }
+
+  LiveStockState getCurrentState() { return currentState; }
+
+  public StockState getStockState() { return StockStateMapper.toStockState(currentState) ; }
 
   public String getSymbol()
   {

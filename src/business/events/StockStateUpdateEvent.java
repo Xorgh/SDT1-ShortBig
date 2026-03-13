@@ -1,7 +1,7 @@
 package business.events;
 
-import business.stockmarket.simulation.LiveStockState;
+import entities.StockState;
 
-public record StockStateUpdateEvent(String stockSymbol, LiveStockState oldLiveStockState, LiveStockState newLiveStockState)
+public record StockStateUpdateEvent(String stockSymbol, StockState oldLiveStockState, StockState newLiveStockState)
 {
 }

@@ -4,11 +4,7 @@ import business.events.StockBankruptcyEvent;
 import business.events.StockPriceUpdateEvent;
 import business.events.StockResetEvent;
 import business.events.StockStateUpdateEvent;
-import business.stockmarket.simulation.BankruptState;
 import business.stockmarket.simulation.LiveStock;
-import business.stockmarket.simulation.LiveStockState;
-import business.stockmarket.simulation.ResetState;
-import business.stockmarket.simulation.StockStateMapper;
 import entities.Stock;
 import entities.StockState;
 import shared.logging.LogLevel;
@@ -62,16 +58,16 @@ public enum StockMarket
     {
       String stockSymbol = liveStock.getSymbol();
 
-      LiveStockState oldLiveStockState = liveStock.getCurrentState();
+      StockState oldStockState = liveStock.getStockState();
       double oldPrice = liveStock.getCurrentPrice();
 
       liveStock.updatePrice();
 
       double newPrice = liveStock.getCurrentPrice();
-      LiveStockState newState = liveStock.getCurrentState();
+      StockState newState = liveStock.getStockState();
 
       // Check for StockReset and fire event
-      if (newState instanceof ResetState)
+      if (newState == StockState.RESET)
       {
         StockResetEvent newResetEvent = new StockResetEvent(stockSymbol);
         onStockReset.forEach(listener -> listener.accept(newResetEvent));
@@ -80,7 +76,7 @@ public enum StockMarket
       // Check for bankruptcy, and fire event
       // TODO Should bankruptcy events be fired every time we hit an instanceof 'BankruptState' or only when it's changed to this state?
       //
-      if (newState instanceof BankruptState)
+      if (newState == StockState.BANKRUPT)
       {
         StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
         onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
@@ -90,9 +86,9 @@ public enum StockMarket
       StockPriceUpdateEvent newPriceUpdateEvent = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
 
       // Compare old and new state, if changed notify listeners.
-      if (!oldLiveStockState.equals(newState))
+      if (!oldStockState.equals(newState))
       {
-        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldLiveStockState, newState);
+        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldStockState, newState);
         onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
       }
 

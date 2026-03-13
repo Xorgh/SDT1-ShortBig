@@ -6,7 +6,7 @@ public class SteadyState implements LiveStockState
 {
   @Override public double calculateNewPrice(double currentPrice)
   {
-    double change = (ThreadLocalRandom.current().nextDouble() * 2 - 1); // +- 0.01
+    double change = (ThreadLocalRandom.current().nextDouble() * 2 - 1) / 100; // +-1%
     return currentPrice + currentPrice * change;
   }
 

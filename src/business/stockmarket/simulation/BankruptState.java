@@ -2,7 +2,7 @@ package business.stockmarket.simulation;
 
 public class BankruptState implements LiveStockState
 {
-  @Override public double calculatePriceChange()
+  @Override public double calculateNewPrice(double currentPrice)
   {
     return 0;
   }

@@ -4,7 +4,7 @@ import shared.configuration.AppConfig;
 
 public class ResetState implements LiveStockState
 {
-  @Override public double calculatePriceChange()
+  @Override public double calculateNewPrice(double currentPrice)
   {
     return AppConfig.INSTANCE.getStockResetValue();
   }

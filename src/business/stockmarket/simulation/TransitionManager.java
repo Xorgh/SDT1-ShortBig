@@ -2,85 +2,68 @@ package business.stockmarket.simulation;
 
 import shared.configuration.AppConfig;
 
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class TransitionManager
 {
-  /**
-   * Determines the next state based on current state and consecutive ticks.
-   * Probabilities increase for transitioning out as consecutive ticks accumulate.
-   * After max consecutive ticks, transition is guaranteed.
-   *
-   * @param currentState The current state of the stock
-   * @param consecutiveTicks Number of consecutive ticks in the current state
-   * @return The next state (could be same or different)
-   */
+  // Maps state class → transition handler (consecutiveTicks, adjustment) → nextState
+  private final Map<Class<? extends LiveStockState>, BiFunction<Integer, Double, LiveStockState>> transitionHandlers;
 
-  // TODO rework evt med map
-  public LiveStockState getNextState(LiveStockState currentState, int consecutiveTicks)
+  // Maps state class → forced transition handler (only states that can be force-transitioned)
+  private final Map<Class<? extends LiveStockState>, Supplier<LiveStockState>> forceTransitionHandlers;
+
+  public TransitionManager()
   {
-    // Handle BankruptState timeout
-    if (currentState instanceof BankruptState)
-    {
-      if (consecutiveTicks >= AppConfig.INSTANCE.getBankruptStateTimeoutTicks())
-      {
-        return new ResetState();
-      }
-      return currentState; // Stay bankrupt until timeout
-    }
+    transitionHandlers = new HashMap<>();
+    transitionHandlers.put(BankruptState.class,  this::handleBankruptTransition);
+    transitionHandlers.put(ResetState.class,     (ticks, adj) -> new SteadyState());
+    transitionHandlers.put(SteadyState.class,    (ticks, adj) -> handleSteadyStateTransition(adj));
+    transitionHandlers.put(GrowingState.class,   (ticks, adj) -> handleGrowingStateTransition(adj));
+    transitionHandlers.put(DecliningState.class, (ticks, adj) -> handleDecliningStateTransition(adj));
 
-    // ResetState doesn't transition
-    if (currentState instanceof ResetState)
-    {
-      return new SteadyState();
-    }
+    forceTransitionHandlers = new HashMap<>();
+    forceTransitionHandlers.put(SteadyState.class,
+        () -> ThreadLocalRandom.current().nextDouble() < 0.5 ? new GrowingState() : new DecliningState());
+    forceTransitionHandlers.put(GrowingState.class,   SteadyState::new);
+    forceTransitionHandlers.put(DecliningState.class, SteadyState::new);
+  }
 
-    // Calculate adjustment based on consecutive ticks
+  LiveStockState getNextState(LiveStockState currentState, int consecutiveTicks)
+  {
     double adjustment = consecutiveTicks * AppConfig.INSTANCE.getStateTransitionIncrementPerTick();
 
-    // Check if we've reached max consecutive ticks (force transition)
-    if (consecutiveTicks >= AppConfig.INSTANCE.getMaxConsecutiveTicksBeforeForceTransition())
+    // Force transition if max ticks reached — only applies to states that have a force handler
+    if (consecutiveTicks >= AppConfig.INSTANCE.getMaxConsecutiveTicksBeforeForceTransition()
+        && forceTransitionHandlers.containsKey(currentState.getClass()))
     {
       return forceTransition(currentState);
     }
 
-    // Handle each state type
-    if (currentState instanceof SteadyState)
+    BiFunction<Integer, Double, LiveStockState> handler = transitionHandlers.get(currentState.getClass());
+
+    if (handler == null)
     {
-      return handleSteadyStateTransition(adjustment);
-    }
-    else if (currentState instanceof GrowingState)
-    {
-      return handleGrowingStateTransition(adjustment);
-    }
-    else if (currentState instanceof DecliningState)
-    {
-      return handleDecliningStateTransition(adjustment);
+      return currentState; // Unknown state, fallback — stay in current
     }
 
-    return currentState; // Fallback
+    return handler.apply(consecutiveTicks, adjustment);
   }
 
-  /**
-   * Force a transition when max consecutive ticks is reached.
-   * SteadyState: 50/50 to Growing or Declining
-   * GrowingState/DecliningState: 100% to SteadyState
-   */
+  private LiveStockState handleBankruptTransition(int consecutiveTicks, double adjustment)
+  {
+    return consecutiveTicks >= AppConfig.INSTANCE.getBankruptStateTimeoutTicks()
+        ? new ResetState()
+        : new BankruptState();
+  }
+
   private LiveStockState forceTransition(LiveStockState currentState)
   {
-    if (currentState instanceof SteadyState)
-    {
-      // 50/50 split between Growing and Declining
-      return ThreadLocalRandom.current().nextDouble() < 0.5 ? new GrowingState() : new DecliningState();
-    }
-    else if (currentState instanceof GrowingState || currentState instanceof DecliningState)
-    {
-      // Always transition to Steady
-      return new SteadyState();
-    }
-
-    return currentState;
+    Supplier<LiveStockState> handler = forceTransitionHandlers.get(currentState.getClass());
+    return handler != null ? handler.get() : currentState;
   }
 
   /**

@@ -4,10 +4,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SteadyState implements LiveStockState
 {
-  @Override public double calculatePriceChange()
+  @Override public double calculateNewPrice(double currentPrice)
   {
-    double change = (ThreadLocalRandom.current().nextDouble() * 2-1) / 100; // +- 0.01
-    return change;
+    double change = (ThreadLocalRandom.current().nextDouble() * 2 - 1); // +- 0.01
+    return currentPrice + currentPrice * change;
   }
 
   @Override public String getName()

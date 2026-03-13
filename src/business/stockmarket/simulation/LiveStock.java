@@ -44,17 +44,17 @@ public class LiveStock
   {
     double previousPrice = currentPrice;
 
-    // Calculate and apply price change
-    double priceChange = currentState.calculatePriceChange();
-    currentPrice += currentPrice * priceChange;
-    currentPrice = MathUtil.Round(currentPrice);
+    currentPrice = MathUtil.Round(currentState.calculateNewPrice(currentPrice));
+
+    // Calculate percentage change from previous to new price
+    double percentageChange = previousPrice != 0 ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
 
     // Log price change
     logger.log(LogLevel.DEBUG, String.format("[%s] %.2f → %.2f (%+.2f%%) | %s (tick %d)",
         symbol,
         previousPrice,
         currentPrice,
-        priceChange * 100,
+        percentageChange,       // ← was: priceChange * 100
         currentState.getName(),
         consecutiveTicksInState + 1
     ));

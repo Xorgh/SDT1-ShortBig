@@ -2,6 +2,6 @@ package business.stockmarket.simulation;
 
 interface LiveStockState
 {
-  double calculatePriceChange();
+  double calculateNewPrice(double currentPrice);
   String getName();
 }

@@ -2,7 +2,6 @@ package business.services;
 
 import business.events.StockPriceUpdateEvent;
 import business.events.StockStateUpdateEvent;
-import business.stockmarket.simulation.StockStateMapper;
 import entities.Stock;
 import entities.StockPriceHistory;
 import persistence.interfaces.StockDAO;
@@ -39,7 +38,7 @@ public class StockListenerService
       return;
     }
 
-    stock.setCurrentState(StockStateMapper.toStockState(event.newLiveStockState()));
+    stock.setCurrentState(event.newState());
     stockDAO.update(stock);
 
     uow.commit();

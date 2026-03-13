@@ -12,10 +12,10 @@ import shared.logging.Logger;
 
 public class StockListenerService
 {
-  private UnitOfWork uow;
-  private Logger logger = Logger.getInstance();
-  private StockDAO stockDAO;
-  private StockPriceHistoryDAO priceHistoryDAO;
+  private final UnitOfWork uow;
+  private final Logger logger = Logger.getInstance();
+  private final StockDAO stockDAO;
+  private final StockPriceHistoryDAO priceHistoryDAO;
 
 
   public StockListenerService(UnitOfWork uow, StockDAO stockDAO, StockPriceHistoryDAO priceHistoryDAO)

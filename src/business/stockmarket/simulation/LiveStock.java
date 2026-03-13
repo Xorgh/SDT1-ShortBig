@@ -28,7 +28,6 @@ public class LiveStock
     logger.log(LogLevel.INFO, String.format("[%s] Initialized at %.2f", symbol, currentPrice));
   }
 
-  // TODO tag StockState som input ikke LiveStockState
   public LiveStock(String symbol, double currentPrice, StockState currentState)
   {
     this.symbol = symbol;
@@ -105,8 +104,6 @@ public class LiveStock
   {
     return currentState.getName();
   }
-
-  LiveStockState getCurrentState() { return currentState; }
 
   public StockState getStockState() { return StockStateMapper.toStockState(currentState) ; }
 

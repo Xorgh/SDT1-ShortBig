@@ -2,7 +2,7 @@ package business.services;
 
 import business.events.StockPriceUpdateEvent;
 import business.events.StockStateUpdateEvent;
-import business.utility.StockStateMapper;
+import business.stockmarket.simulation.StockStateMapper;
 import entities.Stock;
 import entities.StockPriceHistory;
 import persistence.interfaces.StockDAO;
@@ -10,8 +10,6 @@ import persistence.interfaces.StockPriceHistoryDAO;
 import persistence.interfaces.UnitOfWork;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
-
-import java.util.List;
 
 public class StockListenerService
 {

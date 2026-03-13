@@ -1,6 +1,5 @@
-package business.utility;
+package business.stockmarket.simulation;
 
-import business.stockmarket.simulation.*;
 import entities.StockState;
 
 public class StockStateMapper

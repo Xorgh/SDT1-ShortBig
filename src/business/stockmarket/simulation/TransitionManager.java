@@ -16,6 +16,8 @@ public class TransitionManager
    * @param consecutiveTicks Number of consecutive ticks in the current state
    * @return The next state (could be same or different)
    */
+
+  // TODO rework evt med map
   public LiveStockState getNextState(LiveStockState currentState, int consecutiveTicks)
   {
     // Handle BankruptState timeout

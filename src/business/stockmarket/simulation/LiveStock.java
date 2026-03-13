@@ -1,5 +1,6 @@
 package business.stockmarket.simulation;
 
+import entities.StockState;
 import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
@@ -32,11 +33,12 @@ public class LiveStock
     logger.log(LogLevel.INFO, String.format("[%s] Initialized at %.2f", symbol, currentPrice));
   }
 
-  public LiveStock(String symbol, double currentPrice, LiveStockState currentState)
+  // TODO tag StockState som input ikke LiveStockState
+  public LiveStock(String symbol, double currentPrice, StockState currentState)
   {
     this.symbol = symbol;
     this.currentPrice = MathUtil.Round(currentPrice);
-    this.currentState = currentState;
+    this.currentState = StockStateMapper.toLiveStockState(currentState);;
     this.consecutiveTicksInState = 0;
     // TODO last current tick lost when reloading, do I care?
     this.transitionManager = new TransitionManager();
@@ -89,7 +91,8 @@ public class LiveStock
       // Reset price when transitioning to ResetState
       if (newState instanceof ResetState)
       {
-        currentPrice = AppConfig.INSTANCE.getStockResetValue();
+        // TODO rework price calculation.
+//        newState.calculatePriceChange();
         logger.log(LogLevel.INFO, String.format("[%s] RESET - Price restored to %.2f",
             symbol, currentPrice));
       }

@@ -15,7 +15,7 @@ import shared.logging.LogLevel;
 import shared.logging.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -50,10 +50,9 @@ public enum StockMarket
   {
     String symbol = stock.getSymbol().toUpperCase();
     StockState stockState = stock.getCurrentState();
-    LiveStockState liveStockState = StockStateMapper.toLiveStockState(stockState);
     double currentPrice = stock.getCurrentPrice();
 
-    liveStocks.add(new LiveStock(symbol, currentPrice, liveStockState));
+    liveStocks.add(new LiveStock(symbol, currentPrice, stockState));
     logger.log(LogLevel.INFO, "Added existing stock: [" + symbol + "] to StockMarket\n");
   }
 
@@ -101,10 +100,5 @@ public enum StockMarket
       onStockPriceChange.forEach(listener -> listener.accept(newPriceUpdateEvent));
 
     }
-  }
-
-  public List<LiveStock> getAllLiveStocks()
-  {
-    return Collections.unmodifiableList(liveStocks);
   }
 }

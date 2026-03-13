@@ -57,7 +57,7 @@ public class RunApp
     stockMarket.onStockReset.add(stockAlertService::handleStockResetAlert);
 
     // Test Real-Time Threaded Market Ticker
-    testRealTimeMarket(uow, logger, stockMarket, 10);
+    testRealTimeMarket(uow, logger, stockMarket, stockDAO, 10);
 
     //    // Test LiveStock State Machine
     //    testStateMachine(logger, 100);
@@ -67,7 +67,7 @@ public class RunApp
   }
 
 
-  private static void testRealTimeMarket(UnitOfWork uow, Logger logger, StockMarket stockMarket, int secondsToRun)
+  private static void testRealTimeMarket(UnitOfWork uow, Logger logger, StockMarket stockMarket, StockDAO stockDAO, int secondsToRun)
   {
     logger.log(LogLevel.INFO, "=== Testing Real-Time Market Ticker ===");
     int msTorun = secondsToRun * 1000;
@@ -93,13 +93,13 @@ public class RunApp
       Thread.currentThread().interrupt();
     }
 
-    // Summary
+    // Summary - read from persistence, not from StockMarket internals
     logger.log(LogLevel.INFO, "\n=== Final Stock States ===");
-    for (LiveStock stock : stockMarket.getAllLiveStocks())
+    uow.commit(); // make sure everything is flushed
+    for (Stock stock : stockDAO.getAll())
     {
       logger.log(LogLevel.INFO,
-          String.format("%s: $%.2f (%s, %d ticks)", stock.getSymbol(), stock.getCurrentPrice(), stock.getStateName(),
-              stock.getConsecutiveTicksInState()));
+          String.format("%s: $%.2f (%s)", stock.getSymbol(), stock.getCurrentPrice(), stock.getCurrentState()));
     }
 
     // Stop the ticker

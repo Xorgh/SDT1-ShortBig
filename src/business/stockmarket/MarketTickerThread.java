@@ -30,7 +30,7 @@ public class MarketTickerThread extends Thread
   {
     running = true;
     currentTick++;
-    logger.log(LogLevel.INFO, "Market ticker thread started (update frequency: " + updateFrequency + "ms)");
+    logger.log(LogLevel.INFO, "Market ticker thread started (update frequency: " + updateFrequency + "ms) - Press Ctrl+C to stop.");
 
     while (running)
     {

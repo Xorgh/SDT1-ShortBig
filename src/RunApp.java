@@ -81,7 +81,7 @@ public class RunApp
     MarketTickerThread ticker = new MarketTickerThread();
     ticker.start();
 
-    logger.log(LogLevel.INFO, "Market ticker running. Press Ctrl+C to stop.\n");
+
 
     // Let it run for 30 seconds for testing
     try

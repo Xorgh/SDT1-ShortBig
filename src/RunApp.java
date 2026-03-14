@@ -18,9 +18,6 @@ public class RunApp
 {
   public static void main(String[] args)
   {
-    Logger logger = Logger.getInstance();
-
-    // Test observer pattern
 
     FileUnitOfWork uow = new FileUnitOfWork("data/test/");
 

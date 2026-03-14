@@ -7,10 +7,10 @@ public class Portfolio
   private final UUID id;
   private double currentBalance;
 
-  public Portfolio()
+  public Portfolio(double currentBalance)
   {
     id = UUID.randomUUID();
-    currentBalance = 0;
+    this.currentBalance = currentBalance;
   }
 
   public Portfolio(UUID id, double currentBalance)

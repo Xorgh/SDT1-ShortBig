@@ -1,6 +1,10 @@
 package business.services;
 
+import business.events.BuyStockRequest;
+import business.events.SellStockRequest;
+import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
+import dtos.PortfolioSummaryDTO;
 import entities.*;
 import persistence.interfaces.*;
 import shared.configuration.AppConfig;
@@ -8,8 +12,10 @@ import shared.logging.LogLevel;
 import shared.logging.Logger;
 
 import java.util.List;
+import java.util.UUID;
 
-public class GameService {
+public class GameService
+{
   private final UnitOfWork uow;
   private final StockDAO stockDAO;
   private final PortfolioDAO portfolioDAO;
@@ -18,21 +24,70 @@ public class GameService {
   private final StockPriceHistoryDAO historyDAO;
   private final StockMarket stockMarket = StockMarket.INSTANCE;
   private final Logger logger = Logger.getInstance();
+
+  // Services created internally — GameService owns them
+  private final StockListenerService stockListenerService;
+  private final StockBankruptService stockBankruptService;
+  private final StockAlertService stockAlertService;
+  private final StockResetService stockResetService;
+  private final BuyStockService buyStockService;
+  private final SellStockService sellStockService;
+  private final PortfolioQueryService portfolioQueryService;
   private final AppConfig config = AppConfig.INSTANCE;
 
-  public GameService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO,
-      OwnedStockDAO ownedStockDAO, TransactionDAO transactionDAO, StockPriceHistoryDAO historyDAO) {
+  private MarketTickerThread ticker;
+
+  public GameService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
+      TransactionDAO transactionDAO, StockPriceHistoryDAO historyDAO)
+  {
     this.uow = uow;
     this.stockDAO = stockDAO;
     this.portfolioDAO = portfolioDAO;
     this.ownedStockDAO = ownedStockDAO;
     this.transactionDAO = transactionDAO;
     this.historyDAO = historyDAO;
+
+    // Create services
+    this.stockListenerService = new StockListenerService(uow, stockDAO, historyDAO);
+    this.stockBankruptService = new StockBankruptService(uow, ownedStockDAO);
+    this.stockAlertService = new StockAlertService();
+    this.stockResetService = new StockResetService();
+    this.buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    this.sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    this.portfolioQueryService = new PortfolioQueryService(portfolioDAO, ownedStockDAO, transactionDAO);
+
+    // Register observers
+    registerObservers();
   }
 
-  public void startNewGame() {
+  private void registerObservers()
+  {
+    stockMarket.onStockPriceChange.add(stockListenerService::handlePriceChange);
+    stockMarket.onStockStateChange.add(stockListenerService::handleStateChange);
+    stockMarket.onStockBankruptcy.add(stockBankruptService::handleBankruptcy);
+    stockMarket.onStockBankruptcy.add(stockAlertService::handleBankruptcyAlert);
+    stockMarket.onStockReset.add(stockResetService::handleStockReset);
+    stockMarket.onStockReset.add(stockAlertService::handleStockResetAlert);
+  }
+
+  public void startTicker()
+  {
+    ticker = new MarketTickerThread();
+    ticker.start();
+  }
+
+  public void stopTicker()
+  {
+    if (ticker != null)
+      ticker.stopTicker();
+  }
+
+  // ... startNewGame(), loadGame(), resetGame()
+  public void startNewGame()
+  {
     uow.begin();
-    try {
+    try
+    {
       // Create default stocks
       stockDAO.create(new Stock("AAPL", "Apple", config.getStockResetValue(), StockState.STEADY));
       stockDAO.create(new Stock("GOOG", "Google", config.getStockResetValue(), StockState.STEADY));
@@ -41,50 +96,60 @@ public class GameService {
       stockDAO.create(new Stock("AMZN", "Amazon", config.getStockResetValue(), StockState.STEADY));
       stockDAO.create(new Stock("MU", "Micron Technology", config.getStockResetValue(), StockState.STEADY));
 
-
       // Create portfolio with starting balance
       portfolioDAO.create(new Portfolio(config.getStartingBalance()));
 
       uow.commit();
 
       // Load into StockMarket
-      for (Stock stock : stockDAO.getAll()) {
+      for (Stock stock : stockDAO.getAll())
+      {
         stockMarket.addExistingLiveStock(stock);
       }
 
       logger.log(LogLevel.INFO, "New game started");
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Failed to start new game: " + e.getMessage());
     }
   }
 
-  public void loadGame() {
+  public void loadGame()
+  {
     uow.begin();
-    try {
+    try
+    {
       List<Stock> stocks = stockDAO.getAll();
-      if (stocks.isEmpty()) {
+      if (stocks.isEmpty())
+      {
         logger.log(LogLevel.INFO, "No saved game found, starting new game");
         uow.rollback();
         startNewGame();
         return;
       }
 
-      for (Stock stock : stocks) {
+      for (Stock stock : stocks)
+      {
         stockMarket.addExistingLiveStock(stock);
       }
 
       uow.rollback(); // read-only, nothing to commit
       logger.log(LogLevel.INFO, "Game loaded — " + stocks.size() + " stocks restored");
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Failed to load game: " + e.getMessage());
     }
   }
 
-  public void resetGame() {
+  public void resetGame()
+  {
     uow.begin();
-    try {
+    try
+    {
       // Clear all persisted data
       for (OwnedStock os : ownedStockDAO.getAll())
         ownedStockDAO.delete(os.getId());
@@ -100,9 +165,24 @@ public class GameService {
       uow.commit();
       logger.log(LogLevel.INFO, "Game reset");
       startNewGame();
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Failed to reset game: " + e.getMessage());
     }
+  }
+
+  // Expose trading services to presentation layer
+  public void buyStock(BuyStockRequest request) {
+    buyStockService.handleBuyStockRequest(request);
+  }
+
+  public void sellStock(SellStockRequest request) {
+    sellStockService.handleSellStockRequest(request);
+  }
+
+  public PortfolioSummaryDTO getPortfolioSummary(UUID portfolioId) {
+    return portfolioQueryService.getPortfolioSummary(portfolioId);
   }
 }

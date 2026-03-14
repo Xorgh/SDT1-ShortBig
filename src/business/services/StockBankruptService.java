@@ -41,8 +41,4 @@ public class StockBankruptService
 
     uow.commit();
   }
-
-  // TODO update class diagram
-  // TODO implement interaction with Portfolio, how do we update portfolio balance?
-  // TODO continued, where in the flow should portfolio balance be calculated?
 }

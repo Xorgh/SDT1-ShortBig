@@ -173,16 +173,45 @@ public class GameService
     }
   }
 
+  public void testRealTimeMarket(int secondsToRun)
+  {
+    logger.log(LogLevel.INFO, "=== Testing Real-Time Market Ticker ===");
+    int msTorun = secondsToRun * 1000;
+
+    try
+    {
+      Thread.sleep(msTorun);
+    }
+    catch (InterruptedException e)
+    {
+      Thread.currentThread().interrupt();
+    }
+
+    // Summary - read from persistence, not from StockMarket internals
+    logger.log(LogLevel.INFO, "\n=== Final Stock States ===");
+    uow.commit(); // make sure everything is flushed
+    for (Stock stock : stockDAO.getAll())
+    {
+      logger.log(LogLevel.INFO,
+          String.format("%s: $%.2f (%s)", stock.getSymbol(), stock.getCurrentPrice(), stock.getCurrentState()));
+    }
+
+    logger.log(LogLevel.INFO, "Test completed");
+  }
+
   // Expose trading services to presentation layer
-  public void buyStock(BuyStockRequest request) {
+  public void buyStock(BuyStockRequest request)
+  {
     buyStockService.handleBuyStockRequest(request);
   }
 
-  public void sellStock(SellStockRequest request) {
+  public void sellStock(SellStockRequest request)
+  {
     sellStockService.handleSellStockRequest(request);
   }
 
-  public PortfolioSummaryDTO getPortfolioSummary(UUID portfolioId) {
+  public PortfolioSummaryDTO getPortfolioSummary(UUID portfolioId)
+  {
     return portfolioQueryService.getPortfolioSummary(portfolioId);
   }
 }

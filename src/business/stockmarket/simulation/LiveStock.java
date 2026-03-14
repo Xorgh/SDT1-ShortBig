@@ -92,11 +92,6 @@ public class LiveStock
     consecutiveTicksInState = 0; // Reset counter when state changes
   }
 
-  public String getStateName()
-  {
-    return currentState.getName();
-  }
-
   public StockState getStockState() { return StockStateMapper.toStockState(currentState) ; }
 
   public String getSymbol()

@@ -4,6 +4,7 @@ import business.events.BuyStockRequest;
 import business.events.SellStockRequest;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
+import dtos.BalanceHistoryDTO;
 import dtos.PortfolioSummaryDTO;
 import entities.*;
 import persistence.interfaces.*;
@@ -82,7 +83,6 @@ public class GameService
       ticker.stopTicker();
   }
 
-  // ... startNewGame(), loadGame(), resetGame()
   public void startNewGame()
   {
     uow.begin();
@@ -199,6 +199,67 @@ public class GameService
     logger.log(LogLevel.INFO, "Test completed");
   }
 
+  public void testTransactions()
+  {
+    logger.log(LogLevel.INFO, "=== Testing Transaction Scripts ===");
+
+    // Get portfolio created by startNewGame
+    List<Portfolio> portfolios = portfolioDAO.getAll();
+    if (portfolios.isEmpty())
+    {
+      logger.log(LogLevel.ERROR, "No portfolios found — run startNewGame() first");
+      return;
+    }
+
+    UUID portfolioId = portfolios.get(0).getId();
+    printPortfolioSummary(portfolioId, "Initial State");
+
+    // --- BUY tests ---
+    logger.log(LogLevel.INFO, "Buying 5 AAPL");
+    buyStock(new BuyStockRequest("AAPL", 5, portfolioId));
+    printPortfolioSummary(portfolioId, "After buying 5 AAPL");
+
+    logger.log(LogLevel.INFO, "Buying 3 GOOG");
+    buyStock(new BuyStockRequest("GOOG", 3, portfolioId));
+    printPortfolioSummary(portfolioId, "After buying 3 GOOG");
+
+    logger.log(LogLevel.INFO, "Buying 2 more AAPL (should add to existing)");
+    buyStock(new BuyStockRequest("AAPL", 2, portfolioId));
+    printPortfolioSummary(portfolioId, "After buying 2 more AAPL");
+
+    logger.log(LogLevel.INFO, "Buying 99999 AAPL (should fail — insufficient balance)");
+    buyStock(new BuyStockRequest("AAPL", 99999, portfolioId));
+
+    // --- SELL tests ---
+    logger.log(LogLevel.INFO, "Selling 3 AAPL (partial)");
+    sellStock(new SellStockRequest("AAPL", 3, portfolioId));
+    printPortfolioSummary(portfolioId, "After selling 3 AAPL");
+
+    logger.log(LogLevel.INFO, "Selling remaining 4 AAPL (should delete owned stock record)");
+    sellStock(new SellStockRequest("AAPL", 4, portfolioId));
+    printPortfolioSummary(portfolioId, "After selling all AAPL");
+
+    logger.log(LogLevel.INFO, "Selling 99 GOOG (should fail — only own 3)");
+    sellStock(new SellStockRequest("GOOG", 99, portfolioId));
+
+    logger.log(LogLevel.INFO, "Selling MSFT (should fail — not owned)");
+    sellStock(new SellStockRequest("MSFT", 1, portfolioId));
+
+    logger.log(LogLevel.INFO, "=== Transaction Tests Complete ===");
+  }
+
+  private void printPortfolioSummary(UUID portfolioId, String label)
+  {
+    PortfolioSummaryDTO summary = getPortfolioSummary(portfolioId);
+    logger.log(LogLevel.INFO, String.format("--- %s ---", label));
+    logger.log(LogLevel.INFO, String.format("Balance: $%.2f", summary.balance()));
+    for (OwnedStock os : summary.ownedStocks())
+    {
+      logger.log(LogLevel.INFO, String.format("  Holdings: %s x%d", os.getStockSymbol(), os.getNumberOfShares()));
+    }
+    logger.log(LogLevel.INFO, String.format("  Total transactions: %d", summary.transactionHistory().size()));
+  }
+
   // Expose trading services to presentation layer
   public void buyStock(BuyStockRequest request)
   {
@@ -213,5 +274,10 @@ public class GameService
   public PortfolioSummaryDTO getPortfolioSummary(UUID portfolioId)
   {
     return portfolioQueryService.getPortfolioSummary(portfolioId);
+  }
+
+  public List<BalanceHistoryDTO> getBalanceHistory(UUID portfolioId)
+  {
+    return portfolioQueryService.getBalanceHistory(portfolioId);
   }
 }

@@ -19,9 +19,14 @@ public class RunApp
 
     GameService gameService = new GameService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, historyDAO);
 
+//    Transaction test
     gameService.startNewGame();
-    gameService.startTicker();
-    gameService.testRealTimeMarket(10);
-    gameService.stopTicker();
+    gameService.testTransactions();
+
+//    // Basic real time market test
+//    gameService.startNewGame();
+//    gameService.startTicker();
+//    gameService.testRealTimeMarket(10);
+//    gameService.stopTicker();
   }
 }

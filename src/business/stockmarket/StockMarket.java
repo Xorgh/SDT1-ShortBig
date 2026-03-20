@@ -57,7 +57,7 @@ public enum StockMarket
     {
       String stockSymbol = liveStock.getSymbol();
 
-      StockState oldStockState = liveStock.getStockState();
+      StockState oldState = liveStock.getStockState();
       double oldPrice = liveStock.getCurrentPrice();
 
       liveStock.updatePrice();
@@ -85,9 +85,9 @@ public enum StockMarket
       StockPriceUpdateEvent newPriceUpdateEvent = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
 
       // Compare old and new state, if changed notify listeners.
-      if (!oldStockState.equals(newState))
+      if (!oldState.equals(newState))
       {
-        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldStockState, newState);
+        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldState, newState);
         onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
       }
 

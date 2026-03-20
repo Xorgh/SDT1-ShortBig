@@ -1,9 +1,12 @@
-package shared.logging;
+package mocks;
+
+import shared.logging.LogLevel;
+import shared.logging.LogOutput;
 
 public class TestLogOutput implements LogOutput
 {
   @Override public void log(LogLevel logLevel, String message)
   {
-    // Logging effectively disabled while testing
+    // Logging silenced for tests
   }
 }

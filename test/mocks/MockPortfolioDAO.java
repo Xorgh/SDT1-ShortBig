@@ -17,7 +17,7 @@ public class MockPortfolioDAO implements PortfolioDAO
 
   @Override public void create(Portfolio portfolio)
   {
-
+// TODO implement mock create method and finish the last buy test cases.
   }
 
   @Override public Portfolio getById(UUID id)

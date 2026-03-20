@@ -221,4 +221,41 @@ public class BuyStockServiceTest
     // Assert
     assertEquals(4000, portfolio.getCurrentBalance());
   }
+
+  @Test void handleBuyStockRequest_BankruptStock_ShouldThrow()
+  {
+    // Arrange
+    mockStockDAO.setStockToReturn(new Stock("AAPL", "Apple", 100.0, StockState.BANKRUPT));
+    BuyStockRequest request = new BuyStockRequest("AAPL", 10, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
+
+  @Test void handleBuyStockRequest_StockSymbolIsNull_ShouldThrow()
+  {
+    // Arrange
+    BuyStockRequest request = new BuyStockRequest(null, 10, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
+
+  @Test void handleBuyStockRequest_StockSymbolIsEmpty_ShouldThrow()
+  {
+    // Arrange
+    BuyStockRequest request = new BuyStockRequest("", 10, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
+
+  @Test void handleBuyStockRequest_StockSymbolIsUnknown_ShouldThrow()
+  {
+    // Arrange
+    BuyStockRequest request = new BuyStockRequest("NVDA", 10, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
 }

@@ -21,7 +21,9 @@ public class MockStockDAO implements StockDAO
 
   @Override public Stock getBySymbol(String symbol)
   {
-    return stockToReturn;
+    if (stockToReturn != null && stockToReturn.getSymbol().equals(symbol))
+      return stockToReturn;
+    return null;
   }
 
   @Override public List<Stock> getAll()

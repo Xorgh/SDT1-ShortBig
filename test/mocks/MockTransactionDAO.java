@@ -9,6 +9,7 @@ import java.util.UUID;
 public class MockTransactionDAO implements TransactionDAO
 {
   private Transaction transactionToReturn;
+  private Transaction lastCreated;
 
   public void setTransactionToReturn(Transaction transactionToReturn)
   {
@@ -17,7 +18,7 @@ public class MockTransactionDAO implements TransactionDAO
 
   @Override public void create(Transaction transaction)
   {
-
+    lastCreated = transaction;
   }
 
   @Override public Transaction getById(UUID id)

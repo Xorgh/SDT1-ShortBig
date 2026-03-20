@@ -15,7 +15,7 @@ public class BuyStockService
   private final PortfolioDAO portfolioDAO;
   private final OwnedStockDAO ownedStockDAO;
   private final TransactionDAO transactionDAO;
-  private final double transactionFee = AppConfig.INSTANCE.getTransactionFee();
+  private final double transactionFee;
 
   public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
       TransactionDAO transactionDAO)
@@ -25,6 +25,18 @@ public class BuyStockService
     this.portfolioDAO = portfolioDAO;
     this.ownedStockDAO = ownedStockDAO;
     this.transactionDAO = transactionDAO;
+    this.transactionFee = AppConfig.INSTANCE.getTransactionFee();
+  }
+
+  public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
+      TransactionDAO transactionDAO, double transactionFee)
+  {
+    this.uow = uow;
+    this.stockDAO = stockDAO;
+    this.portfolioDAO = portfolioDAO;
+    this.ownedStockDAO = ownedStockDAO;
+    this.transactionDAO = transactionDAO;
+    this.transactionFee = transactionFee;
   }
 
   public void handleBuyStockRequest(BuyStockRequest request)
@@ -96,6 +108,7 @@ public class BuyStockService
     {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Buy stock failed: " + e.getMessage());
+      throw e;
     }
   }
 }

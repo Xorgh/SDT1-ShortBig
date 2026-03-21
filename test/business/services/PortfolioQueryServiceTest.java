@@ -192,6 +192,18 @@ public class PortfolioQueryServiceTest
     assertTrue(results.isEmpty());
   }
 
+  @Test void getBalanceHistory_SingleBuyTransaction_ShouldReturnOneEntry()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(1, results.size());
+  }
+
   @Test void getBalanceHistory_SingleBuyTransaction_ShouldReturnNegativeBalance()
   {
     // Arrange — defaults from setup are sufficient
@@ -229,6 +241,20 @@ public class PortfolioQueryServiceTest
 
     // Assert
     assertEquals(-300.15, results.getLast().balanceAfter(), 0.001);
+  }
+
+  @Test void getBalanceHistory_MultipleBuyTransactions_ShouldReturnCorrectCount()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(3, results.size());
   }
 
   @Test void getBalanceHistory_MixedBuyAndSell_ShouldCalculateCorrectRunningBalance()
@@ -277,6 +303,12 @@ public class PortfolioQueryServiceTest
 
     // Assert
     assertEquals(1, results.size());
+  }
+
+  @Test void getBalanceHistory_NullPortfolioId_ShouldThrow()
+  {
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.getBalanceHistory(null));
   }
 
   //  ## State & Behavior

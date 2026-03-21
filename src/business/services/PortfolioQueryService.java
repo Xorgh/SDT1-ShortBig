@@ -57,6 +57,11 @@ public class PortfolioQueryService
 
   public List<BalanceHistoryDTO> getBalanceHistory(UUID portfolioId)
   {
+    if (portfolioId == null)
+    {
+      throw new IllegalArgumentException("Portfolio ID cannot be null");
+    }
+
     List<Transaction> history = transactionDAO.getAll().stream().filter(t -> t.getPortfolioId().equals(portfolioId))
         .sorted(Comparator.comparing(Transaction::getTimestamp)).toList();
 

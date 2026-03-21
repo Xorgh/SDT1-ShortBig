@@ -8,8 +8,14 @@ import java.util.UUID;
 
 public class MockPortfolioDAO implements PortfolioDAO
 {
+  private int updateCounter;
   private Portfolio portfolioToReturn;
   private Portfolio lastCreated;
+
+  public int getUpdateCounter()
+  {
+    return updateCounter;
+  }
 
   public void setPortfolioToReturn(Portfolio portfolioToReturn)
   {
@@ -38,7 +44,7 @@ public class MockPortfolioDAO implements PortfolioDAO
 
   @Override public void update(Portfolio portfolio)
   {
-
+    updateCounter++;
   }
 
   @Override public void delete(UUID id)

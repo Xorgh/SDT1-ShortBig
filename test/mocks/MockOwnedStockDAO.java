@@ -11,6 +11,16 @@ public class MockOwnedStockDAO implements OwnedStockDAO
   // INPUT — configure what getAllByStockSymbol returns
   private List<OwnedStock> ownedStocksBySymbol = List.of();
 
+  private List<OwnedStock> allOwnedStocks = List.of();
+
+  public void setAllOwnedStocks(List<OwnedStock> ownedStocks) {
+    this.allOwnedStocks = ownedStocks;
+  }
+
+  @Override public List<OwnedStock> getAll() {
+    return allOwnedStocks;
+  }
+
   // OUTPUT — capture what create/update received
   private OwnedStock lastCreated;
   private OwnedStock shouldReturnOwnedStock;
@@ -61,6 +71,4 @@ public class MockOwnedStockDAO implements OwnedStockDAO
   public int getUpdateCount() { return updateCount; }
 
   @Override public OwnedStock getById(UUID id) { return null; }
-  @Override public List<OwnedStock> getAll() { return List.of(); }
-
 }

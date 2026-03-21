@@ -16,6 +16,16 @@ public class MockTransactionDAO implements TransactionDAO
     this.transactionToReturn = transactionToReturn;
   }
 
+  public Transaction getTransactionToReturn()
+  {
+    return transactionToReturn;
+  }
+
+  public Transaction getLastCreated()
+  {
+    return lastCreated;
+  }
+
   @Override public void create(Transaction transaction)
   {
     lastCreated = transaction;

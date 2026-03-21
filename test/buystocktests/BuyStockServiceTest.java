@@ -2,14 +2,12 @@ package buystocktests;
 
 import business.events.BuyStockRequest;
 import business.services.BuyStockService;
-import entities.OwnedStock;
-import entities.Portfolio;
-import entities.Stock;
-import entities.StockState;
+import entities.*;
 import mocks.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +44,7 @@ public class BuyStockServiceTest
   @Test void handleBuyStockRequest_SingleValidAffordableStock_ShouldUpdateBalance()
   {
     // Arrange
+    // - Note @before each setup uses BuyStockService default contructor which read transactionfee from shared AppConfig
     Portfolio portfolio = new Portfolio(PORTFOLIO_ID, 5000);
     mockPortfolioDAO.setPortfolioToReturn(portfolio);
 
@@ -257,5 +256,35 @@ public class BuyStockServiceTest
 
     // Act & Assert
     assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
+
+  @Test void handleBuyStockRequest_ValidPurchase_ShouldHaveCorrectTransactionType()
+  {
+    // Arrange
+    BuyStockRequest request = new BuyStockRequest("AAPL", 10, PORTFOLIO_ID);
+
+    // Act
+    service.handleBuyStockRequest(request);
+
+    // Assert
+    assertEquals(TransactionType.BUY, mockTransactionDAO.getLastCreated().getType());
+  }
+
+  // Omitting Timestamp format testing, my service uses LocalDateTime, formatting happens in persistence layer.
+  @Test void handleBuyStockRequest_ValidPurchase_ShouldHaveRecentTransactionTimestamp()
+  {
+    // Arrange
+    BuyStockRequest request = new BuyStockRequest("AAPL", 10, PORTFOLIO_ID);
+
+    // Act
+    LocalDateTime before = LocalDateTime.now();
+    service.handleBuyStockRequest(request);
+    LocalDateTime after = LocalDateTime.now();
+
+    // Assert
+    LocalDateTime timestamp = mockTransactionDAO.getLastCreated().getTimestamp();
+    assertNotNull(timestamp);
+    assertFalse(timestamp.isBefore(before));
+    assertFalse(timestamp.isAfter(after));
   }
 }

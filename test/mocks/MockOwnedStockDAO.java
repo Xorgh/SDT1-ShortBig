@@ -13,12 +13,29 @@ public class MockOwnedStockDAO implements OwnedStockDAO
 
   // OUTPUT — capture what create/update received
   private OwnedStock lastCreated;
+  private OwnedStock shouldReturnOwnedStock;
   private int createCount;
   private int updateCount;
+  private int deleteCount;
+
+  public int getDeleteCount()
+  {
+    return deleteCount;
+  }
+
+  public void setShouldReturnOwnedStock(OwnedStock shouldReturnOwnedStock)
+  {
+    this.shouldReturnOwnedStock = shouldReturnOwnedStock;
+  }
 
   public void setOwnedStocksBySymbol(List<OwnedStock> ownedStocks)
   {
     this.ownedStocksBySymbol = ownedStocks;
+  }
+
+  public OwnedStock getShouldReturnOwnedStock()
+  {
+    return shouldReturnOwnedStock;
   }
 
   @Override public List<OwnedStock> getAllByStockSymbol(String stockSymbol)
@@ -37,12 +54,13 @@ public class MockOwnedStockDAO implements OwnedStockDAO
     updateCount++;
   }
 
+  @Override public void delete(UUID id) {deleteCount++;}
+
   public OwnedStock getLastCreated() { return lastCreated; }
   public int getCreateCount() { return createCount; }
   public int getUpdateCount() { return updateCount; }
 
-  // These are unused by BuyStockService — keep as stubs
   @Override public OwnedStock getById(UUID id) { return null; }
   @Override public List<OwnedStock> getAll() { return List.of(); }
-  @Override public void delete(UUID id) { }
+
 }

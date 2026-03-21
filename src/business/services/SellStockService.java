@@ -100,6 +100,7 @@ public class SellStockService
     {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Sell stock failed: " + e.getMessage());
+      throw e;
     }
   }
 }

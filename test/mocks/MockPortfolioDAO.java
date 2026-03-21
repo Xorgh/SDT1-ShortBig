@@ -9,15 +9,21 @@ import java.util.UUID;
 public class MockPortfolioDAO implements PortfolioDAO
 {
   private Portfolio portfolioToReturn;
+  private Portfolio lastCreated;
 
   public void setPortfolioToReturn(Portfolio portfolioToReturn)
   {
     this.portfolioToReturn = portfolioToReturn;
   }
 
+  public Portfolio getPortfolioToReturn()
+  {
+    return portfolioToReturn;
+  }
+
   @Override public void create(Portfolio portfolio)
   {
-// TODO implement mock create method and finish the last buy test cases.
+    lastCreated = portfolio;
   }
 
   @Override public Portfolio getById(UUID id)

@@ -10,7 +10,15 @@ public class MockTransactionDAO implements TransactionDAO
 {
   private Transaction transactionToReturn;
   private Transaction lastCreated;
+  private List<Transaction> allTransactions = List.of();
 
+  public void setAllTransactions(List<Transaction> transactions) {
+    this.allTransactions = transactions;
+  }
+
+  @Override public List<Transaction> getAll() {
+    return allTransactions;
+  }
   public void setTransactionToReturn(Transaction transactionToReturn)
   {
     this.transactionToReturn = transactionToReturn;
@@ -34,11 +42,6 @@ public class MockTransactionDAO implements TransactionDAO
   @Override public Transaction getById(UUID id)
   {
     return transactionToReturn;
-  }
-
-  @Override public List<Transaction> getAll()
-  {
-    return List.of();
   }
 
   @Override public void delete(UUID id)

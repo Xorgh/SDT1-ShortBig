@@ -1,7 +1,6 @@
-package buystocktests;
+package business.services;
 
 import business.events.BuyStockRequest;
-import business.services.BuyStockService;
 import entities.*;
 import mocks.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -286,5 +285,39 @@ public class BuyStockServiceTest
     assertNotNull(timestamp);
     assertFalse(timestamp.isBefore(before));
     assertFalse(timestamp.isAfter(after));
+  }
+
+  @Test void handleBuyStockRequest_NegativeTransactionFee_ShouldReduceTotalCost()
+  {
+    // Arrange
+    service = new BuyStockService(
+        mockUow, mockStockDAO, mockPortfolioDAO,
+        mockOwnedStockDAO, mockTransactionDAO, -10.0);
+
+    Portfolio portfolio = new Portfolio(PORTFOLIO_ID, 5000);
+    mockPortfolioDAO.setPortfolioToReturn(portfolio);
+
+    BuyStockRequest request = new BuyStockRequest("AAPL", 1, PORTFOLIO_ID);
+
+    // Act
+    service.handleBuyStockRequest(request);
+
+    // Assert — cost = (100 * 1) + (-10) = 90
+    assertEquals(4910.0, portfolio.getCurrentBalance());
+  }
+
+  @Test void handleBuyStockRequest_InsufficientBalance_ShouldRollback()
+  {
+    // Arrange
+    Portfolio portfolio = new Portfolio(PORTFOLIO_ID, 50);
+    mockPortfolioDAO.setPortfolioToReturn(portfolio);
+
+    BuyStockRequest request = new BuyStockRequest("AAPL", 10, PORTFOLIO_ID);
+
+    // Act
+    try { service.handleBuyStockRequest(request); } catch (IllegalArgumentException ignored) {}
+
+    // Assert
+    assertEquals(1, mockUow.getRollbackCount());
   }
 }

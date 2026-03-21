@@ -60,6 +60,10 @@ public enum AppConfig
     // General configuration
     this.startingBalance = 10000;
     this.transactionFee = 0.05;
+    if (this.transactionFee < 0)
+      throw new IllegalStateException("Transaction fee cannot be negative");
+
+
     this.updateFrequencyInMs = 1000;
     this.stockResetValue = 100.0;
 

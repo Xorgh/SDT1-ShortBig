@@ -1,5 +1,6 @@
 package business.services;
 
+import dtos.BalanceHistoryDTO;
 import dtos.PortfolioSummaryDTO;
 import entities.OwnedStock;
 import entities.Portfolio;
@@ -9,6 +10,7 @@ import mocks.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,12 +93,9 @@ public class PortfolioQueryServiceTest
   @Test void getPortfolioSummary_ValidPortfolioMultipleTransactions_ShouldReturnAll()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(
-        List.of(
-            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 10, 100),
-            new Transaction(PORTFOLIO_ID, "MSFT", TransactionType.SELL, 10, 100),
-            new Transaction(PORTFOLIO_ID, "NVDA", TransactionType.BUY, 10, 100)
-            ));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 10, 100),
+        new Transaction(PORTFOLIO_ID, "MSFT", TransactionType.SELL, 10, 100),
+        new Transaction(PORTFOLIO_ID, "NVDA", TransactionType.BUY, 10, 100)));
 
     // Act
     PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
@@ -104,7 +103,6 @@ public class PortfolioQueryServiceTest
     // Assert
     assertEquals(3, result.transactionHistory().size());
   }
-
 
   //  ## Interface & Exceptions
 
@@ -125,18 +123,17 @@ public class PortfolioQueryServiceTest
     assertThrows(IllegalArgumentException.class, () -> service.getPortfolioSummary(null));
   }
 
-
   //  ## State & Behavior
-    @Test void getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectBalance()
-    {
-      // Arrange
+  @Test void getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectBalance()
+  {
+    // Arrange
 
-      // Act
-      PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
 
-      // Assert
-      assertEquals(5000, result.balance());
-    }
+    // Assert
+    assertEquals(5000, result.balance());
+  }
 
   //
   @Test void getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectPortfolioId()
@@ -154,32 +151,25 @@ public class PortfolioQueryServiceTest
   {
     // Arrange
     mockOwnedStockDAO.setAllOwnedStocks(
-        List.of(
-            new OwnedStock(PORTFOLIO_ID, "AAPL", 10),
-            new OwnedStock(PORTFOLIO_ID, "MSFT", 10),
-            new OwnedStock(PORTFOLIO_ID, "NVDA", 10),
-            new OwnedStock(UUID.randomUUID(), "AAPL", 99),
-            new OwnedStock(UUID.randomUUID(), "AAPL", 99)
-        ));
+        List.of(new OwnedStock(PORTFOLIO_ID, "AAPL", 10), new OwnedStock(PORTFOLIO_ID, "MSFT", 10),
+            new OwnedStock(PORTFOLIO_ID, "NVDA", 10), new OwnedStock(UUID.randomUUID(), "AAPL", 99),
+            new OwnedStock(UUID.randomUUID(), "AAPL", 99)));
 
     // Act
     PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
 
     // Assert
     assertEquals(3, result.ownedStocks().size());
-      }
+  }
 
   @Test void getPortfolioSummary_MixedPortfolios_ShouldOnlyReturnTransactionsForRequestedPortfolio()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(
-        List.of(
-            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
-            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
-            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
-            new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100),
-            new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100)
-        ));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+        new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100),
+        new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100)));
 
     // Act
     PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
@@ -191,20 +181,127 @@ public class PortfolioQueryServiceTest
   //  # getBalanceHistory:
 
   //  ## Zero & One
-  //  getBalanceHistory_NoTransactions_ShouldReturnEmptyList
-  //  getBalanceHistory_SingleBuyTransaction_ShouldReturnNegativeBalance
-  //  getBalanceHistory_SingleSellTransaction_ShouldReturnPositiveBalance
+  @Test void getBalanceHistory_NoTransactions_ShouldReturnEmptyList()
+  {
+    // Arrange — defaults from setup are sufficient
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertTrue(results.isEmpty());
+  }
+
+  @Test void getBalanceHistory_SingleBuyTransaction_ShouldReturnNegativeBalance()
+  {
+    // Arrange — defaults from setup are sufficient
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(-100.05, results.getFirst().balanceAfter());
+  }
+
+  @Test void getBalanceHistory_SingleSellTransaction_ShouldReturnPositiveBalance()
+  {
+    // Arrange — defaults from setup are sufficient
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(99.95, results.getFirst().balanceAfter());
+  }
 
   //  ## Many & Boundaries
-  //  getBalanceHistory_MultipleBuyTransactions_ShouldAccumulateNegativeBalance
-  //  getBalanceHistory_MixedBuyAndSell_ShouldCalculateCorrectRunningBalance
-  //  getBalanceHistory_MultipleTransactions_ShouldBeSortedByTimestamp
+  @Test void getBalanceHistory_MultipleBuyTransactions_ShouldAccumulateNegativeBalance()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(-300.15, results.getLast().balanceAfter());
+  }
+
+  @Test void getBalanceHistory_MixedBuyAndSell_ShouldCalculateCorrectRunningBalance()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert — (-100.05) + 99.95 + (-100.05) = -100.15
+    assertEquals(-100.15, results.getLast().balanceAfter(), 0.001);
+  }
+
+  @Test void getBalanceHistory_MultipleTransactions_ShouldBeSortedByTimestamp()
+  {
+    // Arrange — intentionally out of order
+    mockTransactionDAO.setAllTransactions(List.of(
+        new Transaction(UUID.randomUUID(), PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 100.05, 0.05,
+            LocalDateTime.of(2026, 1, 1, 12, 0)),
+        new Transaction(UUID.randomUUID(), PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 100.05, 0.05,
+            LocalDateTime.of(2026, 1, 1, 10, 0)),
+        new Transaction(UUID.randomUUID(), PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 100.05, 0.05,
+            LocalDateTime.of(2026, 1, 1, 11, 0))));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert — first result should have the earliest timestamp
+    assertTrue(results.get(0).timestamp().isBefore(results.get(1).timestamp()));
+  }
 
   //  ## Interface & Exceptions
-  //  getBalanceHistory_TransactionsFromOtherPortfolio_ShouldBeExcluded
+  @Test void getBalanceHistory_TransactionsFromOtherPortfolio_ShouldBeExcluded()
+  {
+    // Arrange
+    UUID otherPortfolioId = UUID.randomUUID();
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(otherPortfolioId, "AAPL", TransactionType.BUY, 1, 100),
+        new Transaction(otherPortfolioId, "MSFT", TransactionType.SELL, 1, 50)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(1, results.size());
+  }
 
   //  ## State & Behavior
-  //  getBalanceHistory_SingleBuy_ShouldHaveCorrectTransactionType
-  //  getBalanceHistory_SingleBuy_ShouldHaveCorrectAmount
+  @Test void getBalanceHistory_SingleBuy_ShouldHaveCorrectTransactionType()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(TransactionType.BUY, results.getFirst().type());
+  }
+
+  @Test void getBalanceHistory_SingleBuy_ShouldHaveCorrectAmount()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+
+    // Act
+    List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(100.05, results.getFirst().amount());
+  }
 
 }

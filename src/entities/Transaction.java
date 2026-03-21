@@ -29,7 +29,13 @@ public class Transaction
     this.quantity = quantity;
     this.pricePerShare = pricePerShare;
     fee = AppConfig.INSTANCE.getTransactionFee();
-    totalAmount = (quantity * pricePerShare) + fee;
+
+    if (type == TransactionType.BUY) {
+      totalAmount = (quantity * pricePerShare) + fee;
+    } else {
+      totalAmount = (quantity * pricePerShare) - fee;
+    }
+
     timestamp = LocalDateTime.now();
   }
 

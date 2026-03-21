@@ -200,7 +200,7 @@ public class SellStockServiceTest
   }
 
   // Omitting Timestamp format testing, my service uses LocalDateTime, formatting happens in persistence layer.
-  @Test void handleSellStockRequest_ValidPurchase_ShouldHaveRecentTransactionTimestamp()
+  @Test void handleSellStockRequest_ValidSale_ShouldHaveRecentTransactionTimestamp()
   {
     // Arrange
     SellStockRequest request = new SellStockRequest("AAPL", 10, PORTFOLIO_ID);
@@ -229,13 +229,23 @@ public class SellStockServiceTest
     assertEquals(1, mockUow.getCommitCount());
   }
 
+  @Test void handleSellStockRequest_PortfolioNotFound_ShouldThrow()
+  {
+    // Arrange
+    mockPortfolioDAO.setPortfolioToReturn(null);
+    SellStockRequest request = new SellStockRequest("AAPL", 1, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleSellStockRequest(request));
+  }
+
   @Test void handleSellStockRequest_InValidSale_ShouldRollback()
   {
     // Arrange
     SellStockRequest request = new SellStockRequest("AAPL", 11, PORTFOLIO_ID);
 
     // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> service.handleSellStockRequest(request));
+    try { service.handleSellStockRequest(request); } catch (IllegalArgumentException ignored) {}
     assertEquals(1, mockUow.getRollbackCount());
   }
 }

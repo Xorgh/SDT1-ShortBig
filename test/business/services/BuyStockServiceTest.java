@@ -306,6 +306,16 @@ public class BuyStockServiceTest
     assertEquals(4910.0, portfolio.getCurrentBalance(), 0.001);
   }
 
+  @Test void handleBuyStockRequest_PortfolioNotFound_ShouldThrow()
+  {
+    // Arrange
+    mockPortfolioDAO.setPortfolioToReturn(null);
+    BuyStockRequest request = new BuyStockRequest("AAPL", 1, PORTFOLIO_ID);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.handleBuyStockRequest(request));
+  }
+
   @Test void handleBuyStockRequest_InsufficientBalance_ShouldRollback()
   {
     // Arrange

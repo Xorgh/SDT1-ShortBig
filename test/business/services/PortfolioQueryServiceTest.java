@@ -3,8 +3,8 @@ package business.services;
 import dtos.PortfolioSummaryDTO;
 import entities.OwnedStock;
 import entities.Portfolio;
-import entities.Stock;
-import entities.StockState;
+import entities.Transaction;
+import entities.TransactionType;
 import mocks.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PortfolioQueryServiceTest
 {
@@ -38,6 +37,7 @@ public class PortfolioQueryServiceTest
   }
 
   // # getPortfolioSummary:
+  // ## Zero & One
 
   @Test void getPortfolioSummary_ValidPortfolioNoStocksNoTransactions_ShouldReturnEmptyOwnedStockList()
   {
@@ -74,18 +74,119 @@ public class PortfolioQueryServiceTest
   }
 
   //  ## Many
-  //  getPortfolioSummary_ValidPortfolioMultipleOwnedStocks_ShouldReturnAll
-  //  getPortfolioSummary_ValidPortfolioMultipleTransactions_ShouldReturnAll
+  @Test void getPortfolioSummary_ValidPortfolioMultipleOwnedStocks_ShouldReturnAll()
+  {
+    // Arrange
+    mockOwnedStockDAO.setAllOwnedStocks(
+        List.of(new OwnedStock(PORTFOLIO_ID, "AAPL", 10), new OwnedStock(PORTFOLIO_ID, "MSFT", 10),
+            new OwnedStock(PORTFOLIO_ID, "NVDA", 10)));
+
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(3, result.ownedStocks().size());
+  }
+
+  @Test void getPortfolioSummary_ValidPortfolioMultipleTransactions_ShouldReturnAll()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(
+        List.of(
+            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 10, 100),
+            new Transaction(PORTFOLIO_ID, "MSFT", TransactionType.SELL, 10, 100),
+            new Transaction(PORTFOLIO_ID, "NVDA", TransactionType.BUY, 10, 100)
+            ));
+
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(3, result.transactionHistory().size());
+  }
+
 
   //  ## Interface & Exceptions
-  //  getPortfolioSummary_PortfolioNotFound_ShouldThrow
-  //  getPortfolioSummary_NullPortfolioId_ShouldThrow
+
+  @Test void getPortfolioSummary_PortfolioNotFound_ShouldThrow()
+  {
+    // Arrange
+    mockPortfolioDAO.setPortfolioToReturn(null);
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.getPortfolioSummary(PORTFOLIO_ID));
+  }
+
+  @Test void getPortfolioSummary_NullPortfolioId_ShouldThrow()
+  {
+    // Arrange
+
+    // Act & Assert
+    assertThrows(IllegalArgumentException.class, () -> service.getPortfolioSummary(null));
+  }
+
 
   //  ## State & Behavior
-  //  getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectBalance
-  //  getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectPortfolioId
-  //  getPortfolioSummary_MixedPortfolios_ShouldOnlyReturnOwnedStocksForRequestedPortfolio
-  //  getPortfolioSummary_MixedPortfolios_ShouldOnlyReturnTransactionsForRequestedPortfolio
+    @Test void getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectBalance()
+    {
+      // Arrange
+
+      // Act
+      PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+      // Assert
+      assertEquals(5000, result.balance());
+    }
+
+  //
+  @Test void getPortfolioSummary_ValidPortfolio_ShouldReturnCorrectPortfolioId()
+  {
+    // Arrange
+
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(PORTFOLIO_ID.toString(), result.portfolioId().toString());
+  }
+
+  @Test void getPortfolioSummary_MixedPortfolios_ShouldOnlyReturnOwnedStocksForRequestedPortfolio()
+  {
+    // Arrange
+    mockOwnedStockDAO.setAllOwnedStocks(
+        List.of(
+            new OwnedStock(PORTFOLIO_ID, "AAPL", 10),
+            new OwnedStock(PORTFOLIO_ID, "MSFT", 10),
+            new OwnedStock(PORTFOLIO_ID, "NVDA", 10),
+            new OwnedStock(UUID.randomUUID(), "AAPL", 99),
+            new OwnedStock(UUID.randomUUID(), "AAPL", 99)
+        ));
+
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(3, result.ownedStocks().size());
+      }
+
+  @Test void getPortfolioSummary_MixedPortfolios_ShouldOnlyReturnTransactionsForRequestedPortfolio()
+  {
+    // Arrange
+    mockTransactionDAO.setAllTransactions(
+        List.of(
+            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+            new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 10, 100),
+            new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100),
+            new Transaction(UUID.randomUUID(), "AAPL", TransactionType.SELL, 10, 100)
+        ));
+
+    // Act
+    PortfolioSummaryDTO result = service.getPortfolioSummary(PORTFOLIO_ID);
+
+    // Assert
+    assertEquals(3, result.transactionHistory().size());
+  }
 
   //  # getBalanceHistory:
 

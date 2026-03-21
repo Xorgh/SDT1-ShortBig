@@ -17,7 +17,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-public class PortfolioQueryService {
+public class PortfolioQueryService
+{
   private final Logger logger = Logger.getInstance();
   private final PortfolioDAO portfolioDAO;
   private final OwnedStockDAO ownedStockDAO;
@@ -32,37 +33,44 @@ public class PortfolioQueryService {
 
   public PortfolioSummaryDTO getPortfolioSummary(UUID portfolioId)
   {
+    if (portfolioId == null)
+    {
+      throw new IllegalArgumentException("Portfolio ID cannot be null");
+    }
+
     Portfolio portfolio = portfolioDAO.getById(portfolioId);
 
-    if (portfolio == null) {
+    if (portfolio == null)
+    {
       logger.log(LogLevel.ERROR, "Portfolio not found: " + portfolioId);
       throw new IllegalArgumentException("Portfolio not found: " + portfolioId);
     }
 
-    List<OwnedStock> owned = ownedStockDAO.getAll().stream()
-        .filter(os -> os.getPortfolioId().equals(portfolioId))
+    List<OwnedStock> owned = ownedStockDAO.getAll().stream().filter(os -> os.getPortfolioId().equals(portfolioId))
         .toList();
 
-    List<Transaction> history = transactionDAO.getAll().stream()
-        .filter(t -> t.getPortfolioId().equals(portfolioId))
+    List<Transaction> history = transactionDAO.getAll().stream().filter(t -> t.getPortfolioId().equals(portfolioId))
         .toList();
 
     return new PortfolioSummaryDTO(portfolioId, portfolio.getCurrentBalance(), owned, history);
   }
 
-  public List<BalanceHistoryDTO> getBalanceHistory(UUID portfolioId) {
-    List<Transaction> history = transactionDAO.getAll().stream()
-        .filter(t -> t.getPortfolioId().equals(portfolioId))
-        .sorted(Comparator.comparing(Transaction::getTimestamp))
-        .toList();
+  public List<BalanceHistoryDTO> getBalanceHistory(UUID portfolioId)
+  {
+    List<Transaction> history = transactionDAO.getAll().stream().filter(t -> t.getPortfolioId().equals(portfolioId))
+        .sorted(Comparator.comparing(Transaction::getTimestamp)).toList();
 
     List<BalanceHistoryDTO> result = new ArrayList<>();
     double runningBalance = 0;
 
-    for (Transaction t : history) {
-      if (t.getType() == TransactionType.BUY) {
+    for (Transaction t : history)
+    {
+      if (t.getType() == TransactionType.BUY)
+      {
         runningBalance -= t.getTotalAmount();
-      } else {
+      }
+      else
+      {
         runningBalance += t.getTotalAmount();
       }
       result.add(new BalanceHistoryDTO(t.getTimestamp(), t.getType(), t.getTotalAmount(), runningBalance));
@@ -70,3 +78,4 @@ public class PortfolioQueryService {
     return result;
   }
 }
+

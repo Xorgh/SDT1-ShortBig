@@ -53,7 +53,7 @@ public class BuyStockServiceTest
     service.handleBuyStockRequest(request);
 
     // Assert
-    assertEquals(4899.95, portfolio.getCurrentBalance());
+    assertEquals(4899.95, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleBuyStockRequest_SingleValidAffordableStock_ShouldCommit()
@@ -152,7 +152,7 @@ public class BuyStockServiceTest
     service.handleBuyStockRequest(request);
 
     // Assert
-    assertEquals(399_999_999.95, portfolio.getCurrentBalance());
+    assertEquals(399_999_999.95, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleBuyStockRequest_LargeQuantityValidAffordableStock_ShouldIncrementShares()
@@ -182,7 +182,7 @@ public class BuyStockServiceTest
     service.handleBuyStockRequest(request);
 
     // Assert
-    assertEquals(0, portfolio.getCurrentBalance());
+    assertEquals(0, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleBuyStockRequest_PortfolioBalanceOffByOneCent_ShouldThrow()
@@ -303,7 +303,7 @@ public class BuyStockServiceTest
     service.handleBuyStockRequest(request);
 
     // Assert — cost = (100 * 1) + (-10) = 90
-    assertEquals(4910.0, portfolio.getCurrentBalance());
+    assertEquals(4910.0, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleBuyStockRequest_InsufficientBalance_ShouldRollback()

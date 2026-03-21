@@ -55,7 +55,7 @@ public class SellStockServiceTest
     service.handleSellStockRequest(request);
 
     // Assert
-    assertEquals(5099.95, portfolio.getCurrentBalance());
+    assertEquals(5099.95, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleSellStockRequest_ZeroQuantityValidStock_ShouldThrow()
@@ -127,7 +127,7 @@ public class SellStockServiceTest
     service.handleSellStockRequest(request);
 
     // Assert
-    assertEquals(100_004_999.95, portfolio.getCurrentBalance());
+    assertEquals(100_004_999.95, portfolio.getCurrentBalance(), 0.001);
   }
 
   @Test void handleSellStockRequest_NegativeQuantityValidStock_ShouldThrow()

@@ -201,7 +201,7 @@ public class PortfolioQueryServiceTest
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
 
     // Assert
-    assertEquals(-100.05, results.getFirst().balanceAfter());
+    assertEquals(-100.05, results.getFirst().balanceAfter(), 0.001);
   }
 
   @Test void getBalanceHistory_SingleSellTransaction_ShouldReturnPositiveBalance()
@@ -213,7 +213,7 @@ public class PortfolioQueryServiceTest
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
 
     // Assert
-    assertEquals(99.95, results.getFirst().balanceAfter());
+    assertEquals(99.95, results.getFirst().balanceAfter(), 0.001);
   }
 
   //  ## Many & Boundaries
@@ -228,7 +228,7 @@ public class PortfolioQueryServiceTest
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
 
     // Assert
-    assertEquals(-300.15, results.getLast().balanceAfter());
+    assertEquals(-300.15, results.getLast().balanceAfter(), 0.001);
   }
 
   @Test void getBalanceHistory_MixedBuyAndSell_ShouldCalculateCorrectRunningBalance()
@@ -301,7 +301,7 @@ public class PortfolioQueryServiceTest
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID);
 
     // Assert
-    assertEquals(100.05, results.getFirst().amount());
+    assertEquals(100.05, results.getFirst().amount(), 0.001);
   }
 
 }

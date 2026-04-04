@@ -1,7 +1,15 @@
 package business.services;
 
-import business.events.BuyStockRequest;
-import business.events.SellStockRequest;
+import business.requests.BuyStockRequest;
+import business.requests.SellStockRequest;
+import business.services.handlers.StockAlertService;
+import business.services.handlers.StockBankruptService;
+import business.services.handlers.StockListenerService;
+import business.services.handlers.StockResetService;
+import business.services.queries.PortfolioQueryService;
+import business.services.queries.TransactionQueryService;
+import business.services.requests.BuyStockService;
+import business.services.requests.SellStockService;
 import business.stockmarket.MarketTickerThread;
 import business.stockmarket.StockMarket;
 import dtos.BalanceHistoryDTO;
@@ -34,6 +42,7 @@ public class GameService
   private final BuyStockService buyStockService;
   private final SellStockService sellStockService;
   private final PortfolioQueryService portfolioQueryService;
+  private final TransactionQueryService transactionQueryService;
   private final AppConfig config = AppConfig.INSTANCE;
 
   private MarketTickerThread ticker;
@@ -55,7 +64,8 @@ public class GameService
     this.stockResetService = new StockResetService();
     this.buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
     this.sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
-    this.portfolioQueryService = new PortfolioQueryService(portfolioDAO, ownedStockDAO, transactionDAO);
+    this.portfolioQueryService = new PortfolioQueryService(portfolioDAO, ownedStockDAO);
+    this.transactionQueryService = new TransactionQueryService(transactionDAO);
 
     // Register observers
     registerObservers();
@@ -211,7 +221,7 @@ public class GameService
       return;
     }
 
-    UUID portfolioId = portfolios.get(0).getId();
+    UUID portfolioId = portfolios.getFirst().getId();
     printPortfolioSummary(portfolioId, "Initial State");
 
     // --- BUY tests ---
@@ -257,7 +267,8 @@ public class GameService
     {
       logger.log(LogLevel.INFO, String.format("  Holdings: %s x%d", os.getStockSymbol(), os.getNumberOfShares()));
     }
-    logger.log(LogLevel.INFO, String.format("  Total transactions: %d", summary.transactionHistory().size()));
+    logger.log(LogLevel.INFO, String.format("  Total transactions: %d",
+        transactionQueryService.getTransactionsByPortfolio(portfolioId).size()));
   }
 
   // Expose trading services to presentation layer
@@ -278,6 +289,6 @@ public class GameService
 
   public List<BalanceHistoryDTO> getBalanceHistory(UUID portfolioId)
   {
-    return portfolioQueryService.getBalanceHistory(portfolioId);
+    return transactionQueryService.getBalanceHistory(portfolioId, config.getStartingBalance());
   }
 }

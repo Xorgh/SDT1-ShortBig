@@ -14,7 +14,7 @@
 <?import javafx.scene.chart.NumberAxis?>
 <VBox alignment="TOP_CENTER"
       prefHeight="946.0"
-      prefWidth="1920.0" spacing="16.0" stylesheets="@../css/dark.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.views.stockmarket.MarketViewController">
+      prefWidth="1920.0" spacing="16.0" stylesheets="@../css/dark.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.views.portfolio.PortfolioViewController">
    <children>
       <GridPane hgap="16.0" vgap="16.0">
         <columnConstraints>
@@ -66,34 +66,26 @@
          <VBox.margin>
             <Insets />
          </VBox.margin>
-         <children>
-             <VBox styleClass="card"
-                   GridPane.columnSpan="5" GridPane.rowSpan="13">
-                 <padding><Insets top="12" right="0" bottom="0" left="16" /></padding>
-                 <Label styleClass="h3" text="Marked" />
-                 <ListView fx:id="stockListView" VBox.vgrow="ALWAYS" />
-             </VBox>
-             <Pane prefHeight="200.0" prefWidth="200.0" styleClass="card" GridPane.columnSpan="5" GridPane.rowIndex="13" GridPane.rowSpan="14" />
-            <Label contentDisplay="CENTER" text="GRID RIGHT" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.rowIndex="12" GridPane.valignment="CENTER">
-               <font>
-                  <Font size="20.0" />
-               </font>
-            </Label>
-             <VBox styleClass="card"
-                   GridPane.columnIndex="5" GridPane.columnSpan="10" GridPane.rowSpan="27">
-                 <padding><Insets top="12" right="16" bottom="16" left="16" /></padding>
-                 <Label fx:id="chartTitle" styleClass="h3" text="Select a stock" />
-                 <LineChart fx:id="priceChart" VBox.vgrow="ALWAYS"
-                            legendVisible="false" animated="false" createSymbols="false">
-                     <xAxis>
-                         <NumberAxis fx:id="xAxis" minorTickVisible="false" />
-                     </xAxis>
-                     <yAxis>
-                         <NumberAxis fx:id="yAxis" label="Price ($)" />
-                     </yAxis>
-                 </LineChart>
-             </VBox>
-         </children>
+          <children>
+              <VBox styleClass="card" GridPane.columnSpan="5" GridPane.rowSpan="13">
+                  <padding><Insets top="12" right="0" bottom="0" left="16" /></padding>
+                  <Label styleClass="h3" text="Holdings" />
+                  <ListView fx:id="holdingsListView" VBox.vgrow="ALWAYS" />
+              </VBox>
+
+              <VBox styleClass="card" GridPane.columnIndex="5" GridPane.columnSpan="10" GridPane.rowSpan="27">
+                  <padding><Insets top="12" right="16" bottom="16" left="16" /></padding>
+                  <Label fx:id="chartTitle" styleClass="h3" text="Total Balance" />
+                  <LineChart fx:id="balanceChart" legendVisible="false" animated="false" createSymbols="false" VBox.vgrow="ALWAYS">
+                      <xAxis>
+                          <NumberAxis fx:id="xAxis" minorTickVisible="false" />
+                      </xAxis>
+                      <yAxis>
+                          <NumberAxis fx:id="yAxis" label="Balance ($)" />
+                      </yAxis>
+                  </LineChart>
+              </VBox>
+          </children>
       </GridPane>
    </children>
     <padding>

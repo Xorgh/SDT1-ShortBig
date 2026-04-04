@@ -262,6 +262,7 @@
   /* Bottom border always reserves 2px; transparent until active */
   -fx-border-color: transparent;
   -fx-border-width: 0 0 2 0;
+  -fx-cursor: hand;
 }
 
 .nav-tab:hover  { -fx-text-fill: -fx-text; }
@@ -277,7 +278,7 @@
 .status-bar {
   -fx-alignment: center-left;
   -fx-spacing: 10;
-  -fx-padding: 10 14 10 14;
+  -fx-padding: 10 16 10 16;
   -fx-background-color: -fx-background;
   -fx-border-width: 0;
   -fx-min-height: 38;
@@ -341,3 +342,42 @@
 .status-bar.error .status-dot  { -fx-background-color: -fx-negative; }
 .status-bar.error .status-text { -fx-text-fill: #FFC0CC; }
 
+/* =========================================================
+   Lists / Tables
+   ========================================================= */
+.list-view, .table-view {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 12;
+  -fx-background-radius: 12;
+}
+
+/* ListView/TableView embedded inside a .card — inherit card, no double border */
+.card .list-view,
+.card .table-view {
+  -fx-background-color: transparent;
+  -fx-border-width: 0;
+  -fx-border-color: transparent;
+  -fx-background-radius: 0;
+  -fx-border-radius: 0;
+}
+
+/* =========================================================
+   LineChart
+   ========================================================= */
+.chart                        { -fx-background-color: transparent; -fx-padding: 0; }
+.chart-plot-background        { -fx-background-color: rgba(255,255,255,0.02); -fx-background-radius: 8; }
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines  { -fx-stroke: rgba(255,255,255,0.06); }
+.chart-alternative-row-fill,
+.chart-alternative-column-fill{ -fx-fill: transparent; -fx-stroke: transparent; }
+.axis                         { -fx-tick-label-fill: -fx-text-muted; -fx-font-size: 11px; }
+.axis-label                   { -fx-text-fill: -fx-text-muted; }
+.chart-legend                 { -fx-background-color: transparent; }
+
+.default-color0.chart-series-line  { -fx-stroke: -fx-accent; -fx-stroke-width: 2px; }
+.default-color0.chart-line-symbol  {
+  -fx-background-color: -fx-accent, -fx-card;
+  -fx-background-radius: 5px;
+  -fx-padding: 4px;
+}

@@ -1,8 +1,7 @@
-package business.services;
+package business.services.handlers;
 
 import business.events.StockBankruptcyEvent;
 import business.events.StockResetEvent;
-import persistence.interfaces.UnitOfWork;
 import shared.logging.Logger;
 
 public class StockAlertService

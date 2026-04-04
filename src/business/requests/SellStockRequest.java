@@ -1,4 +1,4 @@
-package business.events;
+package business.requests;
 
 import java.util.UUID;
 

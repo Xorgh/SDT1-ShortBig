@@ -1,4 +1,4 @@
-package business.services;
+package business.services.handlers;
 
 import business.events.StockPriceUpdateEvent;
 import business.events.StockStateUpdateEvent;

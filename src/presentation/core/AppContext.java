@@ -1,14 +1,16 @@
 package presentation.core;
 
-import business.services.PortfolioQueryService;
-import persistence.fileimplementation.FileUnitOfWork;
-import persistence.fileimplementation.OwnedStockFileDAO;
-import persistence.fileimplementation.PortfolioFileDAO;
-import persistence.fileimplementation.TransactionFileDAO;
+import business.services.queries.PortfolioQueryService;
+import business.services.queries.StockPriceHistoryQueryService;
+import business.services.queries.StockQueryService;
+import business.services.queries.TransactionQueryService;
+import persistence.fileimplementation.*;
 import persistence.interfaces.OwnedStockDAO;
 import persistence.interfaces.PortfolioDAO;
 import persistence.interfaces.TransactionDAO;
 import presentation.views.portfolio.PortfolioViewModel;
+import presentation.views.stockmarket.MarketViewModel;
+import presentation.views.transactions.TransactionViewModel;
 import shared.configuration.AppConfig;
 
 public class AppContext
@@ -28,20 +30,37 @@ public class AppContext
     return instance;
   }
 
-  public PortfolioViewModel getPortfolioViewModel()
-  {
-    return createPortfolioViewModel();
-  }
-
-  private PortfolioViewModel createPortfolioViewModel()
+  public MarketViewModel getMarketViewModel()
   {
     FileUnitOfWork unitOfWork = createFileUnitOfWork();
-    return new PortfolioViewModel(createPortfolioQueryService(unitOfWork));
+    StockQueryService stockQueryService =
+        new StockQueryService(new StockFileDAO(unitOfWork));
+    StockPriceHistoryQueryService historyQueryService =
+        new StockPriceHistoryQueryService(new StockPriceHistoryFileDAO(unitOfWork));
+    return new MarketViewModel(stockQueryService, historyQueryService);
   }
 
-  private PortfolioQueryService createPortfolioQueryService(FileUnitOfWork unitOfWork)
+  public PortfolioViewModel getPortfolioViewModel()
   {
-    return new PortfolioQueryService(createPortfolioDAO(unitOfWork), createOwnedStockDAO(unitOfWork), createTransactionDAO(unitOfWork));
+    FileUnitOfWork unitOfWork = createFileUnitOfWork();
+    return new PortfolioViewModel(
+        new PortfolioQueryService(createPortfolioDAO(unitOfWork), createOwnedStockDAO(unitOfWork)),
+        new TransactionQueryService(createTransactionDAO(unitOfWork)),
+        new StockQueryService(new StockFileDAO(unitOfWork))
+    );
+  }
+
+  public TransactionViewModel getTransactionViewModel() { return createTransactionViewModel(); }
+
+  private TransactionViewModel createTransactionViewModel()
+  {
+    FileUnitOfWork unitOfWork = createFileUnitOfWork();
+    return new TransactionViewModel(createTransactionQueryService(unitOfWork));
+  }
+
+  private TransactionQueryService createTransactionQueryService(FileUnitOfWork unitOfWork)
+  {
+    return new TransactionQueryService(createTransactionDAO(unitOfWork));
   }
 
   private OwnedStockDAO createOwnedStockDAO(FileUnitOfWork unitOfWork)
@@ -63,4 +82,6 @@ public class AppContext
   {
     return new FileUnitOfWork(AppConfig.INSTANCE.getTestDataDirectory());
   }
+
+
 }

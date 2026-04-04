@@ -1,13 +1,13 @@
-package business.services;
+package business.services.requests;
 
-import business.events.SellStockRequest;
+import business.requests.BuyStockRequest;
 import entities.*;
 import persistence.interfaces.*;
 import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
-public class SellStockService
+public class BuyStockService
 {
   private final UnitOfWork uow;
   private final Logger logger = Logger.getInstance();
@@ -15,9 +15,9 @@ public class SellStockService
   private final PortfolioDAO portfolioDAO;
   private final OwnedStockDAO ownedStockDAO;
   private final TransactionDAO transactionDAO;
-  private final double transactionFee = AppConfig.INSTANCE.getTransactionFee();
+  private final double transactionFee;
 
-  public SellStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
+  public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
       TransactionDAO transactionDAO)
   {
     this.uow = uow;
@@ -25,9 +25,21 @@ public class SellStockService
     this.portfolioDAO = portfolioDAO;
     this.ownedStockDAO = ownedStockDAO;
     this.transactionDAO = transactionDAO;
+    this.transactionFee = AppConfig.INSTANCE.getTransactionFee();
   }
 
-  public void handleSellStockRequest(SellStockRequest request)
+  public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
+      TransactionDAO transactionDAO, double transactionFee)
+  {
+    this.uow = uow;
+    this.stockDAO = stockDAO;
+    this.portfolioDAO = portfolioDAO;
+    this.ownedStockDAO = ownedStockDAO;
+    this.transactionDAO = transactionDAO;
+    this.transactionFee = transactionFee;
+  }
+
+  public void handleBuyStockRequest(BuyStockRequest request)
   {
     uow.begin();
 
@@ -47,7 +59,8 @@ public class SellStockService
       }
 
       int numberOfShares = request.numberOfShares();
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) - transactionFee;
+      double totalCost = (stock.getCurrentPrice() * numberOfShares) + transactionFee;
+      double currentBalance = portfolio.getCurrentBalance();
       StockState currentStockState = stock.getCurrentState();
 
       // Business rules
@@ -59,47 +72,42 @@ public class SellStockService
         throw new IllegalArgumentException("Stock is bankrupt: " + request.stockSymbol());
       }
 
-      // Verify seller actually owns this stock in this portfolio
+      if (currentBalance < totalCost)
+      {
+        throw new IllegalArgumentException("Insufficient balance. Required: " + totalCost);
+      }
+
+      // Apply balance change to portfolio object
+      portfolio.setCurrentBalance(portfolio.getCurrentBalance() - totalCost);
+      portfolioDAO.update(portfolio);
+
+      // Check if buyer already owns this stock in this portfolio
       OwnedStock existing = ownedStockDAO.getAllByStockSymbol(request.stockSymbol()).stream()
           .filter(ownedStock -> ownedStock.getPortfolioId().equals(request.portfolioId())).findFirst().orElse(null);
 
       if (existing == null)
       {
-        throw new IllegalArgumentException("Stock not found in portfolio: " + request.stockSymbol());
+        ownedStockDAO.create(new OwnedStock(request.portfolioId(), request.stockSymbol(), numberOfShares));
       }
-
-      // Verify seller isn't selling more than he owns.
-      if (numberOfShares > existing.getNumberOfShares())
+      else
       {
-        throw new IllegalArgumentException(
-            "Selling more shares than owned. Owned: " + existing.getNumberOfShares() + " Selling: " + numberOfShares);
-      }
-
-      // Apply changes to ownedstock object, check if seller sold his entire holdings
-      existing.setNumberOfShares(existing.getNumberOfShares() - numberOfShares);
-      if (existing.getNumberOfShares() == 0) {
-        ownedStockDAO.delete(existing.getId());
-      } else {
+        existing.setNumberOfShares(existing.getNumberOfShares() + numberOfShares);
         ownedStockDAO.update(existing);
       }
 
-      // Apply balance change to portfolio object
-      portfolio.setCurrentBalance(portfolio.getCurrentBalance() + totalCost);
-      portfolioDAO.update(portfolio);
-
       // Create a transaction
       transactionDAO.create(
-          new Transaction(request.portfolioId(), request.stockSymbol(), TransactionType.SELL, numberOfShares,
+          new Transaction(request.portfolioId(), request.stockSymbol(), TransactionType.BUY, numberOfShares,
               stock.getCurrentPrice()));
 
       uow.commit();
-      logger.log(LogLevel.INFO, "Sold " + numberOfShares + " of " + request.stockSymbol());
+      logger.log(LogLevel.INFO, "Bought " + numberOfShares + " of " + request.stockSymbol());
 
     }
     catch (Exception e)
     {
       uow.rollback();
-      logger.log(LogLevel.ERROR, "Sell stock failed: " + e.getMessage());
+      logger.log(LogLevel.ERROR, "Buy stock failed: " + e.getMessage());
       throw e;
     }
   }

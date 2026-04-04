@@ -1,0 +1,343 @@
+/* =========================================================
+   ShortBig – Dark Theme (JavaFX)
+   ========================================================= */
+
+/* =========================================================
+   Color tokens
+   ========================================================= */
+.root {
+  /* Base surfaces */
+  -fx-base:       #101113;
+  -fx-background: #0E0F11;
+
+  /* Card surfaces */
+  -fx-card:   #17191C;
+  -fx-card-2: #1C1F23;
+
+  /* Borders */
+  -fx-border-soft: #2A2E34;
+
+  /* Text */
+  -fx-text:       #E7E9EE;
+  -fx-text-muted: #A7AFBA;
+  -fx-text-dim:   #7E8794;
+
+  /* Accents */
+  -fx-accent:   #2F6BFF;   /* Primary blue  */
+  -fx-accent-2: #27D6C8;   /* Teal          */
+  -fx-positive: #2ECC71;   /* Green         */
+  -fx-negative: #FF4D6D;   /* Red/Pink      */
+
+  /* Typography */
+  -fx-font-family: "Inter", "Segoe UI", "SF Pro Display", "Roboto", "Arial";
+  -fx-font-size: 13px;
+
+  -fx-background-color: -fx-background;
+}
+
+/* =========================================================
+   Generic text
+   ========================================================= */
+.label {
+  -fx-text-fill: -fx-text;
+  -fx-font-size: 13px;
+}
+
+.text {
+  -fx-fill: -fx-text;
+}
+
+.text-muted, .label.text-muted { -fx-text-fill: -fx-text-muted; }
+.text-dim,   .label.text-dim   { -fx-text-fill: -fx-text-dim; }
+
+/* Headings */
+.h1, .label.h1 { -fx-font-size: 22px; -fx-font-weight: 800; }
+.h2, .label.h2 { -fx-font-size: 16px; -fx-font-weight: 700; }
+.h3, .label.h3 { -fx-font-size: 14px; -fx-font-weight: 700; }
+
+/* =========================================================
+   Containers / Cards
+   ========================================================= */
+.card {
+  -fx-background-color: -fx-card;
+  -fx-background-radius: 12;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 12;
+  -fx-border-width: 1;
+}
+
+.card-secondary {
+  -fx-background-color: -fx-card-2;
+  -fx-background-radius: 12;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 12;
+  -fx-border-width: 1;
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+.button {
+  -fx-background-color: #22262B;
+  -fx-text-fill: -fx-text;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-width: 1;
+  -fx-padding: 8 12 8 12;
+  -fx-font-size: 13px;
+}
+
+.button:hover   { -fx-background-color: #2A2F36; }
+.button:pressed { -fx-background-color: #1F2328; }
+
+/* Primary */
+.button.primary {
+  -fx-background-color: -fx-accent;
+  -fx-text-fill: white;
+  -fx-border-color: transparent;
+  -fx-font-weight: 700;
+}
+.button.primary:hover { -fx-background-color: #285DE0; }
+
+/* Ghost */
+.button.ghost {
+  -fx-background-color: transparent;
+  -fx-text-fill: -fx-text;
+  -fx-border-color: -fx-border-soft;
+}
+.button.ghost:hover { -fx-background-color: rgba(255,255,255,0.04); }
+
+/* =========================================================
+   Text inputs
+   ========================================================= */
+.text-field, .password-field, .text-area {
+  -fx-background-color: #121417;
+  -fx-text-fill: -fx-text;
+  -fx-prompt-text-fill: -fx-text-dim;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-width: 1;
+  -fx-font-size: 13px;
+}
+
+/* Only border color changes on focus — width stays 1 */
+.text-field:focused, .password-field:focused, .text-area:focused {
+  -fx-border-color: -fx-accent;
+}
+
+/* =========================================================
+   ComboBox
+   ========================================================= */
+.combo-box {
+  -fx-background-color: #121417;
+  -fx-background-radius: 10;
+  -fx-border-radius: 10;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-width: 1;
+  -fx-font-size: 13px;
+}
+
+.combo-box .list-cell             { -fx-text-fill: -fx-text; }
+.combo-box-popup .list-view       { -fx-background-color: -fx-card; -fx-border-color: -fx-border-soft; }
+.combo-box-popup .list-cell:hover { -fx-background-color: #2A2F36; }
+
+/* =========================================================
+   TabPane
+   ========================================================= */
+.tab-pane,
+.tab-pane .tab-header-area,
+.tab-pane .tab-header-background {
+  -fx-background-color: transparent;
+}
+
+.tab {
+  -fx-background-color: transparent;
+  -fx-padding: 6 10 6 10;
+}
+
+.tab .tab-label {
+  -fx-text-fill: -fx-text-muted;
+  -fx-font-weight: 600;
+  -fx-font-size: 13px;
+}
+
+.tab:selected .tab-label { -fx-text-fill: -fx-text; }
+.tab:selected {
+  -fx-background-color: rgba(255,255,255,0.04);
+  -fx-background-radius: 10;
+}
+
+/* =========================================================
+   Lists / Tables
+   ========================================================= */
+.list-view, .table-view {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 12;
+  -fx-background-radius: 12;
+}
+
+.list-cell {
+  -fx-background-color: transparent;
+  -fx-text-fill: -fx-text;
+  -fx-font-size: 13px;
+}
+.list-cell:hover { -fx-background-color: rgba(255,255,255,0.04); }
+
+.table-view .column-header-background {
+  -fx-background-color: #14171A;
+}
+
+.table-view .column-header,
+.table-view .filler {
+  -fx-background-color: #14171A;
+  -fx-border-color: -fx-border-soft;
+}
+
+.table-view .column-header .label {
+  -fx-text-fill: -fx-text-muted;
+  -fx-font-weight: 700;
+  -fx-font-size: 12px;
+}
+
+.table-row-cell {
+  -fx-background-color: transparent;
+  -fx-text-fill: -fx-text;
+}
+.table-row-cell:filled:hover { -fx-background-color: rgba(255,255,255,0.04); }
+.table-row-cell:selected     { -fx-background-color: rgba(47,107,255,0.18); }
+
+/* =========================================================
+   Scroll bars
+   ========================================================= */
+.scroll-bar:horizontal,
+.scroll-bar:vertical {
+  -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb       { -fx-background-color: #2A2E34; -fx-background-radius: 10; }
+.scroll-bar .thumb:hover { -fx-background-color: #343A43; }
+
+/* =========================================================
+   Pills / Tags
+   ========================================================= */
+.pill {
+  -fx-background-color: rgba(255,255,255,0.06);
+  -fx-text-fill: -fx-text-muted;
+  -fx-background-radius: 999;
+  -fx-padding: 4 10 4 10;
+  -fx-font-size: 12px;
+  -fx-font-weight: 600;
+}
+
+.pill.primary  { -fx-background-color: rgba(47,107,255,0.22);  -fx-text-fill: #BFD0FF; }
+.pill.positive { -fx-background-color: rgba(46,204,113,0.18);  -fx-text-fill: #A9F2C3; }
+.pill.negative { -fx-background-color: rgba(255,77,109,0.18);  -fx-text-fill: #FFC0CC; }
+
+/* =========================================================
+   Header / Navigation
+   ========================================================= */
+
+/* VBox wrapping title + nav bar */
+.header {
+  -fx-padding: 16 16 0 16;
+  -fx-spacing: 8;
+}
+
+/* HBox containing nav-tab labels */
+.nav-bar {
+  -fx-alignment: center-left;
+  -fx-spacing: 14;
+  -fx-padding: 0;
+}
+
+/* Nav tab label — font-weight fixed at 800 to prevent width shift on active toggle */
+.nav-tab {
+  -fx-text-fill: #C7CED9;
+  -fx-font-size: 13px;
+  -fx-font-weight: 800;
+  -fx-padding: 8 0 8 0;
+  /* Bottom border always reserves 2px; transparent until active */
+  -fx-border-color: transparent;
+  -fx-border-width: 0 0 2 0;
+}
+
+.nav-tab:hover  { -fx-text-fill: -fx-text; }
+
+.nav-tab.active {
+  -fx-text-fill: -fx-text;
+  -fx-border-color: transparent transparent -fx-accent transparent;
+}
+
+/* =========================================================
+   Status Bar
+   ========================================================= */
+.status-bar {
+  -fx-alignment: center-left;
+  -fx-spacing: 10;
+  -fx-padding: 10 14 10 14;
+  -fx-background-color: -fx-background;
+  -fx-border-width: 0;
+  -fx-min-height: 38;
+  -fx-pref-height: 38;
+  -fx-max-height: 38;
+}
+
+.status-text {
+  -fx-text-fill: -fx-text-muted;
+  -fx-font-size: 12.5px;
+  -fx-font-weight: 600;
+}
+
+.status-right {
+  -fx-text-fill: -fx-text-dim;
+  -fx-font-size: 12px;
+  -fx-font-weight: 500;
+}
+
+/* Indicator dot (Region) — pref-width/height locked via min+max */
+.status-dot {
+  -fx-min-width: 8;   -fx-max-width: 8;
+  -fx-min-height: 8;  -fx-max-height: 8;
+  -fx-background-radius: 999;
+  -fx-background-color: -fx-accent;
+  -fx-opacity: 0.95;
+}
+
+/* Idle */
+.status-bar.idle .status-text { -fx-text-fill: -fx-text-dim; -fx-font-weight: 500; }
+.status-bar.idle .status-dot  { -fx-background-color: #3A404A; -fx-opacity: 0.7; }
+
+/* ---------------------------------------------------------
+   Status Bar variants  (add styleClass to the HBox)
+   --------------------------------------------------------- */
+
+/* INFO — dot stays default -fx-accent, only text color noted */
+.status-bar.info {
+  -fx-border-color: rgba(47, 107, 255, 0.40) transparent transparent transparent;
+}
+.status-bar.info .status-text { -fx-text-fill: -fx-text-muted; }
+
+/* SUCCESS */
+.status-bar.success {
+  -fx-border-color: rgba(46, 204, 113, 0.55) transparent transparent transparent;
+}
+.status-bar.success .status-dot  { -fx-background-color: -fx-positive; }
+.status-bar.success .status-text { -fx-text-fill: #CFF7DF; }
+
+/* WARNING */
+.status-bar.warning {
+  -fx-border-color: rgba(255, 193, 7, 0.60) transparent transparent transparent;
+}
+.status-bar.warning .status-dot  { -fx-background-color: #FFC107; }
+.status-bar.warning .status-text { -fx-text-fill: #FFE7A3; }
+
+/* ERROR */
+.status-bar.error {
+  -fx-border-color: rgba(255, 77, 109, 0.70) transparent transparent transparent;
+}
+.status-bar.error .status-dot  { -fx-background-color: -fx-negative; }
+.status-bar.error .status-text { -fx-text-fill: #FFC0CC; }
+

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="1080.0" prefWidth="1920.0"
+            stylesheets="@../css/dark.css"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="presentation.views.mainmenu.MainViewController">
+   <top>
+      <VBox prefHeight="96.0" prefWidth="1920.0" styleClass="header">
+         <children>
+            <Label styleClass="h1" text="ShortBig - Stock Game"
+                   onMouseClicked="#handleShowMarket" />
+            <HBox styleClass="nav-bar">
+               <children>
+                  <Label fx:id="tabMarket"  styleClass="nav-tab" text="Oversigt"
+                         onMouseClicked="#handleShowMarket" />
+                  <Label fx:id="tabPortfolio" styleClass="nav-tab" text="Portfolio"
+                         onMouseClicked="#handleShowPortfolio" />
+                  <Label fx:id="tabTransactions" styleClass="nav-tab" text="Transaktioner"
+                         onMouseClicked="#handleShowTransactions" />
+               </children>
+            </HBox>
+            <Separator />
+         </children>
+      </VBox>
+   </top>
+   <bottom>
+      <HBox fx:id="statusBar" styleClass="status-bar" prefHeight="38.0">
+         <children>
+            <Label fx:id="statusText" styleClass="status-text" text="Klar" />
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

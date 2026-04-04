@@ -22,6 +22,8 @@ public enum AppConfig
   INSTANCE;
 
   // General configuration
+  private final String dataDirectory;
+  private final String testDataDirectory;
   private final int startingBalance;
   private final double transactionFee;
   private final int updateFrequencyInMs;
@@ -54,10 +56,21 @@ public enum AppConfig
   private final double decliningToSteadyBase;
   private final double decliningToGrowingBase;
 
+  public String getDataDirectory()
+  {
+    return dataDirectory;
+  }
+
+  public String getTestDataDirectory()
+  {
+    return testDataDirectory;
+  }
 
   AppConfig()
   {
     // General configuration
+    this.dataDirectory = "data/prd/";
+    this.testDataDirectory = "data/test/";
     this.startingBalance = 10000;
     this.transactionFee = 0.05;
     if (this.transactionFee < 0)

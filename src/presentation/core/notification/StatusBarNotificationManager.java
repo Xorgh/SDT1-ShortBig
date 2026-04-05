@@ -30,6 +30,7 @@ public class StatusBarNotificationManager implements NotificationManager
       // Map NotificationType → CSS class
       String cssClass = switch (type)
       {
+        case SUCCESS -> "confirmation";
         case INFO    -> "info";
         case WARNING -> "warning";
         case ERROR   -> "error";

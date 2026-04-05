@@ -139,9 +139,21 @@
   -fx-font-size: 13px;
 }
 
-.combo-box .list-cell             { -fx-text-fill: -fx-text; }
-.combo-box-popup .list-view       { -fx-background-color: -fx-card; -fx-border-color: -fx-border-soft; }
-.combo-box-popup .list-cell:hover { -fx-background-color: #2A2F36; }
+.combo-box .list-cell                { -fx-text-fill: -fx-text; }
+.combo-box-popup .list-view          { -fx-background-color: -fx-card; -fx-border-color: -fx-border-soft; -fx-border-radius: 8; -fx-background-radius: 8; }
+.combo-box-popup .list-cell          { -fx-background-color: -fx-card; -fx-text-fill: -fx-text; -fx-padding: 6 12 6 12; }
+.combo-box-popup .list-cell:hover    { -fx-background-color: #2A2F36; }
+.combo-box-popup .list-cell:selected { -fx-background-color: rgba(47,107,255,0.18); -fx-text-fill: -fx-text; }
+
+/* Lock popup width to match the combo box — prevents layout jumps */
+.combo-box-popup .list-view {
+  -fx-max-width: inherit;
+  -fx-pref-width: inherit;
+}
+
+.combo-box .list-cell {
+  -fx-text-overrun: ellipsis;
+}
 
 /* =========================================================
    TabPane
@@ -272,6 +284,19 @@
   -fx-border-color: transparent transparent -fx-accent transparent;
 }
 
+/* Settings cogwheel in nav bar */
+.nav-settings {
+  -fx-text-fill: -fx-text-dim;
+  -fx-font-size: 30px;
+  -fx-padding: 4 0 4 0;
+  -fx-cursor: hand;
+}
+
+.nav-settings:hover {
+  -fx-text-fill: -fx-text;
+}
+
+
 /* =========================================================
    Status Bar
    ========================================================= */
@@ -380,4 +405,39 @@
   -fx-background-color: -fx-accent, -fx-card;
   -fx-background-radius: 5px;
   -fx-padding: 4px;
+}
+
+/* =========================================================
+   Context Menu (settings dropdown)
+   ========================================================= */
+.context-menu {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 8;
+  -fx-background-radius: 8;
+  -fx-padding: 4 0 4 0;
+}
+
+.context-menu .menu-item {
+  -fx-background-color: transparent;
+  -fx-padding: 8 16 8 16;
+}
+
+.context-menu .menu-item .label {
+  -fx-text-fill: -fx-text;
+  -fx-font-size: 13px;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+  -fx-background-color: #2A2F36;
+}
+
+.context-menu .separator {
+  -fx-padding: 4 0 4 0;
+}
+
+.context-menu .separator .line {
+  -fx-border-color: -fx-border-soft;
+  -fx-border-width: 1 0 0 0;
 }

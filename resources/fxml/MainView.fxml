@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.layout.Pane?>
 <BorderPane prefHeight="1080.0" prefWidth="1920.0"
             stylesheets="@../css/dark.css"
             xmlns="http://javafx.com/javafx/25"
@@ -19,12 +20,16 @@
                    onMouseClicked="#handleShowMarket" />
             <HBox styleClass="nav-bar">
                <children>
-                  <Label fx:id="tabMarket"  styleClass="nav-tab" text="Oversigt"
+                  <Label fx:id="tabMarket" styleClass="nav-tab" text="Oversigt"
                          onMouseClicked="#handleShowMarket" />
                   <Label fx:id="tabPortfolio" styleClass="nav-tab" text="Portfolio"
                          onMouseClicked="#handleShowPortfolio" />
                   <Label fx:id="tabTransactions" styleClass="nav-tab" text="Transaktioner"
                          onMouseClicked="#handleShowTransactions" />
+                  <Pane HBox.hgrow="ALWAYS" />
+                  <Label fx:id="settingsButton" styleClass="nav-settings" text="⚙"
+                         onMouseClicked="#handleShowSettings" />
+
                </children>
             </HBox>
             <Separator />

@@ -1,4 +1,4 @@
-package presentation.views.shared;
+package presentation.views.stockmarket;
 
 import dtos.StockDTO;
 import entities.StockState;

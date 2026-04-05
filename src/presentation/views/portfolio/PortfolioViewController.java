@@ -3,9 +3,10 @@ package presentation.views.portfolio;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import presentation.core.ArgumentReceiver;
+import presentation.core.ViewManager;
+import presentation.core.notification.NotificationType;
 
 import java.util.UUID;
 
@@ -16,6 +17,14 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
   @FXML private NumberAxis xAxis;
   @FXML private NumberAxis yAxis;
   @FXML private Label chartTitle;
+
+  // Summary card
+  @FXML private Label cashLabel;
+  @FXML private Label holdingsValueLabel;
+  @FXML private ComboBox<String> buyStockCombo;
+  @FXML private ComboBox<String> sellStockCombo;
+  @FXML private Spinner<Integer> buySpinner;
+  @FXML private Spinner<Integer> sellSpinner;
 
   private final PortfolioViewModel viewModel;
 
@@ -31,14 +40,61 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
     holdingsListView.setItems(viewModel.getHoldings());
 
     balanceChart.getData().add(viewModel.getBalanceSeries());
-
     xAxis.setTickLabelFormatter(viewModel.getXAxisFormatter());
     xAxis.setTickLabelRotation(-45);
-
     viewModel.setYAxis(yAxis);
 
-    // Auto-load with default portfolio (no argument needed from navigation)
+    // Spinners: 1–999, default 1
+    buySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
+    sellSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
+
+    // Combo boxes
+    buyStockCombo.setItems(viewModel.getAllStockSymbols());
+    sellStockCombo.setItems(viewModel.getOwnedStockSymbols());
+
+    // Bind summary labels
+    viewModel.cashBalanceProperty().addListener((_, _, v) ->
+        cashLabel.setText(String.format("$%.2f", v.doubleValue())));
+    viewModel.holdingsValueProperty().addListener((_, _, v) ->
+        holdingsValueLabel.setText(String.format("$%.2f", v.doubleValue())));
+
     viewModel.load(null);
+  }
+
+  @FXML
+  private void onBuy()
+  {
+    String symbol = buyStockCombo.getValue();
+    if (symbol == null) return;
+    try
+    {
+      viewModel.buyStock(symbol, buySpinner.getValue());
+      ViewManager.getNotificationManager()
+          .notify("Bought " + buySpinner.getValue() + " " + symbol, NotificationType.SUCCESS);
+    }
+    catch (Exception e)
+    {
+      ViewManager.getNotificationManager()
+          .notify(e.getMessage(), NotificationType.ERROR);
+    }
+  }
+
+  @FXML
+  private void onSell()
+  {
+    String symbol = sellStockCombo.getValue();
+    if (symbol == null) return;
+    try
+    {
+      viewModel.sellStock(symbol, sellSpinner.getValue());
+      ViewManager.getNotificationManager()
+          .notify("Sold " + sellSpinner.getValue() + " " + symbol, NotificationType.SUCCESS);
+    }
+    catch (Exception e)
+    {
+      ViewManager.getNotificationManager()
+          .notify(e.getMessage(), NotificationType.ERROR);
+    }
   }
 
   @Override

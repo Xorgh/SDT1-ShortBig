@@ -1,11 +1,17 @@
 package presentation.views.portfolio;
 
+import business.requests.BuyStockRequest;
+import business.requests.SellStockRequest;
 import business.services.queries.PortfolioQueryService;
 import business.services.queries.StockQueryService;
 import business.services.queries.TransactionQueryService;
+import business.services.requests.BuyStockService;
+import business.services.requests.SellStockService;
 import dtos.BalanceHistoryDTO;
 import dtos.PortfolioSummaryDTO;
 import dtos.StockDTO;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.NumberAxis;
@@ -25,10 +31,21 @@ public class PortfolioViewModel
   private final PortfolioQueryService portfolioQueryService;
   private final TransactionQueryService transactionQueryService;
   private final StockQueryService stockQueryService;
+  private final BuyStockService buyStockService;
+  private final SellStockService sellStockService;
 
   private final ObservableList<PortfolioHoldingRow> holdings = FXCollections.observableArrayList();
   private final XYChart.Series<Number, Number> balanceSeries = new XYChart.Series<>();
 
+  // Summary properties
+  private final DoubleProperty cashBalance = new SimpleDoubleProperty();
+  private final DoubleProperty holdingsValue = new SimpleDoubleProperty();
+
+  // Combo box data
+  private final ObservableList<String> allStockSymbols = FXCollections.observableArrayList();
+  private final ObservableList<String> ownedStockSymbols = FXCollections.observableArrayList();
+
+  private UUID currentPortfolioId;
   private List<BalanceHistoryDTO> currentDataPoints = List.of();
   private NumberAxis yAxis;
 
@@ -37,11 +54,15 @@ public class PortfolioViewModel
 
   public PortfolioViewModel(PortfolioQueryService portfolioQueryService,
       TransactionQueryService transactionQueryService,
-      StockQueryService stockQueryService)
+      StockQueryService stockQueryService,
+      BuyStockService buyStockService,
+      SellStockService sellStockService)
   {
     this.portfolioQueryService = portfolioQueryService;
     this.transactionQueryService = transactionQueryService;
     this.stockQueryService = stockQueryService;
+    this.buyStockService = buyStockService;
+    this.sellStockService = sellStockService;
   }
 
   public void setYAxis(NumberAxis yAxis)
@@ -60,11 +81,57 @@ public class PortfolioViewModel
       portfolioId = resolveDefaultPortfolioId();
       if (portfolioId == null) return;
     }
+    this.currentPortfolioId = portfolioId;
 
     PortfolioSummaryDTO summary = portfolioQueryService.getPortfolioSummary(portfolioId);
     loadHoldings(summary);
+    loadSummary(summary);
     loadBalanceChart(portfolioId);
+    loadComboData(summary);
   }
+
+  private void loadSummary(PortfolioSummaryDTO summary)
+  {
+    cashBalance.set(summary.balance());
+
+    double totalVal = holdings.stream()
+        .mapToDouble(PortfolioHoldingRow::totalValue)
+        .sum();
+    holdingsValue.set(totalVal);
+  }
+
+  private void loadComboData(PortfolioSummaryDTO summary)
+  {
+    allStockSymbols.setAll(
+        stockQueryService.getAllStocks().stream()
+            .map(StockDTO::symbol).toList());
+
+    ownedStockSymbols.setAll(
+        summary.ownedStocks().stream()
+            .map(os -> os.getStockSymbol()).toList());
+  }
+
+  public void buyStock(String symbol, int shares)
+  {
+    if (currentPortfolioId == null || symbol == null) return;
+    buyStockService.handleBuyStockRequest(
+        new BuyStockRequest(symbol, shares, currentPortfolioId));
+    load(currentPortfolioId);   // refresh everything
+  }
+
+  public void sellStock(String symbol, int shares)
+  {
+    if (currentPortfolioId == null || symbol == null) return;
+    sellStockService.handleSellStockRequest(
+        new SellStockRequest(symbol, shares, currentPortfolioId));
+    load(currentPortfolioId);   // refresh everything
+  }
+
+  // Getters for new properties
+  public DoubleProperty cashBalanceProperty()    { return cashBalance; }
+  public DoubleProperty holdingsValueProperty()  { return holdingsValue; }
+  public ObservableList<String> getAllStockSymbols()   { return allStockSymbols; }
+  public ObservableList<String> getOwnedStockSymbols() { return ownedStockSymbols; }
 
 
   private UUID resolveDefaultPortfolioId()
@@ -74,16 +141,19 @@ public class PortfolioViewModel
 
   private void loadHoldings(PortfolioSummaryDTO summary)
   {
-    Map<String, Double> priceBySymbol = stockQueryService.getAllStocks().stream()
-        .collect(Collectors.toMap(StockDTO::symbol, StockDTO::currentPrice));
+    Map<String, StockDTO> stockBySymbol = stockQueryService.getAllStocks().stream()
+        .collect(Collectors.toMap(StockDTO::symbol, s -> s));
 
     List<PortfolioHoldingRow> rows = summary.ownedStocks().stream()
         .map(os -> {
-          double price = priceBySymbol.getOrDefault(os.getStockSymbol(), 0.0);
+          StockDTO stock = stockBySymbol.get(os.getStockSymbol());
+          double price = stock != null ? stock.currentPrice() : 0.0;
+          entities.StockState state = stock != null ? stock.currentState() : entities.StockState.STEADY;
           return new PortfolioHoldingRow(
               os.getStockSymbol(),
               os.getNumberOfShares(),
-              os.getNumberOfShares() * price);
+              os.getNumberOfShares() * price,
+              state);
         })
         .toList();
 

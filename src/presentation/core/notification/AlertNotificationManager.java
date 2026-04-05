@@ -10,6 +10,7 @@ public class AlertNotificationManager implements NotificationManager
   {
     Alert.AlertType alertType = switch (type)
     {
+      case SUCCESS -> Alert.AlertType.CONFIRMATION;
       case INFO    -> Alert.AlertType.INFORMATION;
       case WARNING -> Alert.AlertType.WARNING;
       case ERROR   -> Alert.AlertType.ERROR;

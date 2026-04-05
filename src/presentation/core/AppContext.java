@@ -1,12 +1,17 @@
 package presentation.core;
 
+import business.services.GameService;
+import business.services.handlers.StockAlertService;
+import business.services.handlers.StockBankruptService;
+import business.services.handlers.StockListenerService;
+import business.services.handlers.StockResetService;
 import business.services.queries.PortfolioQueryService;
 import business.services.queries.StockPriceHistoryQueryService;
 import business.services.queries.StockQueryService;
 import business.services.queries.TransactionQueryService;
 import business.services.requests.BuyStockService;
 import business.services.requests.SellStockService;
-import entities.StockPriceHistory;
+import business.stockmarket.StockMarket;
 import persistence.fileimplementation.*;
 import persistence.interfaces.*;
 import presentation.views.portfolio.PortfolioViewModel;
@@ -18,6 +23,8 @@ public class AppContext
 {
   private static AppContext instance;
 
+  private GameService gameService;
+
   private AppContext()
   {
   }
@@ -27,16 +34,58 @@ public class AppContext
     if (instance == null)
     {
       instance = new AppContext();
+      instance.initialize();
     }
     return instance;
   }
 
+  private void initialize()
+  {
+    FileUnitOfWork gameUow = createFileUnitOfWork();
+    StockDAO stockDAO = createStockDAO(gameUow);
+    PortfolioDAO portfolioDAO = createPortfolioDAO(gameUow);
+    OwnedStockDAO ownedStockDAO = createOwnedStockDAO(gameUow);
+    TransactionDAO transactionDAO = createTransactionDAO(gameUow);
+    StockPriceHistoryDAO historyDAO = createStockPriceHistoryDAO(gameUow);
+
+    // Create GameService
+    gameService = new GameService(gameUow, stockDAO, portfolioDAO,
+        ownedStockDAO, transactionDAO, historyDAO);
+
+    // Register observers — composition root wires everything
+    registerObservers(gameUow, stockDAO, ownedStockDAO, historyDAO);
+  }
+
+  private void registerObservers(UnitOfWork uow, StockDAO stockDAO,
+      OwnedStockDAO ownedStockDAO, StockPriceHistoryDAO historyDAO)
+  {
+    StockListenerService listenerService = new StockListenerService(uow, stockDAO, historyDAO);
+    StockBankruptService bankruptService = new StockBankruptService(uow, ownedStockDAO);
+    StockAlertService alertService = new StockAlertService();
+    StockResetService resetService = new StockResetService();
+
+    StockMarket market = StockMarket.INSTANCE;
+    market.onStockPriceChange.add(listenerService::handlePriceChange);
+    market.onStockStateChange.add(listenerService::handleStateChange);
+    market.onStockBankruptcy.add(bankruptService::handleBankruptcy);
+    market.onStockBankruptcy.add(alertService::handleBankruptcyAlert);
+    market.onStockReset.add(resetService::handleStockReset);
+    market.onStockReset.add(alertService::handleStockResetAlert);
+  }
+
+  public GameService getGameService()
+  {
+    return gameService;
+  }
+
+
   public MarketViewModel getMarketViewModel()
   {
     FileUnitOfWork unitOfWork = createFileUnitOfWork();
-    StockQueryService stockQueryService = createStockQueryService(unitOfWork);
-    StockPriceHistoryQueryService historyQueryService = createStockPriceHistoryQueryService(unitOfWork);
-    return new MarketViewModel(stockQueryService, historyQueryService);
+    return new MarketViewModel(
+        createStockQueryService(unitOfWork),
+        createStockPriceHistoryQueryService(unitOfWork),
+        unitOfWork::begin);
   }
 
   public PortfolioViewModel getPortfolioViewModel()
@@ -52,13 +101,16 @@ public class AppContext
         createTransactionQueryService(transactionDAO),
         createStockQueryService(stockDAO),
         createBuyStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO),
-        createSellStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO)
+        createSellStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO),
+        unitOfWork::begin
     );
   }
 
-
-  public TransactionViewModel getTransactionViewModel() { return createTransactionViewModel(); }
-
+  public TransactionViewModel getTransactionViewModel()
+  {
+    FileUnitOfWork unitOfWork = createFileUnitOfWork();
+    return new TransactionViewModel(createTransactionQueryService(unitOfWork));
+  }
 
   private StockQueryService createStockQueryService(FileUnitOfWork unitOfWork)
   {

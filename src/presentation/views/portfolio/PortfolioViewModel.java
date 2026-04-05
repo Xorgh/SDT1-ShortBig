@@ -16,15 +16,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import shared.configuration.AppConfig;
-
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 
 public class PortfolioViewModel
 {
@@ -52,17 +54,48 @@ public class PortfolioViewModel
   private static final DateTimeFormatter TICK_FORMAT = DateTimeFormatter.ofPattern("dd MMM HH:mm");
   private static final double Y_AXIS_PADDING_FACTOR = 0.20;
 
+  private final Runnable cacheInvalidator;
+  private Timeline autoRefreshTimer;
+  private static final double AUTO_REFRESH_SECONDS = 5.0;
+
+
   public PortfolioViewModel(PortfolioQueryService portfolioQueryService,
       TransactionQueryService transactionQueryService,
       StockQueryService stockQueryService,
       BuyStockService buyStockService,
-      SellStockService sellStockService)
+      SellStockService sellStockService,
+      Runnable cacheInvalidator)
   {
     this.portfolioQueryService = portfolioQueryService;
     this.transactionQueryService = transactionQueryService;
     this.stockQueryService = stockQueryService;
     this.buyStockService = buyStockService;
     this.sellStockService = sellStockService;
+    this.cacheInvalidator = cacheInvalidator;
+  }
+
+  public void startAutoRefresh()
+  {
+    if (autoRefreshTimer != null) return;
+
+    autoRefreshTimer = new Timeline(new KeyFrame(
+        Duration.seconds(AUTO_REFRESH_SECONDS),
+        _ -> {
+          if (currentPortfolioId != null)
+            load(currentPortfolioId);
+        }
+    ));
+    autoRefreshTimer.setCycleCount(Timeline.INDEFINITE);
+    autoRefreshTimer.play();
+  }
+
+  public void stopAutoRefresh()
+  {
+    if (autoRefreshTimer != null)
+    {
+      autoRefreshTimer.stop();
+      autoRefreshTimer = null;
+    }
   }
 
   public void setYAxis(NumberAxis yAxis)
@@ -76,6 +109,8 @@ public class PortfolioViewModel
    */
   public void load(UUID portfolioId)
   {
+    cacheInvalidator.run();  // clear stale cache before reading
+
     if (portfolioId == null)
     {
       portfolioId = resolveDefaultPortfolioId();

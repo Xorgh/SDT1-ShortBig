@@ -1,7 +1,7 @@
 package presentation.views.portfolio;
 
 import javafx.fxml.FXML;
-import javafx.scene.chart.LineChart;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.*;
 import presentation.core.ArgumentReceiver;
@@ -13,7 +13,7 @@ import java.util.UUID;
 public class PortfolioViewController implements ArgumentReceiver<UUID>
 {
   @FXML private ListView<PortfolioHoldingRow> holdingsListView;
-  @FXML private LineChart<Number, Number> balanceChart;
+  @FXML private AreaChart<Number, Number> balanceChart;
   @FXML private NumberAxis xAxis;
   @FXML private NumberAxis yAxis;
   @FXML private Label chartTitle;
@@ -59,6 +59,17 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
         holdingsValueLabel.setText(String.format("$%.2f", v.doubleValue())));
 
     viewModel.load(null);
+
+    // Auto-refresh all cards every 5 seconds
+    viewModel.startAutoRefresh();
+
+    // Stop auto-refresh when this view is removed from the scene
+    holdingsListView.sceneProperty().addListener((_, _, newScene) -> {
+      if (newScene == null)
+      {
+        viewModel.stopAutoRefresh();
+      }
+    });
   }
 
   @FXML

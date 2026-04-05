@@ -2,17 +2,18 @@ package presentation.views.stockmarket;
 
 import dtos.StockDTO;
 import javafx.fxml.FXML;
-import javafx.scene.chart.LineChart;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import presentation.core.ViewManager;
 import presentation.core.notification.NotificationType;
+import presentation.views.stockmarket.StockListCell;
 
 public class MarketViewController
 {
   @FXML private ListView<StockDTO> stockListView;
-  @FXML private LineChart<Number, Number> priceChart;
+  @FXML private AreaChart<Number, Number> priceChart;
   @FXML private NumberAxis xAxis;
   @FXML private NumberAxis yAxis;
   @FXML private Label chartTitle;
@@ -31,11 +32,9 @@ public class MarketViewController
 
     priceChart.getData().add(viewModel.getPriceSeries());
 
-    // Format X axis ticks as timestamps from the data points
     xAxis.setTickLabelFormatter(viewModel.getXAxisFormatter());
     xAxis.setTickLabelRotation(-45);
 
-    // Let the ViewModel control Y axis bounds for centering
     viewModel.setYAxis(yAxis);
 
     stockListView.getSelectionModel().selectedItemProperty().addListener((obs, old, stock) -> {
@@ -44,17 +43,10 @@ public class MarketViewController
         viewModel.selectStock(stock);
         chartTitle.setText(stock.symbol() + " – " + stock.name());
 
-        // Test notification
         // TODO remove after verifying
         ViewManager.getNotificationManager()
             .notify("Selected " + stock.symbol() + " — $" + String.format("%.2f", stock.currentPrice()),
                 NotificationType.INFO);
-
-        // Critical popup test —
-        // TODO remove after verifying
-//        ViewManager.getAlertNotificationManager()
-//            .notify("⚠ CRITICAL: " + stock.symbol() + " selected at $" + String.format("%.2f", stock.currentPrice()),
-//                NotificationType.ERROR);
       }
     });
 
@@ -63,5 +55,16 @@ public class MarketViewController
     {
       stockListView.getSelectionModel().selectFirst();
     }
+
+    // Auto-refresh all cards every 5 seconds
+    viewModel.startAutoRefresh();
+
+    // Stop auto-refresh when this view is removed from the scene
+    stockListView.sceneProperty().addListener((_, _, newScene) -> {
+      if (newScene == null)
+      {
+        viewModel.stopAutoRefresh();
+      }
+    });
   }
 }

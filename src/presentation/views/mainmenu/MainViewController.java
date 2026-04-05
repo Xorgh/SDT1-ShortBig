@@ -1,12 +1,10 @@
 package presentation.views.mainmenu;
 
+import business.services.GameService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import presentation.core.ViewManager;
 import presentation.core.notification.AlertNotificationManager;
@@ -19,47 +17,42 @@ public class MainViewController
   @FXML private Label tabPortfolio;
   @FXML private Label tabTransactions;
   @FXML private Label settingsButton;
-  @FXML private HBox  statusBar;
+  @FXML private HBox statusBar;
   @FXML private Label statusText;
 
+  private final GameService gameService;
   private ContextMenu settingsMenu;
 
-  @FXML
-  public void initialize()
+  public MainViewController(GameService gameService)
   {
-    ViewManager.setNotificationManager(
-        new StatusBarNotificationManager(statusBar, statusText));
-    ViewManager.setAlertNotificationManager(
-        new AlertNotificationManager());
+    this.gameService = gameService;
+  }
+
+  @FXML public void initialize()
+  {
+    ViewManager.setNotificationManager(new StatusBarNotificationManager(statusBar, statusText));
+    ViewManager.setAlertNotificationManager(new AlertNotificationManager());
 
     buildSettingsMenu();
-
     Platform.runLater(() -> showView("/MarketView", tabMarket));
   }
 
   private void buildSettingsMenu()
   {
-    MenuItem startGame    = new MenuItem("Start Game");
-    MenuItem resetGame    = new MenuItem("Reset Game");
+    MenuItem startGame = new MenuItem("Start Game");
+    MenuItem resetGame = new MenuItem("Reset Game");
     MenuItem loadTestData = new MenuItem("Load Test Data");
-    MenuItem exitApp      = new MenuItem("Exit");
+    MenuItem exitApp = new MenuItem("Exit");
 
-    startGame.setOnAction(_    -> handleStartGame());
-    resetGame.setOnAction(_    -> handleResetGame());
+    startGame.setOnAction(_ -> handleStartGame());
+    resetGame.setOnAction(_ -> handleResetGame());
     loadTestData.setOnAction(_ -> handleLoadTestData());
-    exitApp.setOnAction(_      -> handleExit());
+    exitApp.setOnAction(_ -> handleExit());
 
-    settingsMenu = new ContextMenu(
-        startGame,
-        resetGame,
-        loadTestData,
-        new SeparatorMenuItem(),
-        exitApp
-    );
+    settingsMenu = new ContextMenu(startGame, resetGame, loadTestData, new SeparatorMenuItem(), exitApp);
   }
 
-  @FXML
-  public void handleShowSettings()
+  @FXML public void handleShowSettings()
   {
     if (settingsMenu.isShowing())
     {
@@ -73,36 +66,55 @@ public class MainViewController
 
   private void handleStartGame()
   {
-    // TODO: wire to GameService.startNewGame()
-    ViewManager.getNotificationManager()
-        .notify("Starting new game...", NotificationType.INFO);
+    gameService.loadGame();
+    gameService.startTicker();
+    ViewManager.getNotificationManager().notify("Game started", NotificationType.INFO);
   }
 
   private void handleResetGame()
   {
-    // TODO: wire to GameService.resetGame()
-    ViewManager.getNotificationManager()
-        .notify("Game reset", NotificationType.INFO);
+    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+        "This will wipe all game data and start fresh. Are you sure?");
+    confirm.setTitle("Reset Game");
+    confirm.setHeaderText("Reset Game");
+    confirm.showAndWait().ifPresent(response -> {
+      if (response == ButtonType.OK)
+      {
+        gameService.stopTicker();
+        gameService.resetGame();
+        ViewManager.getNotificationManager().notify("Game data wiped. Press Start Game to begin.", NotificationType.INFO);
+      }
+    });
   }
+
 
   private void handleLoadTestData()
   {
-    // TODO: wire to GameService.loadGame()
-    ViewManager.getNotificationManager()
-        .notify("Test data loaded", NotificationType.INFO);
+    gameService.loadGame();
+    gameService.startTicker();
+    ViewManager.getNotificationManager().notify("Game loaded", NotificationType.INFO);
   }
 
   private void handleExit()
   {
+    gameService.stopTicker();
     Platform.exit();
   }
 
-  @FXML
-  public void handleShowMarket()       { showView("/MarketView",      tabMarket); }
-  @FXML
-  public void handleShowPortfolio()    { showView("/PortfolioView",   tabPortfolio); }
-  @FXML
-  public void handleShowTransactions() { showView("/TransactionView", tabTransactions); }
+  @FXML public void handleShowMarket()
+  {
+    showView("/MarketView", tabMarket);
+  }
+
+  @FXML public void handleShowPortfolio()
+  {
+    showView("/PortfolioView", tabPortfolio);
+  }
+
+  @FXML public void handleShowTransactions()
+  {
+    showView("/TransactionView", tabTransactions);
+  }
 
   private void showView(String viewName, Label activeTab)
   {

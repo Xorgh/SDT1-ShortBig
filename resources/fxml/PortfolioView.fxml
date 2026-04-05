@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Separator?>
@@ -132,7 +132,7 @@
                         <Insets top="12" right="16" bottom="16" left="16"/>
                     </padding>
                     <Label fx:id="chartTitle" styleClass="h3" text="Total Balance"/>
-                    <LineChart fx:id="balanceChart" legendVisible="false" animated="false" createSymbols="false"
+                    <AreaChart fx:id="balanceChart" legendVisible="false" animated="false" createSymbols="false"
                                VBox.vgrow="ALWAYS">
                         <xAxis>
                             <NumberAxis fx:id="xAxis" minorTickVisible="false"/>
@@ -140,7 +140,7 @@
                         <yAxis>
                             <NumberAxis fx:id="yAxis" label="Balance ($)"/>
                         </yAxis>
-                    </LineChart>
+                    </AreaChart>
                 </VBox>
             </children>
         </GridPane>

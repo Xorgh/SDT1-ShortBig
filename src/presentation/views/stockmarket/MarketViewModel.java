@@ -1,11 +1,15 @@
 package presentation.views.stockmarket;
 
+import business.events.StockPriceUpdateEvent;
 import business.services.queries.StockPriceHistoryQueryService;
 import business.services.queries.StockQueryService;
 import business.services.queries.PriceHistoryRange;
+import business.stockmarket.StockMarket;
 import dtos.StockDTO;
 import dtos.StockPriceHistoryDTO;
 import entities.StockPriceHistory;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 import java.time.format.DateTimeFormatter;
@@ -32,18 +37,64 @@ public class MarketViewModel
 
   private List<StockPriceHistory> currentDataPoints = List.of();
   private NumberAxis yAxis;
-  private static final DateTimeFormatter TICK_FORMAT = DateTimeFormatter.ofPattern("dd MMM HH:mm");
-  private static final double Y_AXIS_PADDING_FACTOR = 0.20; // 20% padding above and below
+  private Timeline autoRefreshTimer;
 
-  public MarketViewModel(StockQueryService stockQueryService, StockPriceHistoryQueryService historyQueryService)
+  private static final DateTimeFormatter TICK_FORMAT = DateTimeFormatter.ofPattern("dd MMM HH:mm");
+  private static final double Y_AXIS_PADDING_FACTOR = 0.20;
+  private static final double AUTO_REFRESH_SECONDS = 5.0;
+  private final Runnable cacheInvalidator;
+
+  private final java.util.function.Consumer<StockPriceUpdateEvent> priceListener;
+
+  public MarketViewModel(StockQueryService stockQueryService, StockPriceHistoryQueryService historyQueryService,
+      Runnable cacheInvalidator)
   {
     this.stockQueryService = stockQueryService;
     this.historyQueryService = historyQueryService;
+    this.cacheInvalidator = cacheInvalidator;
     stocks.setAll(stockQueryService.getAllStocks());
 
-    stockQueryService.addPriceChangeListener(event -> Platform.runLater(() ->
-        stocks.setAll(stockQueryService.getAllStocks())
-    ));
+    priceListener = event -> Platform.runLater(() -> {
+      cacheInvalidator.run();
+      stocks.setAll(stockQueryService.getAllStocks());
+    });
+    stockQueryService.addPriceChangeListener(priceListener);
+  }
+
+  public void startAutoRefresh()
+  {
+    if (autoRefreshTimer != null)
+      return;
+
+    autoRefreshTimer = new Timeline(new KeyFrame(Duration.seconds(AUTO_REFRESH_SECONDS), _ -> refreshAll()));
+    autoRefreshTimer.setCycleCount(Timeline.INDEFINITE);
+    autoRefreshTimer.play();
+  }
+
+  public void stopAutoRefresh()
+  {
+    if (autoRefreshTimer != null)
+    {
+      autoRefreshTimer.stop();
+      autoRefreshTimer = null;
+    }
+    stockQueryService.removePriceChangeListener(priceListener);
+  }
+
+  private void refreshAll()
+  {
+    cacheInvalidator.run();  // clear stale file cache
+
+    stocks.setAll(stockQueryService.getAllStocks());
+
+    if (selectedStock.get() != null)
+    {
+      String selectedSymbol = selectedStock.get().symbol();
+      stocks.stream().filter(s -> s.symbol().equals(selectedSymbol)).findFirst()
+          .ifPresent(fresh -> selectedStock.set(fresh));
+
+      refreshChart();
+    }
   }
 
   public void setYAxis(NumberAxis yAxis)
@@ -68,8 +119,7 @@ public class MarketViewModel
 
   private void refreshChart()
   {
-    StockPriceHistoryDTO dto = historyQueryService.getHistory(
-        selectedStock.get().symbol(), selectedRange.get());
+    StockPriceHistoryDTO dto = historyQueryService.getHistory(selectedStock.get().symbol(), selectedRange.get());
 
     currentDataPoints = dto.dataPoints();
     priceSeries.setName(dto.symbol());
@@ -85,7 +135,8 @@ public class MarketViewModel
    */
   private void centerYAxis()
   {
-    if (yAxis == null || currentDataPoints.isEmpty()) return;
+    if (yAxis == null || currentDataPoints.isEmpty())
+      return;
 
     double min = currentDataPoints.stream().mapToDouble(StockPriceHistory::getPrice).min().orElse(0);
     double max = currentDataPoints.stream().mapToDouble(StockPriceHistory::getPrice).max().orElse(0);
@@ -117,8 +168,15 @@ public class MarketViewModel
     // No decimals on Y axis labels
     yAxis.setTickLabelFormatter(new StringConverter<>()
     {
-      @Override public String toString(Number value) { return String.valueOf(value.intValue()); }
-      @Override public Number fromString(String s)   { return 0; }
+      @Override public String toString(Number value)
+      {
+        return String.valueOf(value.intValue());
+      }
+
+      @Override public Number fromString(String s)
+      {
+        return 0;
+      }
     });
   }
 
@@ -141,7 +199,8 @@ public class MarketViewModel
       @Override public String toString(Number index)
       {
         int i = index.intValue();
-        if (i < 0 || i >= currentDataPoints.size()) return "";
+        if (i < 0 || i >= currentDataPoints.size())
+          return "";
         return currentDataPoints.get(i).getTimestamp().format(TICK_FORMAT);
       }
 

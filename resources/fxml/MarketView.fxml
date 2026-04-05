@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <VBox alignment="TOP_CENTER"
       prefHeight="946.0"
@@ -78,15 +78,15 @@
                    GridPane.columnIndex="5" GridPane.columnSpan="10" GridPane.rowSpan="27">
                  <padding><Insets top="12" right="16" bottom="16" left="16" /></padding>
                  <Label fx:id="chartTitle" styleClass="h3" text="Select a stock" />
-                 <LineChart fx:id="priceChart" VBox.vgrow="ALWAYS"
-                            legendVisible="false" animated="false" createSymbols="false">
-                     <xAxis>
-                         <NumberAxis fx:id="xAxis" minorTickVisible="false" />
-                     </xAxis>
-                     <yAxis>
-                         <NumberAxis fx:id="yAxis" label="Price ($)" />
-                     </yAxis>
-                 </LineChart>
+                 <AreaChart fx:id="priceChart" VBox.vgrow="ALWAYS"
+                             legendVisible="false" animated="false" createSymbols="false">
+                      <xAxis>
+                          <NumberAxis fx:id="xAxis" minorTickVisible="false" />
+                      </xAxis>
+                      <yAxis>
+                          <NumberAxis fx:id="yAxis" label="Price ($)" />
+                      </yAxis>
+                  </AreaChart>
              </VBox>
          </children>
       </GridPane>

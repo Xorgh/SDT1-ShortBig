@@ -28,4 +28,10 @@ public class StockQueryService
   {
     StockMarket.INSTANCE.onStockPriceChange.add(listener);
   }
+
+  public void removePriceChangeListener(Consumer<StockPriceUpdateEvent> listener)
+  {
+    StockMarket.INSTANCE.onStockPriceChange.remove(listener);
+  }
+
 }

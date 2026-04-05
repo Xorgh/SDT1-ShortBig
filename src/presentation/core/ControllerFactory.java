@@ -19,7 +19,7 @@ public class ControllerFactory implements Callback<Class<?>, Object>
   {
     if (controllerType == MainViewController.class)
     {
-      return new MainViewController();
+      return new MainViewController(context.getGameService());
     }
     if (controllerType == MarketViewController.class)
     {

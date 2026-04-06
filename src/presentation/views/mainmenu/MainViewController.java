@@ -22,6 +22,8 @@ public class MainViewController
 
   private final GameService gameService;
   private ContextMenu settingsMenu;
+  private String currentView = "/MarketView";
+  private Label currentTab;
 
   public MainViewController(GameService gameService)
   {
@@ -34,6 +36,7 @@ public class MainViewController
     ViewManager.setAlertNotificationManager(new AlertNotificationManager());
 
     buildSettingsMenu();
+    currentTab = tabMarket;
     Platform.runLater(() -> showView("/MarketView", tabMarket));
   }
 
@@ -68,8 +71,10 @@ public class MainViewController
   {
     gameService.loadGame();
     gameService.startTicker();
+    showView(currentView, currentTab);
     ViewManager.getNotificationManager().notify("Game started", NotificationType.INFO);
   }
+
 
   private void handleResetGame()
   {
@@ -82,16 +87,21 @@ public class MainViewController
       {
         gameService.stopTicker();
         gameService.resetGame();
-        ViewManager.getNotificationManager().notify("Game data wiped. Press Start Game to begin.", NotificationType.INFO);
+
+        // Immediately reload the current view with fresh data
+        showView(currentView, currentTab);
+
+        ViewManager.getNotificationManager()
+            .notify("Game data wiped. Press Start Game to begin.", NotificationType.INFO);
       }
     });
   }
-
 
   private void handleLoadTestData()
   {
     gameService.loadGame();
     gameService.startTicker();
+    showView(currentView, currentTab);
     ViewManager.getNotificationManager().notify("Game loaded", NotificationType.INFO);
   }
 
@@ -118,6 +128,8 @@ public class MainViewController
 
   private void showView(String viewName, Label activeTab)
   {
+    currentView = viewName;       // ← track it
+    currentTab = activeTab;       // ← track it
     ViewManager.showView(viewName, null);
     setActiveTab(activeTab);
   }

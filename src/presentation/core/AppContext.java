@@ -14,6 +14,8 @@ import business.services.requests.SellStockService;
 import business.stockmarket.StockMarket;
 import persistence.fileimplementation.*;
 import persistence.interfaces.*;
+import presentation.core.notification.NotificationManager;
+import presentation.core.notification.NotificationType;
 import presentation.views.portfolio.PortfolioViewModel;
 import presentation.views.stockmarket.MarketViewModel;
 import presentation.views.transactions.TransactionViewModel;
@@ -61,8 +63,24 @@ public class AppContext
   {
     StockListenerService listenerService = new StockListenerService(uow, stockDAO, historyDAO);
     StockBankruptService bankruptService = new StockBankruptService(uow, ownedStockDAO);
-    StockAlertService alertService = new StockAlertService();
     StockResetService resetService = new StockResetService();
+
+    // Bridge: business → presentation via lambda
+    // ViewManager.getAlertNotificationManager() won't be set yet at init time,
+    // so use a lazy lambda that resolves it at call time:
+    StockAlertService alertService = new StockAlertService(
+        message -> {
+          NotificationManager alertManager = ViewManager.getAlertNotificationManager();
+          if (alertManager != null)
+            alertManager.notify(message, NotificationType.ERROR);
+        },
+        message -> {
+          NotificationManager alertManager = ViewManager.getAlertNotificationManager();
+          if (alertManager != null)
+            alertManager.notify(message, NotificationType.INFO);
+        }
+    );
+
 
     StockMarket market = StockMarket.INSTANCE;
     market.onStockPriceChange.add(listenerService::handlePriceChange);
@@ -72,6 +90,7 @@ public class AppContext
     market.onStockReset.add(resetService::handleStockReset);
     market.onStockReset.add(alertService::handleStockResetAlert);
   }
+
 
   public GameService getGameService()
   {

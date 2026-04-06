@@ -99,10 +99,10 @@ public class MainViewController
 
   private void handleLoadTestData()
   {
-    gameService.loadGame();
+    gameService.loadTestGame();
     gameService.startTicker();
     showView(currentView, currentTab);
-    ViewManager.getNotificationManager().notify("Game loaded", NotificationType.INFO);
+    ViewManager.getNotificationManager().notify("Test Game loaded", NotificationType.INFO);
   }
 
   private void handleExit()

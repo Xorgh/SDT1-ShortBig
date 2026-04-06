@@ -8,6 +8,8 @@ import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
+import java.util.function.Consumer;
+
 public class GameService
 {
   private final UnitOfWork uow;
@@ -129,6 +131,37 @@ public class GameService
     {
       uow.rollback();
       logger.log(LogLevel.ERROR, "Failed to reset game: " + e.getMessage());
+    }
+  }
+
+  public void loadTestGame()
+  {
+    resetGame();
+    uow.begin();
+    try
+    {
+
+      stockDAO.create(new Stock("AAPL", "Apple", 10, StockState.STEADY));
+      stockDAO.create(new Stock("GOOG", "Google", 0, StockState.STEADY));
+      stockDAO.create(new Stock("MSFT", "Microsoft", 10, StockState.GROWING));
+      stockDAO.create(new Stock("NVDA", "Nvidia", 10, StockState.DECLINING));
+      stockDAO.create(new Stock("AMZN", "Amazon", 10, StockState.RESET));
+      stockDAO.create(new Stock("MU", "Micron Technology", 10, StockState.BANKRUPT));
+
+      portfolioDAO.create(new Portfolio(config.getStartingBalance()));
+      uow.commit();
+
+      for (Stock stock : stockDAO.getAll())
+      {
+        stockMarket.addExistingLiveStock(stock);
+      }
+
+      logger.log(LogLevel.INFO, "New game started");
+    }
+    catch (Exception e)
+    {
+      uow.rollback();
+      logger.log(LogLevel.ERROR, "Failed to start new game: " + e.getMessage());
     }
   }
 }

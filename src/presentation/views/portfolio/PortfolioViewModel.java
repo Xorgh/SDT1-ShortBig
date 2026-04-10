@@ -208,6 +208,11 @@ public class PortfolioViewModel
                 i, currentDataPoints.get(i).balanceAfter()))
             .toList());
 
+    if (currentDataPoints.isEmpty() && yAxis != null)
+    {
+      yAxis.setAutoRanging(true);
+      return;
+    }
     centerYAxis();
   }
 

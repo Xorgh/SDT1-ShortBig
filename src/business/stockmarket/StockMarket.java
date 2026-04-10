@@ -34,6 +34,12 @@ public enum StockMarket
     liveStocks = new ArrayList<>();
   }
 
+  public void clearLiveStocks()
+  {
+    liveStocks.clear();
+    logger.log(LogLevel.INFO, "All live stocks cleared from StockMarket");
+  }
+
   public void addNewLiveStock(String stockSymbol)
   {
     String upperStockSymbol = stockSymbol.toUpperCase();

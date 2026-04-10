@@ -86,6 +86,7 @@ public class GameService
 
   public void loadGame()
   {
+    stockMarket.clearLiveStocks();
     uow.begin();
     try
     {
@@ -115,6 +116,7 @@ public class GameService
 
   public void resetGame()
   {
+    stockMarket.clearLiveStocks();
     uow.begin();
     try
     {
@@ -137,6 +139,7 @@ public class GameService
   public void loadTestGame()
   {
     resetGame();
+    stockMarket.clearLiveStocks();
     uow.begin();
     try
     {

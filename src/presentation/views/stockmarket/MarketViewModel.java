@@ -126,6 +126,11 @@ public class MarketViewModel
     priceSeries.getData().setAll(IntStream.range(0, currentDataPoints.size())
         .mapToObj(i -> new XYChart.Data<Number, Number>(i, currentDataPoints.get(i).getPrice())).toList());
 
+    if (currentDataPoints.isEmpty() && yAxis != null)
+    {
+      yAxis.setAutoRanging(true);
+      return;
+    }
     centerYAxis();
   }
 

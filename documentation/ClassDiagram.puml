@@ -1,0 +1,731 @@
+@startuml ClassDiagram
+!pragma layout smetana
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' ========================================================
+' PACKAGE: entities
+' ========================================================
+package entities {
+
+  class Stock {
+    - symbol: String
+    - name: String
+    - currentPrice: double
+    - currentState: StockState
+    + Stock(symbol, name, currentPrice, currentState)
+    + getSymbol(): String
+    + getName(): String
+    + getCurrentPrice(): double
+    + setCurrentPrice(newPrice: double): void
+    + getCurrentState(): StockState
+    + setCurrentState(newState: StockState): void
+  }
+
+  class Portfolio {
+    - id: UUID
+    - currentBalance: double
+    + Portfolio(currentBalance: double)
+    + Portfolio(id: UUID, currentBalance: double)
+    + getId(): UUID
+    + getCurrentBalance(): double
+    + setCurrentBalance(newBalance: double): void
+  }
+
+  class OwnedStock {
+    - id: UUID
+    - portfolioId: UUID
+    - stockSymbol: String
+    - numberOfShares: int
+    + OwnedStock(portfolioId, stockSymbol, numberOfShares)
+    + getId(): UUID
+    + getPortfolioId(): UUID
+    + getStockSymbol(): String
+    + getNumberOfShares(): int
+    + setNumberOfShares(numberOfShares: int): void
+  }
+
+  class Transaction {
+    - id: UUID
+    - portfolioId: UUID
+    - stockSymbol: String
+    - type: TransactionType
+    - quantity: int
+    - pricePerShare: double
+    - totalAmount: double
+    - fee: double
+    - timestamp: LocalDateTime
+    + Transaction(portfolioId, stockSymbol, type, quantity, pricePerShare)
+  }
+
+  class StockPriceHistory {
+    - id: UUID
+    - stockSymbol: String
+    - price: double
+    - timestamp: LocalDateTime
+    + StockPriceHistory(stockSymbol, price)
+    + StockPriceHistory(id, stockSymbol, price, timestamp)
+  }
+
+  enum StockState {
+    STEADY
+    GROWING
+    DECLINING
+    BANKRUPT
+    RESET
+  }
+
+  enum TransactionType {
+    BUY
+    SELL
+  }
+
+  Stock --> StockState
+  Transaction --> TransactionType
+}
+
+
+' ========================================================
+' PACKAGE: persistence.interfaces
+' ========================================================
+package persistence.interfaces {
+
+  interface UnitOfWork {
+    + begin(): void
+    + commit(): void
+    + rollback(): void
+  }
+
+  interface StockDAO {
+    + create(stock: Stock): void
+    + getBySymbol(symbol: String): Stock
+    + getAll(): List<Stock>
+    + update(stock: Stock): void
+    + delete(symbol: String): void
+  }
+
+  interface PortfolioDAO {
+    + create(portfolio: Portfolio): void
+    + getById(id: UUID): Portfolio
+    + getAll(): List<Portfolio>
+    + update(portfolio: Portfolio): void
+    + delete(id: UUID): void
+  }
+
+  interface OwnedStockDAO {
+    + create(ownedStock: OwnedStock): void
+    + getById(id: UUID): OwnedStock
+    + getAll(): List<OwnedStock>
+    + getAllByStockSymbol(symbol: String): List<OwnedStock>
+    + update(ownedStock: OwnedStock): void
+    + delete(id: UUID): void
+  }
+
+  interface TransactionDAO {
+    + create(transaction: Transaction): void
+    + getById(id: UUID): Transaction
+    + getAll(): List<Transaction>
+    + delete(id: UUID): void
+  }
+
+  interface StockPriceHistoryDAO {
+    + create(history: StockPriceHistory): void
+    + getById(id: UUID): StockPriceHistory
+    + getAll(): List<StockPriceHistory>
+    + delete(id: UUID): void
+  }
+}
+
+
+' ========================================================
+' PACKAGE: persistence.fileimplementation
+' ========================================================
+package persistence.fileimplementation {
+
+  class FileUnitOfWork {
+    - directoryPath: String
+    + FileUnitOfWork(directoryPath: String)
+    + begin(): void
+    + commit(): void
+    + rollback(): void
+  }
+
+  class StockFileDAO {
+    + StockFileDAO(unitOfWork: FileUnitOfWork)
+  }
+
+  class PortfolioFileDAO {
+    + PortfolioFileDAO(unitOfWork: FileUnitOfWork)
+  }
+
+  class OwnedStockFileDAO {
+    + OwnedStockFileDAO(unitOfWork: FileUnitOfWork)
+  }
+
+  class TransactionFileDAO {
+    + TransactionFileDAO(unitOfWork: FileUnitOfWork)
+  }
+
+  class StockPriceHistoryFileDAO {
+    + StockPriceHistoryFileDAO(unitOfWork: FileUnitOfWork)
+  }
+
+  FileUnitOfWork ..|> UnitOfWork
+  StockFileDAO ..|> StockDAO
+  PortfolioFileDAO ..|> PortfolioDAO
+  OwnedStockFileDAO ..|> OwnedStockDAO
+  TransactionFileDAO ..|> TransactionDAO
+  StockPriceHistoryFileDAO ..|> StockPriceHistoryDAO
+}
+
+
+' ========================================================
+' PACKAGE: dtos
+' ========================================================
+package dtos {
+
+  class StockDTO <<record>> {
+    + symbol: String
+    + name: String
+    + currentPrice: double
+    + currentState: StockState
+  }
+
+  class PortfolioSummaryDTO <<record>> {
+    + portfolioId: UUID
+    + balance: double
+    + ownedStocks: List<OwnedStock>
+  }
+
+  class StockPriceHistoryDTO <<record>> {
+    + symbol: String
+    + range: PriceHistoryRange
+    + dataPoints: List<StockPriceHistory>
+  }
+
+  class BalanceHistoryDTO <<record>> {
+    + timestamp: LocalDateTime
+    + type: TransactionType
+    + amount: double
+    + balanceAfter: double
+  }
+
+  class TransactionDTO <<record>> {
+    + id: UUID
+    + stockSymbol: String
+    + type: TransactionType
+    + quantity: int
+    + pricePerShare: double
+    + totalAmount: double
+    + fee: double
+    + timestamp: LocalDateTime
+  }
+}
+
+
+' ========================================================
+' PACKAGE: business.events
+' ========================================================
+package business.events {
+
+  class StockPriceUpdateEvent <<record>> {
+    + stockSymbol: String
+    + oldPrice: double
+    + newPrice: double
+  }
+
+  class StockStateUpdateEvent <<record>> {
+    + stockSymbol: String
+    + oldState: StockState
+    + newState: StockState
+  }
+
+  class StockBankruptcyEvent <<record>> {
+    + stockSymbol: String
+  }
+
+  class StockResetEvent <<record>> {
+    + stockSymbol: String
+  }
+}
+
+
+' ========================================================
+' PACKAGE: business.requests
+' ========================================================
+package business.requests {
+
+  class BuyStockRequest <<record>> {
+    + stockSymbol: String
+    + numberOfShares: int
+    + portfolioId: UUID
+  }
+
+  class SellStockRequest <<record>> {
+    + stockSymbol: String
+    + numberOfShares: int
+    + portfolioId: UUID
+  }
+}
+
+
+' ========================================================
+' PACKAGE: business.stockmarket
+' ========================================================
+package business.stockmarket {
+
+  enum StockMarket <<singleton>> {
+    INSTANCE
+    + onStockPriceChange: List<Consumer<StockPriceUpdateEvent>>
+    + onStockStateChange: List<Consumer<StockStateUpdateEvent>>
+    + onStockBankruptcy: List<Consumer<StockBankruptcyEvent>>
+    + onStockReset: List<Consumer<StockResetEvent>>
+    + addNewLiveStock(symbol: String): void
+    + addExistingLiveStock(stock: Stock): void
+    + updateAllLiveStocks(): void
+  }
+
+  class MarketTickerThread {
+    - running: boolean
+    + MarketTickerThread()
+    + run(): void
+    + stopTicker(): void
+    + isRunning(): boolean
+  }
+
+  MarketTickerThread --> StockMarket
+  StockMarket *-- "*" LiveStock
+}
+
+
+' ========================================================
+' PACKAGE: business.stockmarket.simulation
+' ========================================================
+package business.stockmarket.simulation {
+
+  interface LiveStockState {
+    + calculateNewPrice(currentPrice: double): double
+    + getName(): String
+  }
+
+  class LiveStock {
+    - symbol: String
+    - currentPrice: double
+    - consecutiveTicksInState: int
+    + LiveStock(symbol: String)
+    + LiveStock(symbol, currentPrice, currentState)
+    + updatePrice(): void
+    + getStockState(): StockState
+    + getSymbol(): String
+    + getCurrentPrice(): double
+  }
+
+  class TransitionManager {
+    + getNextState(currentState: LiveStockState, ticks: int): LiveStockState
+  }
+
+  class SteadyState implements LiveStockState
+  class GrowingState implements LiveStockState
+  class DecliningState implements LiveStockState
+  class BankruptState implements LiveStockState
+  class ResetState implements LiveStockState
+
+  LiveStock *-- LiveStockState : currentState
+  LiveStock *-- TransitionManager
+}
+
+
+' ========================================================
+' PACKAGE: business.services
+' ========================================================
+package business.services {
+
+  class GameService {
+    - uow: UnitOfWork
+    - stockDAO: StockDAO
+    - portfolioDAO: PortfolioDAO
+    - ownedStockDAO: OwnedStockDAO
+    - transactionDAO: TransactionDAO
+    - historyDAO: StockPriceHistoryDAO
+    + GameService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, historyDAO)
+    + startTicker(): void
+    + stopTicker(): void
+    + startNewGame(): void
+    + loadGame(): void
+    + resetGame(): void
+    + loadTestGame(): void
+  }
+
+  GameService --> StockMarket
+  GameService --> MarketTickerThread
+}
+
+
+' ========================================================
+' PACKAGE: business.services.handlers
+' ========================================================
+package business.services.handlers {
+
+  class StockListenerService {
+    - uow: UnitOfWork
+    - stockDAO: StockDAO
+    - priceHistoryDAO: StockPriceHistoryDAO
+    + StockListenerService(uow, stockDAO, priceHistoryDAO)
+    + handlePriceChange(event: StockPriceUpdateEvent): void
+    + handleStateChange(event: StockStateUpdateEvent): void
+  }
+
+  class StockBankruptService {
+    - uow: UnitOfWork
+    - ownedStockDAO: OwnedStockDAO
+    + StockBankruptService(uow, ownedStockDAO)
+    + handleBankruptcy(event: StockBankruptcyEvent): void
+  }
+
+  class StockResetService {
+    + handleStockReset(event: StockResetEvent): void
+  }
+
+  class StockAlertService {
+    - notifyError: Consumer<String>
+    - notifyInfo: Consumer<String>
+    + StockAlertService(notifyError, notifyInfo)
+    + handleBankruptcyAlert(event: StockBankruptcyEvent): void
+    + handleStockResetAlert(event: StockResetEvent): void
+  }
+}
+
+
+' ========================================================
+' PACKAGE: business.services.queries
+' ========================================================
+package business.services.queries {
+
+  class StockQueryService {
+    - stockDAO: StockDAO
+    + StockQueryService(stockDAO: StockDAO)
+    + getAllStocks(): List<StockDTO>
+    + addPriceChangeListener(listener): void
+    + removePriceChangeListener(listener): void
+  }
+
+  class StockPriceHistoryQueryService {
+    - dao: StockPriceHistoryDAO
+    + StockPriceHistoryQueryService(dao: StockPriceHistoryDAO)
+    + getHistory(symbol, range): StockPriceHistoryDTO
+  }
+
+  class PortfolioQueryService {
+    - portfolioDAO: PortfolioDAO
+    - ownedStockDAO: OwnedStockDAO
+    + PortfolioQueryService(portfolioDAO, ownedStockDAO)
+    + getPortfolioSummary(portfolioId: UUID): PortfolioSummaryDTO
+    + getDefaultPortfolioId(): UUID
+  }
+
+  class TransactionQueryService {
+    - transactionDAO: TransactionDAO
+    + TransactionQueryService(transactionDAO: TransactionDAO)
+    + getTransactionsByPortfolio(portfolioId: UUID): List<TransactionDTO>
+    + getBalanceHistory(portfolioId, startingBalance): List<BalanceHistoryDTO>
+  }
+
+  enum PriceHistoryRange {
+    LAST_HOUR
+    LAST_DAY
+    LAST_WEEK
+    ALL_TIME
+    - label: String
+    - cutoff: Supplier<LocalDateTime>
+    + getLabel(): String
+    + getCutoff(): LocalDateTime
+  }
+}
+
+
+' ========================================================
+' PACKAGE: business.services.requests
+' ========================================================
+package business.services.requests {
+
+  class BuyStockService {
+    - uow: UnitOfWork
+    - stockDAO: StockDAO
+    - portfolioDAO: PortfolioDAO
+    - ownedStockDAO: OwnedStockDAO
+    - transactionDAO: TransactionDAO
+    + BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO)
+    + handleBuyStockRequest(request: BuyStockRequest): void
+  }
+
+  class SellStockService {
+    - uow: UnitOfWork
+    - stockDAO: StockDAO
+    - portfolioDAO: PortfolioDAO
+    - ownedStockDAO: OwnedStockDAO
+    - transactionDAO: TransactionDAO
+    + SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO)
+    + handleSellStockRequest(request: SellStockRequest): void
+  }
+}
+
+
+' ========================================================
+' PACKAGE: presentation.core
+' ========================================================
+package presentation.core {
+
+  class AppContext <<singleton>> {
+    + getInstance(): AppContext
+    + getGameService(): GameService
+    + getMarketViewModel(): MarketViewModel
+    + getPortfolioViewModel(): PortfolioViewModel
+    + getTransactionViewModel(): TransactionViewModel
+  }
+
+  class ViewManager {
+    + {static} init(stage, initialView, context): void
+    + {static} showView(viewName, argument): void
+    + {static} setNotificationManager(manager): void
+    + {static} getNotificationManager(): NotificationManager
+    + {static} setAlertNotificationManager(manager): void
+    + {static} getAlertNotificationManager(): NotificationManager
+  }
+
+  class ControllerFactory {
+    - context: AppContext
+    + ControllerFactory(context: AppContext)
+    + call(controllerType: Class<?>): Object
+  }
+
+  interface "ArgumentReceiver<T>" as ArgumentReceiver {
+    + setArgument(argument: T): void
+  }
+
+  ViewManager *-- ControllerFactory
+  ControllerFactory --> AppContext
+}
+
+
+' ========================================================
+' PACKAGE: presentation.core.notification
+' ========================================================
+package presentation.core.notification {
+
+  interface NotificationManager {
+    + notify(message: String, type: NotificationType): void
+  }
+
+  enum NotificationType {
+    SUCCESS
+    INFO
+    WARNING
+    ERROR
+  }
+
+  class StatusBarNotificationManager {
+    + StatusBarNotificationManager(statusBar, statusText)
+    + notify(message, type): void
+  }
+
+  class AlertNotificationManager {
+    + notify(message, type): void
+  }
+
+  StatusBarNotificationManager ..|> NotificationManager
+  AlertNotificationManager ..|> NotificationManager
+}
+
+
+' ========================================================
+' PACKAGE: presentation.views.mainmenu
+' ========================================================
+package presentation.views.mainmenu {
+
+  class MainViewController {
+    - gameService: GameService
+    + MainViewController(gameService: GameService)
+    + initialize(): void
+  }
+
+  MainViewController *-- GameService
+}
+
+
+' ========================================================
+' PACKAGE: presentation.views.stockmarket
+' ========================================================
+package presentation.views.stockmarket {
+
+  class MarketViewController {
+    - viewModel: MarketViewModel
+    + MarketViewController(viewModel: MarketViewModel)
+    + initialize(): void
+  }
+
+  class MarketViewModel {
+    - stocks: ObservableList<StockDTO>
+    - priceSeries: XYChart.Series<Number, Number>
+    - selectedStock: ObjectProperty<StockDTO>
+    - selectedRange: ObjectProperty<PriceHistoryRange>
+    - stockQueryService: StockQueryService
+    - historyQueryService: StockPriceHistoryQueryService
+    - cacheInvalidator: Runnable
+    + MarketViewModel(stockQueryService, historyQueryService, cacheInvalidator)
+    + loadInitialStock(): void
+    + selectStock(stock: StockDTO): void
+    + startAutoRefresh(): void
+    + stopAutoRefresh(): void
+    + getStocks(): ObservableList<StockDTO>
+    + getPriceSeries(): XYChart.Series<Number, Number>
+    + selectedStockProperty(): ObjectProperty<StockDTO>
+  }
+
+  class StockListCell {
+    + StockListCell()
+    # updateItem(stock: StockDTO, empty: boolean): void
+  }
+
+  MarketViewController *-- MarketViewModel
+  MarketViewModel *-- StockQueryService
+  MarketViewModel *-- StockPriceHistoryQueryService
+  StockListCell --|> "ListCell<StockDTO>"
+}
+
+
+' ========================================================
+' PACKAGE: presentation.views.portfolio
+' ========================================================
+package presentation.views.portfolio {
+
+  class PortfolioViewController {
+    - viewModel: PortfolioViewModel
+    + PortfolioViewController(viewModel: PortfolioViewModel)
+    + initialize(): void
+    + setArgument(portfolioId: UUID): void
+  }
+
+  class PortfolioViewModel {
+    - portfolioQueryService: PortfolioQueryService
+    - transactionQueryService: TransactionQueryService
+    - stockQueryService: StockQueryService
+    - buyStockService: BuyStockService
+    - sellStockService: SellStockService
+    - cacheInvalidator: Runnable
+    - holdings: ObservableList<PortfolioHoldingRow>
+    - balanceSeries: XYChart.Series<Number, Number>
+    + PortfolioViewModel(portfolioQueryService, transactionQueryService, stockQueryService, buyStockService, sellStockService, cacheInvalidator)
+    + load(portfolioId: UUID): void
+    + buyStock(symbol: String, shares: int): void
+    + sellStock(symbol: String, shares: int): void
+    + startAutoRefresh(): void
+    + stopAutoRefresh(): void
+    + getHoldings(): ObservableList<PortfolioHoldingRow>
+    + getBalanceSeries(): XYChart.Series<Number, Number>
+    + cashBalanceProperty(): DoubleProperty
+    + holdingsValueProperty(): DoubleProperty
+  }
+
+  class PortfolioHoldingRow <<record>> {
+    + symbol: String
+    + shares: int
+    + totalValue: double
+    + state: StockState
+  }
+
+  PortfolioViewController ..|> ArgumentReceiver
+  PortfolioViewController *-- PortfolioViewModel
+  PortfolioViewModel *-- PortfolioQueryService
+  PortfolioViewModel *-- TransactionQueryService
+  PortfolioViewModel *-- StockQueryService
+  PortfolioViewModel *-- BuyStockService
+  PortfolioViewModel *-- SellStockService
+}
+
+
+' ========================================================
+' PACKAGE: presentation.views.transactions
+' ========================================================
+package presentation.views.transactions {
+
+  class TransactionViewController {
+    + TransactionViewController(viewModel: TransactionViewModel)
+  }
+
+  class TransactionViewModel {
+    - transactionQueryService: TransactionQueryService
+    + TransactionViewModel(transactionQueryService: TransactionQueryService)
+  }
+
+  TransactionViewController *-- TransactionViewModel
+  TransactionViewModel *-- TransactionQueryService
+}
+
+
+' ========================================================
+' PACKAGE: shared
+' ========================================================
+package shared {
+
+  class Logger <<singleton>> {
+    - {static} instance: Logger
+    - output: LogOutput
+    + {static} getInstance(): Logger
+    + setOutput(output: LogOutput): void
+    + log(logLevel: LogLevel, message: String): void
+  }
+
+  interface LogOutput {
+    + log(logLevel: LogLevel, message: String): void
+  }
+
+  enum LogLevel {
+    DEBUG
+    INFO
+    WARNING
+    ERROR
+  }
+
+  enum AppConfig <<singleton>> {
+    INSTANCE
+    - startingBalance: int
+    - transactionFee: double
+    - updateFrequencyInMs: int
+    - stockResetValue: double
+    - bankruptStateTimeoutTicks: int
+    + getStartingBalance(): int
+    + getTransactionFee(): double
+    + getUpdateFrequencyInMs(): int
+    + getStockResetValue(): double
+  }
+
+  Logger *-- LogOutput
+  Logger --> LogLevel
+}
+
+' ========================================================
+' CROSS-PACKAGE RELATIONSHIPS
+' ========================================================
+
+' AppContext wires everything
+AppContext --> GameService : creates
+AppContext ..> MarketViewModel : creates
+AppContext ..> PortfolioViewModel : creates
+AppContext ..> TransactionViewModel : creates
+
+' Observer pattern — StockMarket fires events
+StockMarket ..> StockPriceUpdateEvent : fires
+StockMarket ..> StockStateUpdateEvent : fires
+StockMarket ..> StockBankruptcyEvent : fires
+StockMarket ..> StockResetEvent : fires
+
+' Handlers observe events
+StockListenerService ..> StockPriceUpdateEvent : handles
+StockListenerService ..> StockStateUpdateEvent : handles
+StockBankruptService ..> StockBankruptcyEvent : handles
+StockAlertService ..> StockBankruptcyEvent : handles
+StockAlertService ..> StockResetEvent : handles
+StockResetService ..> StockResetEvent : handles
+
+@enduml
+

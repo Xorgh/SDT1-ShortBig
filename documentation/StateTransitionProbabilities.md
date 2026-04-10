@@ -6,8 +6,8 @@
 | Config                                      | Value                     |
 |--------------------------------------------|---------------------------|
 | Tick frequency                             | 1000 ms (1 tick / second) |
-| Max consecutive ticks before force transition | 5 ticks                   |
-| Adjustment increment per tick              | +10% per tick             |
+| Max consecutive ticks before force transition | 10 ticks                  |
+| Adjustment increment per tick              | +5% per tick              |
 | Bankrupt timeout                           | 20 ticks                  |
 | Reset price                                | $100.00                   |
 
@@ -15,8 +15,8 @@
 
 # State Transition Probabilities
 
-Each tick spent in the same state adds **+10% adjustment**, increasing the chance to leave the current state.  
-At **tick 5**, the transition is **forced**.
+Each tick spent in the same state adds **+5% adjustment**, increasing the chance to leave the current state.  
+At **tick 10**, the transition is **forced**.
 
 ---
 
@@ -27,41 +27,56 @@ At **tick 5**, the transition is **forced**.
 
 | Tick | Stay   | → Growing | → Declining |
 |-----:|--------|-----------|-------------|
-| 1    | 70%    | 15%       | 15%         |
-| 2    | 60%    | 20%       | 20%         |
-| 3    | 50%    | 25%       | 25%         |
-| 4    | 40%    | 30%       | 30%         |
-| 5    | FORCED | 50%       | 50%         |
+| 1    | 75%    | 12.5%     | 12.5%       |
+| 2    | 70%    | 15%       | 15%         |
+| 3    | 65%    | 17.5%     | 17.5%       |
+| 4    | 60%    | 20%       | 20%         |
+| 5    | 55%    | 22.5%     | 22.5%       |
+| 6    | 50%    | 25%       | 25%         |
+| 7    | 45%    | 27.5%     | 27.5%       |
+| 8    | 40%    | 30%       | 30%         |
+| 9    | 35%    | 32.5%     | 32.5%       |
+| 10   | FORCED | 50%       | 50%         |
 
 ---
 
 ## GROWING →
 
-**Base:** 75% stay, 20% Steady, 5% Declining  
+**Base:** 70% stay, 20% Steady, 10% Declining  
 **Adjustment:** Full adjustment goes to Steady
 
 | Tick | Stay   | → Steady | → Declining |
 |-----:|--------|----------|-------------|
-| 1    | 65%    | 30%      | 5%          |
-| 2    | 55%    | 40%      | 5%          |
-| 3    | 45%    | 50%      | 5%          |
-| 4    | 35%    | 60%      | 5%          |
-| 5    | FORCED | 100%     | —           |
+| 1    | 65%    | 25%      | 10%         |
+| 2    | 60%    | 30%      | 10%         |
+| 3    | 55%    | 35%      | 10%         |
+| 4    | 50%    | 40%      | 10%         |
+| 5    | 45%    | 45%      | 10%         |
+| 6    | 40%    | 50%      | 10%         |
+| 7    | 35%    | 55%      | 10%         |
+| 8    | 30%    | 60%      | 10%         |
+| 9    | 25%    | 65%      | 10%         |
+| 10   | FORCED | 100%     | —           |
 
 ---
 
 ## DECLINING →
 
-**Base:** 65% stay, 25% Steady, 10% Growing  
+**Base:** 70% stay, 20% Steady, 10% Growing  
 **Adjustment:** Full adjustment goes to Steady
 
 | Tick | Stay   | → Steady | → Growing |
 |-----:|--------|----------|-----------|
-| 1    | 55%    | 35%      | 10%       |
-| 2    | 45%    | 45%      | 10%       |
-| 3    | 35%    | 55%      | 10%       |
-| 4    | 25%    | 65%      | 10%       |
-| 5    | FORCED | 100%     | —         |
+| 1    | 65%    | 25%      | 10%       |
+| 2    | 60%    | 30%      | 10%       |
+| 3    | 55%    | 35%      | 10%       |
+| 4    | 50%    | 40%      | 10%       |
+| 5    | 45%    | 45%      | 10%       |
+| 6    | 40%    | 50%      | 10%       |
+| 7    | 35%    | 55%      | 10%       |
+| 8    | 30%    | 60%      | 10%       |
+| 9    | 25%    | 65%      | 10%       |
+| 10   | FORCED | 100%     | —         |
 
 ---
 

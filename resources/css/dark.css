@@ -7,26 +7,26 @@
    ========================================================= */
 .root {
   /* Base surfaces */
-  -fx-base:       #101113;
+  -fx-base: #101113;
   -fx-background: #0E0F11;
 
   /* Card surfaces */
-  -fx-card:   #17191C;
+  -fx-card: #17191C;
   -fx-card-2: #1C1F23;
 
   /* Borders */
   -fx-border-soft: #2A2E34;
 
   /* Text */
-  -fx-text:       #E7E9EE;
+  -fx-text: #E7E9EE;
   -fx-text-muted: #A7AFBA;
-  -fx-text-dim:   #7E8794;
+  -fx-text-dim: #7E8794;
 
   /* Accents */
-  -fx-accent:   #2F6BFF;   /* Primary blue  */
-  -fx-accent-2: #27D6C8;   /* Teal          */
-  -fx-positive: #2ECC71;   /* Green         */
-  -fx-negative: #FF4D6D;   /* Red/Pink      */
+  -fx-accent: #2F6BFF; /* Primary blue  */
+  -fx-accent-2: #27D6C8; /* Teal          */
+  -fx-positive: #2ECC71; /* Green         */
+  -fx-negative: #FF4D6D; /* Red/Pink      */
 
   /* Typography */
   -fx-font-family: "Inter", "Segoe UI", "SF Pro Display", "Roboto", "Arial";
@@ -47,13 +47,29 @@
   -fx-fill: -fx-text;
 }
 
-.text-muted, .label.text-muted { -fx-text-fill: -fx-text-muted; }
-.text-dim,   .label.text-dim   { -fx-text-fill: -fx-text-dim; }
+.text-muted, .label.text-muted {
+  -fx-text-fill: -fx-text-muted;
+}
+
+.text-dim, .label.text-dim {
+  -fx-text-fill: -fx-text-dim;
+}
 
 /* Headings */
-.h1, .label.h1 { -fx-font-size: 22px; -fx-font-weight: 800; }
-.h2, .label.h2 { -fx-font-size: 16px; -fx-font-weight: 700; }
-.h3, .label.h3 { -fx-font-size: 14px; -fx-font-weight: 700; }
+.h1, .label.h1 {
+  -fx-font-size: 22px;
+  -fx-font-weight: 800;
+}
+
+.h2, .label.h2 {
+  -fx-font-size: 16px;
+  -fx-font-weight: 700;
+}
+
+.h3, .label.h3 {
+  -fx-font-size: 14px;
+  -fx-font-weight: 700;
+}
 
 /* =========================================================
    Containers / Cards
@@ -88,8 +104,13 @@
   -fx-font-size: 13px;
 }
 
-.button:hover   { -fx-background-color: #2A2F36; }
-.button:pressed { -fx-background-color: #1F2328; }
+.button:hover {
+  -fx-background-color: #2A2F36;
+}
+
+.button:pressed {
+  -fx-background-color: #1F2328;
+}
 
 /* Primary */
 .button.primary {
@@ -98,7 +119,10 @@
   -fx-border-color: transparent;
   -fx-font-weight: 700;
 }
-.button.primary:hover { -fx-background-color: #285DE0; }
+
+.button.primary:hover {
+  -fx-background-color: #285DE0;
+}
 
 /* Ghost */
 .button.ghost {
@@ -106,7 +130,10 @@
   -fx-text-fill: -fx-text;
   -fx-border-color: -fx-border-soft;
 }
-.button.ghost:hover { -fx-background-color: rgba(255,255,255,0.04); }
+
+.button.ghost:hover {
+  -fx-background-color: rgba(255, 255, 255, 0.04);
+}
 
 /* =========================================================
    Text inputs
@@ -139,9 +166,41 @@
   -fx-font-size: 13px;
 }
 
-.combo-box .list-cell             { -fx-text-fill: -fx-text; }
-.combo-box-popup .list-view       { -fx-background-color: -fx-card; -fx-border-color: -fx-border-soft; }
-.combo-box-popup .list-cell:hover { -fx-background-color: #2A2F36; }
+.combo-box .list-cell {
+  -fx-text-fill: -fx-text;
+}
+
+.combo-box-popup .list-view {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 8;
+  -fx-background-radius: 8;
+}
+
+.combo-box-popup .list-cell {
+  -fx-background-color: -fx-card;
+  -fx-text-fill: -fx-text;
+  -fx-padding: 6 12 6 12;
+}
+
+.combo-box-popup .list-cell:hover {
+  -fx-background-color: #2A2F36;
+}
+
+.combo-box-popup .list-cell:selected {
+  -fx-background-color: rgba(47, 107, 255, 0.18);
+  -fx-text-fill: -fx-text;
+}
+
+/* Lock popup width to match the combo box — prevents layout jumps */
+.combo-box-popup .list-view {
+  -fx-max-width: inherit;
+  -fx-pref-width: inherit;
+}
+
+.combo-box .list-cell {
+  -fx-text-overrun: ellipsis;
+}
 
 /* =========================================================
    TabPane
@@ -163,9 +222,12 @@
   -fx-font-size: 13px;
 }
 
-.tab:selected .tab-label { -fx-text-fill: -fx-text; }
+.tab:selected .tab-label {
+  -fx-text-fill: -fx-text;
+}
+
 .tab:selected {
-  -fx-background-color: rgba(255,255,255,0.04);
+  -fx-background-color: rgba(255, 255, 255, 0.04);
   -fx-background-radius: 10;
 }
 
@@ -184,7 +246,10 @@
   -fx-text-fill: -fx-text;
   -fx-font-size: 13px;
 }
-.list-cell:hover { -fx-background-color: rgba(255,255,255,0.04); }
+
+.list-cell:hover {
+  -fx-background-color: rgba(255, 255, 255, 0.04);
+}
 
 .table-view .column-header-background {
   -fx-background-color: #14171A;
@@ -206,8 +271,14 @@
   -fx-background-color: transparent;
   -fx-text-fill: -fx-text;
 }
-.table-row-cell:filled:hover { -fx-background-color: rgba(255,255,255,0.04); }
-.table-row-cell:selected     { -fx-background-color: rgba(47,107,255,0.18); }
+
+.table-row-cell:filled:hover {
+  -fx-background-color: rgba(255, 255, 255, 0.04);
+}
+
+.table-row-cell:selected {
+  -fx-background-color: rgba(47, 107, 255, 0.18);
+}
 
 /* =========================================================
    Scroll bars
@@ -217,14 +288,20 @@
   -fx-background-color: transparent;
 }
 
-.scroll-bar .thumb       { -fx-background-color: #2A2E34; -fx-background-radius: 10; }
-.scroll-bar .thumb:hover { -fx-background-color: #343A43; }
+.scroll-bar .thumb {
+  -fx-background-color: #2A2E34;
+  -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+  -fx-background-color: #343A43;
+}
 
 /* =========================================================
    Pills / Tags
    ========================================================= */
 .pill {
-  -fx-background-color: rgba(255,255,255,0.06);
+  -fx-background-color: rgba(255, 255, 255, 0.06);
   -fx-text-fill: -fx-text-muted;
   -fx-background-radius: 999;
   -fx-padding: 4 10 4 10;
@@ -232,9 +309,20 @@
   -fx-font-weight: 600;
 }
 
-.pill.primary  { -fx-background-color: rgba(47,107,255,0.22);  -fx-text-fill: #BFD0FF; }
-.pill.positive { -fx-background-color: rgba(46,204,113,0.18);  -fx-text-fill: #A9F2C3; }
-.pill.negative { -fx-background-color: rgba(255,77,109,0.18);  -fx-text-fill: #FFC0CC; }
+.pill.primary {
+  -fx-background-color: rgba(47, 107, 255, 0.22);
+  -fx-text-fill: #BFD0FF;
+}
+
+.pill.positive {
+  -fx-background-color: rgba(46, 204, 113, 0.18);
+  -fx-text-fill: #A9F2C3;
+}
+
+.pill.negative {
+  -fx-background-color: rgba(255, 77, 109, 0.18);
+  -fx-text-fill: #FFC0CC;
+}
 
 /* =========================================================
    Header / Navigation
@@ -262,14 +350,30 @@
   /* Bottom border always reserves 2px; transparent until active */
   -fx-border-color: transparent;
   -fx-border-width: 0 0 2 0;
+  -fx-cursor: hand;
 }
 
-.nav-tab:hover  { -fx-text-fill: -fx-text; }
+.nav-tab:hover {
+  -fx-text-fill: -fx-text;
+}
 
 .nav-tab.active {
   -fx-text-fill: -fx-text;
   -fx-border-color: transparent transparent -fx-accent transparent;
 }
+
+/* Settings cogwheel in nav bar */
+.nav-settings {
+  -fx-text-fill: -fx-text-dim;
+  -fx-font-size: 30px;
+  -fx-padding: 4 0 4 0;
+  -fx-cursor: hand;
+}
+
+.nav-settings:hover {
+  -fx-text-fill: -fx-text;
+}
+
 
 /* =========================================================
    Status Bar
@@ -277,7 +381,7 @@
 .status-bar {
   -fx-alignment: center-left;
   -fx-spacing: 10;
-  -fx-padding: 10 14 10 14;
+  -fx-padding: 10 16 10 16;
   -fx-background-color: -fx-background;
   -fx-border-width: 0;
   -fx-min-height: 38;
@@ -299,16 +403,25 @@
 
 /* Indicator dot (Region) — pref-width/height locked via min+max */
 .status-dot {
-  -fx-min-width: 8;   -fx-max-width: 8;
-  -fx-min-height: 8;  -fx-max-height: 8;
+  -fx-min-width: 8;
+  -fx-max-width: 8;
+  -fx-min-height: 8;
+  -fx-max-height: 8;
   -fx-background-radius: 999;
   -fx-background-color: -fx-accent;
   -fx-opacity: 0.95;
 }
 
 /* Idle */
-.status-bar.idle .status-text { -fx-text-fill: -fx-text-dim; -fx-font-weight: 500; }
-.status-bar.idle .status-dot  { -fx-background-color: #3A404A; -fx-opacity: 0.7; }
+.status-bar.idle .status-text {
+  -fx-text-fill: -fx-text-dim;
+  -fx-font-weight: 500;
+}
+
+.status-bar.idle .status-dot {
+  -fx-background-color: #3A404A;
+  -fx-opacity: 0.7;
+}
 
 /* ---------------------------------------------------------
    Status Bar variants  (add styleClass to the HBox)
@@ -318,26 +431,161 @@
 .status-bar.info {
   -fx-border-color: rgba(47, 107, 255, 0.40) transparent transparent transparent;
 }
-.status-bar.info .status-text { -fx-text-fill: -fx-text-muted; }
+
+.status-bar.info .status-text {
+  -fx-text-fill: -fx-text-muted;
+}
 
 /* SUCCESS */
 .status-bar.success {
   -fx-border-color: rgba(46, 204, 113, 0.55) transparent transparent transparent;
 }
-.status-bar.success .status-dot  { -fx-background-color: -fx-positive; }
-.status-bar.success .status-text { -fx-text-fill: #CFF7DF; }
+
+.status-bar.success .status-dot {
+  -fx-background-color: -fx-positive;
+}
+
+.status-bar.success .status-text {
+  -fx-text-fill: #CFF7DF;
+}
 
 /* WARNING */
 .status-bar.warning {
   -fx-border-color: rgba(255, 193, 7, 0.60) transparent transparent transparent;
 }
-.status-bar.warning .status-dot  { -fx-background-color: #FFC107; }
-.status-bar.warning .status-text { -fx-text-fill: #FFE7A3; }
+
+.status-bar.warning .status-dot {
+  -fx-background-color: #FFC107;
+}
+
+.status-bar.warning .status-text {
+  -fx-text-fill: #FFE7A3;
+}
 
 /* ERROR */
 .status-bar.error {
   -fx-border-color: rgba(255, 77, 109, 0.70) transparent transparent transparent;
 }
-.status-bar.error .status-dot  { -fx-background-color: -fx-negative; }
-.status-bar.error .status-text { -fx-text-fill: #FFC0CC; }
+
+.status-bar.error .status-dot {
+  -fx-background-color: -fx-negative;
+}
+
+.status-bar.error .status-text {
+  -fx-text-fill: #FFC0CC;
+}
+
+/* =========================================================
+   Lists / Tables
+   ========================================================= */
+.list-view, .table-view {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 12;
+  -fx-background-radius: 12;
+}
+
+/* ListView/TableView embedded inside a .card — inherit card, no double border */
+.card .list-view,
+.card .table-view {
+  -fx-background-color: transparent;
+  -fx-border-width: 0;
+  -fx-border-color: transparent;
+  -fx-background-radius: 0;
+  -fx-border-radius: 0;
+}
+
+/* =========================================================
+   LineChart
+   ========================================================= */
+.chart {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+}
+
+.chart-plot-background {
+  -fx-background-color: rgba(255, 255, 255, 0.02);
+  -fx-background-radius: 8;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines {
+  -fx-stroke: rgba(255, 255, 255, 0.06);
+}
+
+.chart-alternative-row-fill,
+.chart-alternative-column-fill {
+  -fx-fill: transparent;
+  -fx-stroke: transparent;
+}
+
+.axis {
+  -fx-tick-label-fill: -fx-text-muted;
+  -fx-font-size: 11px;
+}
+
+.axis-label {
+  -fx-text-fill: -fx-text-muted;
+}
+
+.chart-legend {
+  -fx-background-color: transparent;
+}
+
+.default-color0.chart-series-line {
+  -fx-stroke: -fx-accent;
+  -fx-stroke-width: 2px;
+}
+
+.default-color0.chart-series-area-line {
+  -fx-stroke: -fx-accent;
+  -fx-stroke-width: 2px;
+}
+
+.default-color0.chart-line-symbol {
+  -fx-background-color: -fx-accent, -fx-card;
+  -fx-background-radius: 5px;
+  -fx-padding: 4px;
+}
+
+
+/* =========================================================
+   Context Menu (settings dropdown)
+   ========================================================= */
+.context-menu {
+  -fx-background-color: -fx-card;
+  -fx-border-color: -fx-border-soft;
+  -fx-border-radius: 8;
+  -fx-background-radius: 8;
+  -fx-padding: 4 0 4 0;
+}
+
+.context-menu .menu-item {
+  -fx-background-color: transparent;
+  -fx-padding: 8 16 8 16;
+}
+
+.context-menu .menu-item .label {
+  -fx-text-fill: -fx-text;
+  -fx-font-size: 13px;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+  -fx-background-color: #2A2F36;
+}
+
+.context-menu .separator {
+  -fx-padding: 4 0 4 0;
+}
+
+.context-menu .separator .line {
+  -fx-border-color: -fx-border-soft;
+  -fx-border-width: 1 0 0 0;
+}
+
+/* Fill area under the chart line */
+.default-color0.chart-series-area-fill {
+  -fx-fill: linear-gradient(to bottom, rgba(47, 107, 255, 0.20) 0%, rgba(47, 107, 255, 0.0) 40%);
+}
 

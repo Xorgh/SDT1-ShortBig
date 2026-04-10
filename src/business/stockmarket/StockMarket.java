@@ -65,21 +65,6 @@ public enum StockMarket
       double newPrice = liveStock.getCurrentPrice();
       StockState newState = liveStock.getStockState();
 
-      // Check for StockReset and fire event
-      if (newState == StockState.RESET)
-      {
-        StockResetEvent newResetEvent = new StockResetEvent(stockSymbol);
-        onStockReset.forEach(listener -> listener.accept(newResetEvent));
-      }
-
-      // Check for bankruptcy, and fire event
-      // TODO Should bankruptcy events be fired every time we hit an instanceof 'BankruptState' or only when it's changed to this state?
-      //
-      if (newState == StockState.BANKRUPT)
-      {
-        StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
-        onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
-      }
 
       // create new price event(DTO)
       StockPriceUpdateEvent newPriceUpdateEvent = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
@@ -88,6 +73,21 @@ public enum StockMarket
       if (!oldState.equals(newState))
       {
         StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldState, newState);
+
+        // Check for bankruptcy, and fire event
+        if (newState == StockState.BANKRUPT)
+        {
+          StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
+          onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
+        }
+
+        // Check for StockReset and fire event
+        if (newState == StockState.RESET)
+        {
+          StockResetEvent newResetEvent = new StockResetEvent(stockSymbol);
+          onStockReset.forEach(listener -> listener.accept(newResetEvent));
+        }
+
         onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
       }
 

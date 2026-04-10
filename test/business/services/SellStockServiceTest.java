@@ -1,6 +1,7 @@
 package business.services;
 
-import business.events.SellStockRequest;
+import business.requests.SellStockRequest;
+import business.services.requests.SellStockService;
 import entities.*;
 import mocks.*;
 import org.junit.jupiter.api.BeforeEach;

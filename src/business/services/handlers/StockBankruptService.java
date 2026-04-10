@@ -1,10 +1,8 @@
-package business.services;
+package business.services.handlers;
 
 import business.events.StockBankruptcyEvent;
-import business.events.StockStateUpdateEvent;
 import entities.OwnedStock;
 import persistence.interfaces.OwnedStockDAO;
-import persistence.interfaces.StockPriceHistoryDAO;
 import persistence.interfaces.UnitOfWork;
 import shared.logging.LogLevel;
 import shared.logging.Logger;

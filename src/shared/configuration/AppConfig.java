@@ -89,22 +89,22 @@ public enum AppConfig
     this.bankruptStateTimeoutTicks = 20;
 
     // State transition configuration
-    this.stateTransitionIncrementPerTick = 0.10;
-    this.maxConsecutiveTicksBeforeForceTransition = 5;
+    this.stateTransitionIncrementPerTick = 0.05;
+    this.maxConsecutiveTicksBeforeForceTransition = 10;
 
     // Base probabilities for Steady state (80% stay, 10% growing, 10% declining)
     this.steadyToSteadyBase = 0.80;
     this.steadyToGrowingBase = 0.10;
     this.steadyToDecliningBase = 0.10;
 
-    // Base probabilities for Growing state (75% stay, 20% steady, 5% declining)
-    this.growingToGrowingBase = 0.75;
+    // Base probabilities for Growing state
+    this.growingToGrowingBase = 0.70;
     this.growingToSteadyBase = 0.20;
-    this.growingToDecliningBase = 0.05;
+    this.growingToDecliningBase = 0.10;
 
-    // Base probabilities for Declining state (65% stay, 25% steady, 10% growing)
-    this.decliningToDecliningBase = 0.65;
-    this.decliningToSteadyBase = 0.25;
+    // Base probabilities for Declining state
+    this.decliningToDecliningBase = 0.70;
+    this.decliningToSteadyBase = 0.20;
     this.decliningToGrowingBase = 0.10;
   }
 

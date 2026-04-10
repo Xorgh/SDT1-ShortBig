@@ -63,8 +63,12 @@ public class LiveStock
     if(currentPrice <= 0)
     {
       currentPrice = 0;
-      logger.log(LogLevel.WARNING, String.format("[%s] BANKRUPT - Price reached 0", symbol));
-      setState(new BankruptState());
+      // Only alert at set state when state is transitioning to Bankrupt.
+      if (!(currentState instanceof BankruptState))
+      {
+        logger.log(LogLevel.WARNING, String.format("[%s] BANKRUPT - Price reached 0", symbol));
+        setState(new BankruptState());
+      }
     }
 
     // Increment consecutive ticks counter

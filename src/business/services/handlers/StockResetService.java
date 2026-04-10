@@ -1,4 +1,4 @@
-package business.services;
+package business.services.handlers;
 
 import business.events.StockResetEvent;
 import shared.logging.Logger;

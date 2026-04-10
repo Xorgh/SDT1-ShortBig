@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import presentation.core.notification.NotificationManager;
 
 public class ViewManager
 {
@@ -13,9 +14,31 @@ public class ViewManager
 
   private static BorderPane mainLayout;
   private static ControllerFactory controllerFactory;
+  private static NotificationManager statusBarNotificationManager;
+  private static NotificationManager alertNotificationManager;
 
   public ViewManager()
   {
+  }
+
+  public static void setNotificationManager(NotificationManager manager)
+  {
+    statusBarNotificationManager = manager;
+  }
+
+  public static NotificationManager getNotificationManager()
+  {
+    return statusBarNotificationManager;
+  }
+
+  public static void setAlertNotificationManager(NotificationManager manager)
+  {
+    alertNotificationManager = manager;
+  }
+
+  public static NotificationManager getAlertNotificationManager()
+  {
+    return alertNotificationManager;
   }
 
   public static void init(Stage primaryStage, String initialView, AppContext context) throws Exception
@@ -60,10 +83,12 @@ public class ViewManager
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private static void passArgumentIfSupported(Object controller, Object argument)
+  @SuppressWarnings("unchecked") private static void passArgumentIfSupported(Object controller, Object argument)
   {
-    if (argument == null) { return;}
+    if (argument == null)
+    {
+      return;
+    }
     if (controller instanceof ArgumentReceiver<?> receiver)
     {
       ArgumentReceiver<Object> typedReceiver = (ArgumentReceiver<Object>) receiver;

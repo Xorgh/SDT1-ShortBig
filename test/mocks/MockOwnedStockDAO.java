@@ -21,6 +21,12 @@ public class MockOwnedStockDAO implements OwnedStockDAO
     return allOwnedStocks;
   }
 
+  @Override public List<OwnedStock> getAllByPortfolioId(UUID portfolioId) {
+    return allOwnedStocks.stream()
+        .filter(os -> os.getPortfolioId().equals(portfolioId))
+        .toList();
+  }
+
   // OUTPUT — capture what create/update received
   private OwnedStock lastCreated;
   private OwnedStock shouldReturnOwnedStock;

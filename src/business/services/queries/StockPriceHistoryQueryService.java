@@ -5,7 +5,6 @@ import entities.StockPriceHistory;
 import persistence.interfaces.StockPriceHistoryDAO;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 public class StockPriceHistoryQueryService
@@ -21,14 +20,9 @@ public class StockPriceHistoryQueryService
   {
     LocalDateTime cutoff = range.getCutoff();
 
-    List<StockPriceHistory> points = dao.getAll().stream()
-        .filter(h -> h.getStockSymbol().equalsIgnoreCase(symbol))
-        .filter(h -> h.getTimestamp().isAfter(cutoff))
-        .sorted(Comparator.comparing(StockPriceHistory::getTimestamp))
-        .toList();
+    List<StockPriceHistory> points = dao.getBySymbolSince(symbol, cutoff);
 
     return new StockPriceHistoryDTO(symbol, range, points);
   }
-
 
 }

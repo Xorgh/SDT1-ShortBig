@@ -7,7 +7,6 @@ import entities.TransactionType;
 import persistence.interfaces.TransactionDAO;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,9 +24,25 @@ public class TransactionQueryService
     if (portfolioId == null)
       throw new IllegalArgumentException("Portfolio ID cannot be null");
 
-    return transactionDAO.getAll().stream()
-        .filter(t -> t.getPortfolioId().equals(portfolioId))
-        .sorted(Comparator.comparing(Transaction::getTimestamp))
+    return transactionDAO.getByPortfolioId(portfolioId).stream()
+        .map(t -> new TransactionDTO(
+            t.getId(),
+            t.getStockSymbol(),
+            t.getType(),
+            t.getQuantity(),
+            t.getPricePerShare(),
+            t.getTotalAmount(),
+            t.getFee(),
+            t.getTimestamp()))
+        .toList();
+  }
+
+  public List<TransactionDTO> getTransactionsByPortfolio(UUID portfolioId, int page, int pageSize)
+  {
+    if (portfolioId == null)
+      throw new IllegalArgumentException("Portfolio ID cannot be null");
+
+    return transactionDAO.getByPortfolioId(portfolioId, page, pageSize).stream()
         .map(t -> new TransactionDTO(
             t.getId(),
             t.getStockSymbol(),
@@ -45,10 +60,7 @@ public class TransactionQueryService
     if (portfolioId == null)
       throw new IllegalArgumentException("Portfolio ID cannot be null");
 
-    List<Transaction> history = transactionDAO.getAll().stream()
-        .filter(t -> t.getPortfolioId().equals(portfolioId))
-        .sorted(Comparator.comparing(Transaction::getTimestamp))
-        .toList();
+    List<Transaction> history = transactionDAO.getByPortfolioId(portfolioId);
 
     List<BalanceHistoryDTO> result = new ArrayList<>();
     double runningBalance = startingBalance;

@@ -36,9 +36,7 @@ public class PortfolioQueryService
       throw new IllegalArgumentException("Portfolio not found: " + portfolioId);
     }
 
-    List<OwnedStock> owned = ownedStockDAO.getAll().stream()
-        .filter(os -> os.getPortfolioId().equals(portfolioId))
-        .toList();
+    List<OwnedStock> owned = ownedStockDAO.getAllByPortfolioId(portfolioId);
 
     return new PortfolioSummaryDTO(portfolioId, portfolio.getCurrentBalance(), owned);
   }

@@ -44,6 +44,13 @@ public class OwnedStockFileDAO implements OwnedStockDAO
     uow.getOwnedStocks().remove(getById(id));
   }
 
+  @Override public List<OwnedStock> getAllByPortfolioId(UUID portfolioId)
+  {
+    return uow.getOwnedStocks().stream()
+        .filter(ownedStock -> ownedStock.getPortfolioId().equals(portfolioId))
+        .toList();
+  }
+
   @Override public List<OwnedStock> getAllByStockSymbol(String stockSymbol)
   {
     return uow.getOwnedStocks().stream()

@@ -24,19 +24,25 @@ public class StockBankruptService
 
   public void handleBankruptcy(StockBankruptcyEvent event)
   {
-    // TODO wip implement bankruptcy
     uow.begin();
 
-    List<OwnedStock> ownedStockList = ownedStockDAO.getAllByStockSymbol(event.stockSymbol());
+    try
+    {
+      List<OwnedStock> ownedStockList = ownedStockDAO.getAllByStockSymbol(event.stockSymbol());
 
-    if(ownedStockList.isEmpty())
+      if (ownedStockList.isEmpty())
+      {
+        throw new IllegalArgumentException("No owned stocks found. StockSymbol: " + event.stockSymbol());
+      }
+
+      ownedStockList.forEach(ownedStock -> ownedStock.setNumberOfShares(0));
+
+      uow.commit();
+    }
+    catch (Exception e)
     {
       uow.rollback();
-      logger.log(LogLevel.ERROR, "No owned stocks found. StockSymbol: " + event.stockSymbol());
-      return;
+      logger.log(LogLevel.ERROR, "Bankruptcy handling failed: " + e.getMessage());
     }
-    ownedStockList.forEach(ownedStock -> ownedStock.setNumberOfShares(0));
-
-    uow.commit();
   }
 }

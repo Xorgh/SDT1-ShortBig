@@ -29,40 +29,53 @@ public class StockListenerService
   {
     uow.begin();
 
-    Stock stock = stockDAO.getBySymbol(event.stockSymbol());
+    try
+    {
+      Stock stock = stockDAO.getBySymbol(event.stockSymbol());
 
-    if(stock == null)
+      if (stock == null)
+      {
+        throw new IllegalArgumentException("No such stock found. StockSymbol: " + event.stockSymbol());
+      }
+
+      stock.setCurrentState(event.newState());
+      stockDAO.update(stock);
+
+      uow.commit();
+    }
+    catch (Exception e)
     {
       uow.rollback();
-      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
-      return;
+      logger.log(LogLevel.ERROR, "State change failed: " + e.getMessage());
     }
-
-    stock.setCurrentState(event.newState());
-    stockDAO.update(stock);
-
-    uow.commit();
   }
 
   public void handlePriceChange(StockPriceUpdateEvent event)
   {
     uow.begin();
-    Stock stock = stockDAO.getBySymbol(event.stockSymbol());
-    double newPrice = event.newPrice();
 
-    if(stock == null)
+    try
+    {
+      Stock stock = stockDAO.getBySymbol(event.stockSymbol());
+
+      if (stock == null)
+      {
+        throw new IllegalArgumentException("No such stock found. StockSymbol: " + event.stockSymbol());
+      }
+
+      double newPrice = event.newPrice();
+      stock.setCurrentPrice(newPrice);
+
+      stockDAO.update(stock);
+      savePriceHistory(event);
+
+      uow.commit();
+    }
+    catch (Exception e)
     {
       uow.rollback();
-      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
-      return;
+      logger.log(LogLevel.ERROR, "Price change failed: " + e.getMessage());
     }
-
-    stock.setCurrentPrice(newPrice);
-
-    stockDAO.update(stock);
-    savePriceHistory(event);
-
-    uow.commit();
   }
 
   private void savePriceHistory(StockPriceUpdateEvent event)

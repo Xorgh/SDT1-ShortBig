@@ -31,8 +31,8 @@ public class StockBankruptService
 
     if(ownedStockList.isEmpty())
     {
-      logger.log(LogLevel.ERROR, "No owned stocks found. StockSymbol: " + event.stockSymbol());
       uow.rollback();
+      logger.log(LogLevel.ERROR, "No owned stocks found. StockSymbol: " + event.stockSymbol());
       return;
     }
     ownedStockList.forEach(ownedStock -> ownedStock.setNumberOfShares(0));

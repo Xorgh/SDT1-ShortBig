@@ -61,45 +61,55 @@ public enum StockMarket
   {
     for (LiveStock liveStock : liveStocks)
     {
-      String stockSymbol = liveStock.getSymbol();
-
       StockState oldState = liveStock.getStockState();
       double oldPrice = liveStock.getCurrentPrice();
 
       liveStock.updatePrice();
 
+      String stockSymbol = liveStock.getSymbol();
       double newPrice = liveStock.getCurrentPrice();
       StockState newState = liveStock.getStockState();
 
-
-      // create new price event(DTO)
-      StockPriceUpdateEvent newPriceUpdateEvent = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
-
-      // Compare old and new state, if changed notify listeners.
-      if (!oldState.equals(newState))
-      {
-        StockStateUpdateEvent newStateUpdateEvent = new StockStateUpdateEvent(stockSymbol, oldState, newState);
-
-        // Check for bankruptcy, and fire event
-        if (newState == StockState.BANKRUPT)
-        {
-          StockBankruptcyEvent newBankruptcyEvent = new StockBankruptcyEvent(stockSymbol);
-          onStockBankruptcy.forEach(listener -> listener.accept(newBankruptcyEvent));
-        }
-
-        // Check for StockReset and fire event
-        if (newState == StockState.RESET)
-        {
-          StockResetEvent newResetEvent = new StockResetEvent(stockSymbol);
-          onStockReset.forEach(listener -> listener.accept(newResetEvent));
-        }
-
-        onStockStateChange.forEach(listener -> listener.accept(newStateUpdateEvent));
-      }
-
-      // Notify price listeners
-      onStockPriceChange.forEach(listener -> listener.accept(newPriceUpdateEvent));
-
+      tryFireStateChangeEvents(stockSymbol, oldState, newState);
+      firePriceUpdateEvent(stockSymbol, oldPrice, newPrice);
     }
+  }
+
+  private void tryFireStateChangeEvents(String stockSymbol, StockState oldState, StockState newState)
+  {
+    if (oldState.equals(newState))
+    {
+      return;
+    }
+
+    tryFireBankruptcyEvent(stockSymbol, newState);
+    tryFireResetEvent(stockSymbol, newState);
+
+    StockStateUpdateEvent event = new StockStateUpdateEvent(stockSymbol, oldState, newState);
+    onStockStateChange.forEach(listener -> listener.accept(event));
+  }
+
+  private void tryFireBankruptcyEvent(String stockSymbol, StockState newState)
+  {
+    if (newState == StockState.BANKRUPT)
+    {
+      StockBankruptcyEvent event = new StockBankruptcyEvent(stockSymbol);
+      onStockBankruptcy.forEach(listener -> listener.accept(event));
+    }
+  }
+
+  private void tryFireResetEvent(String stockSymbol, StockState newState)
+  {
+    if (newState == StockState.RESET)
+    {
+      StockResetEvent event = new StockResetEvent(stockSymbol);
+      onStockReset.forEach(listener -> listener.accept(event));
+    }
+  }
+
+  private void firePriceUpdateEvent(String stockSymbol, double oldPrice, double newPrice)
+  {
+    StockPriceUpdateEvent event = new StockPriceUpdateEvent(stockSymbol, oldPrice, newPrice);
+    onStockPriceChange.forEach(listener -> listener.accept(event));
   }
 }

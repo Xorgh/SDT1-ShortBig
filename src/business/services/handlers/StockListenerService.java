@@ -33,8 +33,8 @@ public class StockListenerService
 
     if(stock == null)
     {
-      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
       uow.rollback();
+      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
       return;
     }
 
@@ -52,20 +52,20 @@ public class StockListenerService
 
     if(stock == null)
     {
-      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
       uow.rollback();
+      logger.log(LogLevel.ERROR, "No such stock found. StockSymbol: " + event.stockSymbol());
       return;
     }
 
     stock.setCurrentPrice(newPrice);
 
     stockDAO.update(stock);
-    logStockPriceHistory(event);
+    savePriceHistory(event);
 
     uow.commit();
   }
 
-  private void logStockPriceHistory(StockPriceUpdateEvent event)
+  private void savePriceHistory(StockPriceUpdateEvent event)
   {
     StockPriceHistory priceHistory = new StockPriceHistory(event.stockSymbol(), event.newPrice());
 

@@ -59,20 +59,19 @@ public class BuyStockService
       }
 
       int numberOfShares = request.numberOfShares();
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) + transactionFee;
-      double currentBalance = portfolio.getCurrentBalance();
-      StockState currentStockState = stock.getCurrentState();
 
       // Business rules
       if (numberOfShares <= 0)
         throw new IllegalArgumentException("Number of shares must be positive");
 
-      if (currentStockState == StockState.BANKRUPT)
+      if (stock.getCurrentState() == StockState.BANKRUPT)
       {
         throw new IllegalArgumentException("Stock is bankrupt: " + request.stockSymbol());
       }
 
-      if (currentBalance < totalCost)
+      double totalCost = (stock.getCurrentPrice() * numberOfShares) + transactionFee;
+
+      if (portfolio.getCurrentBalance() < totalCost)
       {
         throw new IllegalArgumentException("Insufficient balance. Required: " + totalCost);
       }

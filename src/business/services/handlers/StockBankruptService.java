@@ -32,12 +32,18 @@ public class StockBankruptService
 
       if (ownedStockList.isEmpty())
       {
-        throw new IllegalArgumentException("No owned stocks found. StockSymbol: " + event.stockSymbol());
+        uow.rollback();
+        logger.log(LogLevel.INFO, "No owned stocks found for bankrupt stock: " + event.stockSymbol());
+        return;
       }
 
-      ownedStockList.forEach(ownedStock -> ownedStock.setNumberOfShares(0));
+      for (OwnedStock ownedStock : ownedStockList)
+      {
+        ownedStockDAO.delete(ownedStock.getId());
+      }
 
       uow.commit();
+      logger.log(LogLevel.INFO, "Bankruptcy handled for stock: " + event.stockSymbol());
     }
     catch (Exception e)
     {

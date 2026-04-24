@@ -60,14 +60,11 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
 
     viewModel.load(null);
 
-    // Auto-refresh all cards every 5 seconds
-    viewModel.startAutoRefresh();
-
-    // Stop auto-refresh when this view is removed from the scene
+    // Dispose of the listener when this view is removed from the scene
     holdingsListView.sceneProperty().addListener((_, _, newScene) -> {
       if (newScene == null)
       {
-        viewModel.stopAutoRefresh();
+        viewModel.dispose();
       }
     });
   }

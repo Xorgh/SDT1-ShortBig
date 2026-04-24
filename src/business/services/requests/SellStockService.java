@@ -1,9 +1,9 @@
 package business.services.requests;
 
+import business.fees.IFeeStrategy;
 import business.requests.SellStockRequest;
 import entities.*;
 import persistence.interfaces.*;
-import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
@@ -15,16 +15,17 @@ public class SellStockService
   private final PortfolioDAO portfolioDAO;
   private final OwnedStockDAO ownedStockDAO;
   private final TransactionDAO transactionDAO;
-  private final double transactionFee = AppConfig.INSTANCE.getTransactionFee();
+  private final IFeeStrategy feeStrategy;
 
   public SellStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
-      TransactionDAO transactionDAO)
+      TransactionDAO transactionDAO, IFeeStrategy feeStrategy)
   {
     this.uow = uow;
     this.stockDAO = stockDAO;
     this.portfolioDAO = portfolioDAO;
     this.ownedStockDAO = ownedStockDAO;
     this.transactionDAO = transactionDAO;
+    this.feeStrategy = feeStrategy;
   }
 
   public void handleSellStockRequest(SellStockRequest request)
@@ -47,7 +48,7 @@ public class SellStockService
       }
 
       int numberOfShares = request.numberOfShares();
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) - transactionFee;
+      double totalCost = (stock.getCurrentPrice() * numberOfShares) - feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
       StockState currentStockState = stock.getCurrentState();
 
       // Business rules

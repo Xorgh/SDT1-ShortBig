@@ -42,7 +42,7 @@ public class SellStockServiceTest
     mockOwnedStockDAO.setShouldReturnOwnedStock(ownedStock);
     mockOwnedStockDAO.setOwnedStocksBySymbol(List.of(ownedStock));
 
-    service = new SellStockService(mockUow, mockStockDAO, mockPortfolioDAO, mockOwnedStockDAO, mockTransactionDAO);
+    service = new SellStockService(mockUow, mockStockDAO, mockPortfolioDAO, mockOwnedStockDAO, mockTransactionDAO, (price, shares) -> 0.05);
   }
 
   @Test void handleSellStockRequest_SingleValidOwnedStock_ShouldUpdateBalance()

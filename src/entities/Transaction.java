@@ -3,7 +3,6 @@ package entities;
 import shared.configuration.AppConfig;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class Transaction
@@ -28,7 +27,7 @@ public class Transaction
     this.type = type;
     this.quantity = quantity;
     this.pricePerShare = pricePerShare;
-    fee = AppConfig.INSTANCE.getTransactionFee();
+    fee = AppConfig.INSTANCE.getTransactionFeePercent();
 
     if (type == TransactionType.BUY) {
       totalAmount = (quantity * pricePerShare) + fee;

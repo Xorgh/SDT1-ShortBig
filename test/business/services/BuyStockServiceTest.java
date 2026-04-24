@@ -37,7 +37,7 @@ public class BuyStockServiceTest
     mockStockDAO.setStockToReturn(new Stock("AAPL", "Apple", 100.0, StockState.STEADY));
     mockPortfolioDAO.setPortfolioToReturn(new Portfolio(PORTFOLIO_ID, 5000));
 
-    service = new BuyStockService(mockUow, mockStockDAO, mockPortfolioDAO, mockOwnedStockDAO, mockTransactionDAO);
+    service = new BuyStockService(mockUow, mockStockDAO, mockPortfolioDAO, mockOwnedStockDAO, mockTransactionDAO, (price, share) -> 0.05);
   }
 
 
@@ -207,7 +207,7 @@ public class BuyStockServiceTest
         mockPortfolioDAO,
         mockOwnedStockDAO,
         mockTransactionDAO,
-        0);
+        (price, share) -> 0.0);
 
     Portfolio portfolio = new Portfolio(PORTFOLIO_ID, 5000);
     mockPortfolioDAO.setPortfolioToReturn(portfolio);
@@ -293,7 +293,7 @@ public class BuyStockServiceTest
     // Arrange
     service = new BuyStockService(
         mockUow, mockStockDAO, mockPortfolioDAO,
-        mockOwnedStockDAO, mockTransactionDAO, -10.0);
+        mockOwnedStockDAO, mockTransactionDAO, (price, shares) -> -10.0);
 
     Portfolio portfolio = new Portfolio(PORTFOLIO_ID, 5000);
     mockPortfolioDAO.setPortfolioToReturn(portfolio);

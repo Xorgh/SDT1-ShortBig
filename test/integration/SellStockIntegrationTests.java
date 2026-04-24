@@ -5,6 +5,7 @@ import business.services.queries.StockQueryService;
 import business.services.queries.TransactionQueryService;
 import business.services.requests.BuyStockService;
 import business.services.requests.SellStockService;
+import business.stockmarket.StockMarket;
 import entities.*;
 import javafx.application.Platform;
 import org.junit.jupiter.api.*;
@@ -13,8 +14,8 @@ import presentation.views.portfolio.PortfolioViewModel;
 import shared.configuration.AppConfig;
 
 import java.io.IOException;
-import java.util.UUID;
 
+import static integration.IntegrationTestUtilities.cleanupTestDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SellStockIntegrationTests
@@ -62,8 +63,8 @@ public class SellStockIntegrationTests
     portfolioQueryService = new PortfolioQueryService(portfolioDAO, ownedStockDAO);
     transactionQueryService = new TransactionQueryService(transactionDAO);
     stockQueryService = new StockQueryService(stockDAO);
-    buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
-    sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, (price, share) -> 0.05);
+    sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, (price, share) -> 0.05);
     cacheInvalidator = uow::begin;
 
     vm = new PortfolioViewModel(portfolioQueryService, transactionQueryService, stockQueryService, buyStockService,
@@ -72,7 +73,13 @@ public class SellStockIntegrationTests
 
   @AfterEach public void cleanup() throws IOException
   {
-    IntegrationTestUtilities.cleanupTestDir(testDirPath);
+    vm.dispose();
+    StockMarket.INSTANCE.onStockPriceChange.clear();
+    StockMarket.INSTANCE.onStockStateChange.clear();
+    StockMarket.INSTANCE.onStockBankruptcy.clear();
+    StockMarket.INSTANCE.onStockReset.clear();
+    StockMarket.INSTANCE.clearLiveStocks();
+    cleanupTestDir(testDirPath);
   }
 
   @Nested class GivenValidInput
@@ -96,7 +103,7 @@ public class SellStockIntegrationTests
       vm.selectedSellSymbolProperty().set("AAPL");
       vm.sellQuantityProperty().set(3);
       vm.sellStock();
-      double expected = before + (3 * 100.0) - AppConfig.INSTANCE.getTransactionFee();
+      double expected = before + (3 * 100.0) - AppConfig.INSTANCE.getTransactionFeePercent();
       assertEquals(expected, vm.cashBalanceProperty().get());
     }
 

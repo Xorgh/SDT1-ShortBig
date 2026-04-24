@@ -5,6 +5,7 @@ import business.services.queries.StockQueryService;
 import business.services.queries.TransactionQueryService;
 import business.services.requests.BuyStockService;
 import business.services.requests.SellStockService;
+import business.stockmarket.StockMarket;
 import entities.Portfolio;
 import entities.Stock;
 import entities.StockState;
@@ -15,10 +16,6 @@ import presentation.views.portfolio.PortfolioViewModel;
 import shared.configuration.AppConfig;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import static integration.IntegrationTestUtilities.cleanupTestDir;
 import static integration.IntegrationTestUtilities.createTestDir;
@@ -44,10 +41,15 @@ public class BuyStockIntegrationTests
   PortfolioViewModel vm;
 
   @BeforeAll static void initToolkit()
-  //      Starts up JavaFX engine
   {
-    Platform.startup(() -> {
-    });
+    try
+    {
+      Platform.startup(() -> {
+      });
+    }
+    catch (IllegalStateException ignored)
+    {
+    } // already started by another test class
   }
 
   @BeforeEach public void setup() throws IOException
@@ -65,8 +67,8 @@ public class BuyStockIntegrationTests
     portfolioQueryService = new PortfolioQueryService(portfolioDAO, ownedStockDAO);
     transactionQueryService = new TransactionQueryService(transactionDAO);
     stockQueryService = new StockQueryService(stockDAO);
-    buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
-    sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    buyStockService = new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, (price, share) -> 0.05);
+    sellStockService = new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, (price, share) -> 0.05);
     cacheInvalidator = uow::begin;
 
     vm = new PortfolioViewModel(portfolioQueryService, transactionQueryService, stockQueryService, buyStockService,
@@ -76,6 +78,12 @@ public class BuyStockIntegrationTests
 
   @AfterEach public void cleanup() throws IOException
   {
+    vm.dispose();
+    StockMarket.INSTANCE.onStockPriceChange.clear();
+    StockMarket.INSTANCE.onStockStateChange.clear();
+    StockMarket.INSTANCE.onStockBankruptcy.clear();
+    StockMarket.INSTANCE.onStockReset.clear();
+    StockMarket.INSTANCE.clearLiveStocks();
     cleanupTestDir(testDirPath);
   }
 
@@ -110,7 +118,7 @@ public class BuyStockIntegrationTests
 
       // Assert
       double expected = balanceBefore - ((2 * stockDAO.getBySymbol("AAPL").getCurrentPrice()
-          + AppConfig.INSTANCE.getTransactionFee()));
+          + AppConfig.INSTANCE.getTransactionFeePercent()));
       assertEquals(expected, vm.cashBalanceProperty().get());
 
     }

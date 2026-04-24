@@ -25,7 +25,8 @@ public enum AppConfig
   private final String dataDirectory;
   private final String testDataDirectory;
   private final int startingBalance;
-  private final double transactionFee;
+  private final double transactionFeePercent;
+  private final double transactionFeeFlat;
   private final int updateFrequencyInMs;
   private final double stockResetValue;
 
@@ -72,8 +73,9 @@ public enum AppConfig
     this.dataDirectory = "data/prd/";
     this.testDataDirectory = "data/test/";
     this.startingBalance = 10000;
-    this.transactionFee = 0.05;
-    if (this.transactionFee < 0)
+    this.transactionFeePercent = 0.05;
+    this.transactionFeeFlat = 10;
+    if (this.transactionFeePercent < 0)
       throw new IllegalStateException("Transaction fee cannot be negative");
 
 
@@ -113,9 +115,9 @@ public enum AppConfig
     return startingBalance;
   }
 
-  public double getTransactionFee()
+  public double getTransactionFeePercent()
   {
-    return transactionFee;
+    return transactionFeePercent;
   }
 
   public int getUpdateFrequencyInMs()
@@ -202,4 +204,6 @@ public enum AppConfig
   {
     return bankruptStateTimeoutTicks;
   }
+
+  public double getTransactionFeeFlat() { return transactionFeeFlat; }
 }

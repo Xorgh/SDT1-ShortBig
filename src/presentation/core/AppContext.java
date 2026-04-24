@@ -1,5 +1,7 @@
 package presentation.core;
 
+import business.fees.IFeeStrategy;
+import business.fees.PercentageFeeStrategy;
 import business.services.GameService;
 import business.services.handlers.StockAlertService;
 import business.services.handlers.StockBankruptService;
@@ -26,6 +28,8 @@ public class AppContext
   private static AppContext instance;
 
   private GameService gameService;
+  private IFeeStrategy feeStrategy;
+
 
   private AppContext()
   {
@@ -49,6 +53,7 @@ public class AppContext
     OwnedStockDAO ownedStockDAO = createOwnedStockDAO(gameUow);
     TransactionDAO transactionDAO = createTransactionDAO(gameUow);
     StockPriceHistoryDAO historyDAO = createStockPriceHistoryDAO(gameUow);
+    feeStrategy = createFeeStrategy();
 
     // Create GameService
     gameService = new GameService(gameUow, stockDAO, portfolioDAO,
@@ -56,6 +61,11 @@ public class AppContext
 
     // Register observers — composition root wires everything
     registerObservers(gameUow, stockDAO, ownedStockDAO, historyDAO);
+  }
+
+  private IFeeStrategy createFeeStrategy()
+  {
+    return new PercentageFeeStrategy();
   }
 
   private void registerObservers(UnitOfWork uow, StockDAO stockDAO,
@@ -119,8 +129,8 @@ public class AppContext
         createPortfolioQueryService(portfolioDAO, ownedStockDAO),
         createTransactionQueryService(transactionDAO),
         createStockQueryService(stockDAO),
-        createBuyStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO),
-        createSellStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO),
+        createBuyStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy),
+        createSellStockService(unitOfWork, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy),
         unitOfWork::begin
     );
   }
@@ -147,15 +157,15 @@ public class AppContext
   }
 
   private BuyStockService createBuyStockService(UnitOfWork uow, StockDAO stockDAO,
-      PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO, TransactionDAO transactionDAO)
+      PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO, TransactionDAO transactionDAO, IFeeStrategy feeStrategy)
   {
-    return new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    return new BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy);
   }
 
   private SellStockService createSellStockService(UnitOfWork uow, StockDAO stockDAO,
-      PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO, TransactionDAO transactionDAO)
+      PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO, TransactionDAO transactionDAO, IFeeStrategy feeStrategy)
   {
-    return new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO);
+    return new SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy);
   }
 
   private TransactionViewModel createTransactionViewModel()

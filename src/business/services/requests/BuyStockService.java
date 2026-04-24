@@ -1,9 +1,9 @@
 package business.services.requests;
 
+import business.fees.IFeeStrategy;
 import business.requests.BuyStockRequest;
 import entities.*;
 import persistence.interfaces.*;
-import shared.configuration.AppConfig;
 import shared.logging.LogLevel;
 import shared.logging.Logger;
 
@@ -15,28 +15,17 @@ public class BuyStockService
   private final PortfolioDAO portfolioDAO;
   private final OwnedStockDAO ownedStockDAO;
   private final TransactionDAO transactionDAO;
-  private final double transactionFee;
+  private final IFeeStrategy feeStrategy;
 
   public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
-      TransactionDAO transactionDAO)
+      TransactionDAO transactionDAO, IFeeStrategy feeStrategy)
   {
     this.uow = uow;
     this.stockDAO = stockDAO;
     this.portfolioDAO = portfolioDAO;
     this.ownedStockDAO = ownedStockDAO;
     this.transactionDAO = transactionDAO;
-    this.transactionFee = AppConfig.INSTANCE.getTransactionFee();
-  }
-
-  public BuyStockService(UnitOfWork uow, StockDAO stockDAO, PortfolioDAO portfolioDAO, OwnedStockDAO ownedStockDAO,
-      TransactionDAO transactionDAO, double transactionFee)
-  {
-    this.uow = uow;
-    this.stockDAO = stockDAO;
-    this.portfolioDAO = portfolioDAO;
-    this.ownedStockDAO = ownedStockDAO;
-    this.transactionDAO = transactionDAO;
-    this.transactionFee = transactionFee;
+    this.feeStrategy = feeStrategy;
   }
 
   public void handleBuyStockRequest(BuyStockRequest request)
@@ -69,7 +58,7 @@ public class BuyStockService
         throw new IllegalArgumentException("Stock is bankrupt: " + request.stockSymbol());
       }
 
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) + transactionFee;
+      double totalCost = (stock.getCurrentPrice() * numberOfShares) + feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
 
       if (portfolio.getCurrentBalance() < totalCost)
       {

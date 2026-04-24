@@ -48,7 +48,8 @@ public class SellStockService
       }
 
       int numberOfShares = request.numberOfShares();
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) - feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
+      double fee = feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
+      double totalProceeds = (stock.getCurrentPrice() * numberOfShares) - fee;
       StockState currentStockState = stock.getCurrentState();
 
       // Business rules
@@ -85,13 +86,13 @@ public class SellStockService
       }
 
       // Apply balance change to portfolio object
-      portfolio.setCurrentBalance(portfolio.getCurrentBalance() + totalCost);
+      portfolio.setCurrentBalance(portfolio.getCurrentBalance() + totalProceeds);
       portfolioDAO.update(portfolio);
 
       // Create a transaction
       transactionDAO.create(
           new Transaction(request.portfolioId(), request.stockSymbol(), TransactionType.SELL, numberOfShares,
-              stock.getCurrentPrice()));
+              stock.getCurrentPrice(), fee));
 
       uow.commit();
       logger.log(LogLevel.INFO, "Sold " + numberOfShares + " of " + request.stockSymbol());

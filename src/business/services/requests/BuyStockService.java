@@ -58,7 +58,8 @@ public class BuyStockService
         throw new IllegalArgumentException("Stock is bankrupt: " + request.stockSymbol());
       }
 
-      double totalCost = (stock.getCurrentPrice() * numberOfShares) + feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
+      double fee = feeStrategy.calculate(stock.getCurrentPrice(), numberOfShares);
+      double totalCost = (stock.getCurrentPrice() * numberOfShares) + fee;
 
       if (portfolio.getCurrentBalance() < totalCost)
       {
@@ -86,7 +87,7 @@ public class BuyStockService
       // Create a transaction
       transactionDAO.create(
           new Transaction(request.portfolioId(), request.stockSymbol(), TransactionType.BUY, numberOfShares,
-              stock.getCurrentPrice()));
+              stock.getCurrentPrice(), fee));
 
       uow.commit();
       logger.log(LogLevel.INFO, "Bought " + numberOfShares + " of " + request.stockSymbol());

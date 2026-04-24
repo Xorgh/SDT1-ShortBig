@@ -19,7 +19,7 @@ public class Transaction
 
 //  new object
   public Transaction(UUID portfolioId, String stockSymbol, TransactionType type, int quantity,
-      double pricePerShare)
+      double pricePerShare, double fee)
   {
     id = UUID.randomUUID();
     this.portfolioId = portfolioId;
@@ -27,7 +27,7 @@ public class Transaction
     this.type = type;
     this.quantity = quantity;
     this.pricePerShare = pricePerShare;
-    fee = AppConfig.INSTANCE.getTransactionFeePercent();
+    this.fee = fee;
 
     if (type == TransactionType.BUY) {
       totalAmount = (quantity * pricePerShare) + fee;

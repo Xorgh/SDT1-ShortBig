@@ -44,7 +44,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_SingleBuyTransaction_ShouldReturnOneEntry()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -56,7 +56,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_SingleBuyTransaction_ShouldReturnNegativeBalance()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -68,7 +68,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_SingleSellTransaction_ShouldReturnPositiveBalance()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -81,9 +81,9 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_MultipleBuyTransactions_ShouldAccumulateNegativeBalance()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -95,9 +95,9 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_MultipleBuyTransactions_ShouldReturnCorrectCount()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -109,9 +109,9 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_MixedBuyAndSell_ShouldCalculateCorrectRunningBalance()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100),
-        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.SELL, 1, 100, 0.05),
+        new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -143,9 +143,9 @@ public class TransactionQueryServiceTest
   {
     // Arrange
     UUID otherPortfolioId = UUID.randomUUID();
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(otherPortfolioId, "AAPL", TransactionType.BUY, 1, 100),
-        new Transaction(otherPortfolioId, "MSFT", TransactionType.SELL, 1, 50)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(otherPortfolioId, "AAPL", TransactionType.BUY, 1, 100, 0.05),
+        new Transaction(otherPortfolioId, "MSFT", TransactionType.SELL, 1, 50, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -164,7 +164,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_SingleBuy_ShouldHaveCorrectTransactionType()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -176,7 +176,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_SingleBuy_ShouldHaveCorrectAmount()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 0);
@@ -188,7 +188,7 @@ public class TransactionQueryServiceTest
   @Test void getBalanceHistory_WithStartingBalance_ShouldOffsetAllResults()
   {
     // Arrange
-    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100)));
+    mockTransactionDAO.setAllTransactions(List.of(new Transaction(PORTFOLIO_ID, "AAPL", TransactionType.BUY, 1, 100, 0.05)));
 
     // Act
     List<BalanceHistoryDTO> results = service.getBalanceHistory(PORTFOLIO_ID, 10000);

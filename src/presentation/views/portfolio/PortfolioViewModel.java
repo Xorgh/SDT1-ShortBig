@@ -13,8 +13,7 @@ import dtos.PortfolioSummaryDTO;
 import dtos.StockDTO;
 import entities.OwnedStock;
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.NumberAxis;
@@ -49,6 +48,13 @@ public class PortfolioViewModel
   // Combo box data
   private final ObservableList<String> allStockSymbols = FXCollections.observableArrayList();
   private final ObservableList<String> ownedStockSymbols = FXCollections.observableArrayList();
+  private final StringProperty selectedBuySymbol = new SimpleStringProperty();
+  private final IntegerProperty buyQuantity = new SimpleIntegerProperty(1);
+  private final StringProperty selectedSellSymbol = new SimpleStringProperty();
+  private final IntegerProperty sellQuantity = new SimpleIntegerProperty(1);
+
+
+  // Bound properties
 
   private UUID currentPortfolioId;
   private List<BalanceHistoryDTO> currentDataPoints = List.of();
@@ -119,20 +125,24 @@ public class PortfolioViewModel
     ownedStockSymbols.setAll(summary.ownedStocks().stream().map(OwnedStock::getStockSymbol).toList());
   }
 
-  public void buyStock(String symbol, int shares)
+  public void buyStock()
   {
-    if (currentPortfolioId == null || symbol == null)
-      return;
-    buyStockService.handleBuyStockRequest(new BuyStockRequest(symbol, shares, currentPortfolioId));
-    load(currentPortfolioId);   // refresh everything
+    String symbol = selectedBuySymbol.get();
+    int shares = buyQuantity.get();
+    if (currentPortfolioId == null || symbol == null) return;
+    buyStockService.handleBuyStockRequest(
+        new BuyStockRequest(symbol, shares, currentPortfolioId));
+    load(currentPortfolioId);
   }
 
-  public void sellStock(String symbol, int shares)
+  public void sellStock()
   {
-    if (currentPortfolioId == null || symbol == null)
-      return;
-    sellStockService.handleSellStockRequest(new SellStockRequest(symbol, shares, currentPortfolioId));
-    load(currentPortfolioId);   // refresh everything
+    String symbol = selectedSellSymbol.get();
+    int shares = sellQuantity.get();
+    if (currentPortfolioId == null || symbol == null) return;
+    sellStockService.handleSellStockRequest(
+        new SellStockRequest(symbol, shares, currentPortfolioId));
+    load(currentPortfolioId);
   }
 
   // Getters for new properties
@@ -272,4 +282,9 @@ public class PortfolioViewModel
   {
     stockQueryService.removePriceChangeListener(priceListener);
   }
+
+  public StringProperty selectedBuySymbolProperty() { return selectedBuySymbol; }
+  public IntegerProperty buyQuantityProperty() { return buyQuantity; }
+  public StringProperty selectedSellSymbolProperty() { return selectedSellSymbol; }
+  public IntegerProperty sellQuantityProperty() { return sellQuantity; }
 }

@@ -82,8 +82,7 @@ public class BuyStockIntegrationTests
   @Nested class GivenValidInput
   {
 
-    @BeforeEach
-    public void setupPortfolio()
+    @BeforeEach public void setupPortfolio()
     {
       uow.begin();
 
@@ -105,10 +104,13 @@ public class BuyStockIntegrationTests
       double balanceBefore = vm.cashBalanceProperty().get();
 
       // Act
-      vm.buyStock("AAPL", 2);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(2);
+      vm.buyStock();
 
       // Assert
-      double expected = balanceBefore - ( (2 * stockDAO.getBySymbol("AAPL").getCurrentPrice() + AppConfig.INSTANCE.getTransactionFee()));
+      double expected = balanceBefore - ((2 * stockDAO.getBySymbol("AAPL").getCurrentPrice()
+          + AppConfig.INSTANCE.getTransactionFee()));
       assertEquals(expected, vm.cashBalanceProperty().get());
 
     }
@@ -116,25 +118,31 @@ public class BuyStockIntegrationTests
     @Test void buyStock_addsToHoldings()
     {
       // Act
-      vm.buyStock("AAPL", 3);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(3);
+      vm.buyStock();
 
       // Assert
-      assertTrue(vm.getHoldings().stream().anyMatch(h->h.symbol().equals("AAPL") && h.shares() == 3));
+      assertTrue(vm.getHoldings().stream().anyMatch(h -> h.symbol().equals("AAPL") && h.shares() == 3));
     }
 
     @Test void buyStock_ownedStockSymbolsUpdates()
     {
       // Act
-      vm.buyStock("AAPL", 3);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(3);
+      vm.buyStock();
 
       // Assert
-      assertTrue(vm.getOwnedStockSymbols().stream().anyMatch(s->s.equals("AAPL")));
+      assertTrue(vm.getOwnedStockSymbols().stream().anyMatch(s -> s.equals("AAPL")));
     }
 
     @Test void buyStock_transactionIsRecorded()
     {
       // Act
-      vm.buyStock("AAPL", 3);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(3);
+      vm.buyStock();
 
       // Assert
       var transactions = transactionDAO.getAll();
@@ -146,17 +154,22 @@ public class BuyStockIntegrationTests
     @Test void buyStock_addsToExistingHoldings()
     {
       // Arrange
-      vm.buyStock("AAPL", 3);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(3);
+      vm.buyStock();
       int numberOfSharesBefore = vm.getHoldings().get(0).shares();
 
       // Act
-      vm.buyStock("AAPL", 2);
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(2);
+      vm.buyStock();
       int numberOfSharesAfter = vm.getHoldings().get(0).shares();
 
       // Assert
       assertEquals(5, numberOfSharesAfter);
     }
   }
+
   @Nested class GivenInValidInput
   {
 
@@ -173,24 +186,32 @@ public class BuyStockIntegrationTests
 
     @Test void buyStock_insufficientBalance_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.buyStock("AAPL", 1));
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(1);
+      assertThrows(IllegalArgumentException.class, () -> vm.buyStock());
     }
 
     @Test void buyStock_insufficientBalance_balanceUnchanged()
     {
       double before = vm.cashBalanceProperty().get();
-      assertThrows(IllegalArgumentException.class, () -> vm.buyStock("AAPL", 1));
+      vm.selectedBuySymbolProperty().set("AAPL");
+      vm.buyQuantityProperty().set(1);
+      assertThrows(IllegalArgumentException.class, () -> vm.buyStock());
       assertEquals(before, vm.cashBalanceProperty().get());
     }
 
     @Test void buyStock_bankruptStock_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.buyStock("DEAD", 1));
+      vm.selectedBuySymbolProperty().set("DEAD");
+      vm.buyQuantityProperty().set(1);
+      assertThrows(IllegalArgumentException.class, () -> vm.buyStock());
     }
 
     @Test void buyStock_nonExistentStock_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.buyStock("FAKE", 1));
+      vm.selectedBuySymbolProperty().set("FAKE");
+      vm.buyQuantityProperty().set(1);
+      assertThrows(IllegalArgumentException.class, () -> vm.buyStock());
     }
   }
 }

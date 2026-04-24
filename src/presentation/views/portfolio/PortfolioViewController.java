@@ -48,6 +48,11 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
     buySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
     sellSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
 
+    buyStockCombo.valueProperty().bindBidirectional(viewModel.selectedBuySymbolProperty());
+    sellStockCombo.valueProperty().bindBidirectional(viewModel.selectedSellSymbolProperty());
+    buySpinner.getValueFactory().valueProperty().addListener((_, _, v) -> viewModel.buyQuantityProperty().set(v));
+    sellSpinner.getValueFactory().valueProperty().addListener((_, _, v) -> viewModel.sellQuantityProperty().set(v));
+
     // Combo boxes
     buyStockCombo.setItems(viewModel.getAllStockSymbols());
     sellStockCombo.setItems(viewModel.getOwnedStockSymbols());
@@ -72,13 +77,12 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
   @FXML
   private void onBuy()
   {
-    String symbol = buyStockCombo.getValue();
-    if (symbol == null) return;
     try
     {
-      viewModel.buyStock(symbol, buySpinner.getValue());
+      viewModel.buyStock();
       ViewManager.getNotificationManager()
-          .notify("Bought " + buySpinner.getValue() + " " + symbol, NotificationType.SUCCESS);
+          .notify("Bought " + viewModel.buyQuantityProperty().get() + " "
+              + viewModel.selectedBuySymbolProperty().get(), NotificationType.SUCCESS);
     }
     catch (Exception e)
     {
@@ -94,9 +98,9 @@ public class PortfolioViewController implements ArgumentReceiver<UUID>
     if (symbol == null) return;
     try
     {
-      viewModel.sellStock(symbol, sellSpinner.getValue());
+      viewModel.sellStock();
       ViewManager.getNotificationManager()
-          .notify("Sold " + sellSpinner.getValue() + " " + symbol, NotificationType.SUCCESS);
+          .notify("Sold " + sellSpinner.getValue() + " " + viewModel.selectedSellSymbolProperty().get(), NotificationType.SUCCESS);
     }
     catch (Exception e)
     {

@@ -1,4 +1,3 @@
-
 package integration;
 
 import business.services.queries.PortfolioQueryService;
@@ -39,8 +38,14 @@ public class SellStockIntegrationTests
 
   @BeforeAll static void initToolkit()
   {
-    try { Platform.startup(() -> {}); }
-    catch (IllegalStateException ignored) {} // already started by BuyStockIntegrationTests
+    try
+    {
+      Platform.startup(() -> {
+      });
+    }
+    catch (IllegalStateException ignored)
+    {
+    } // already started by BuyStockIntegrationTests
   }
 
   @BeforeEach public void setup() throws IOException
@@ -88,32 +93,42 @@ public class SellStockIntegrationTests
     @Test void sellStock_increasesBalance()
     {
       double before = vm.cashBalanceProperty().get();
-      vm.sellStock("AAPL", 3);
+      vm.selectedSellSymbolProperty().set("AAPL");
+      vm.sellQuantityProperty().set(3);
+      vm.sellStock();
       double expected = before + (3 * 100.0) - AppConfig.INSTANCE.getTransactionFee();
       assertEquals(expected, vm.cashBalanceProperty().get());
     }
 
     @Test void sellStock_decreasesHoldings()
     {
-      vm.sellStock("AAPL", 3);
+      vm.selectedSellSymbolProperty().set("AAPL");
+      vm.sellQuantityProperty().set(3);
+      vm.sellStock();
       assertTrue(vm.getHoldings().stream().anyMatch(h -> h.symbol().equals("AAPL") && h.shares() == 7));
     }
 
     @Test void sellStock_allShares_removesFromHoldings()
     {
-      vm.sellStock("AAPL", 10);
+      vm.selectedSellSymbolProperty().set("AAPL");
+      vm.sellQuantityProperty().set(10);
+      vm.sellStock();
       assertTrue(vm.getHoldings().stream().noneMatch(h -> h.symbol().equals("AAPL")));
     }
 
     @Test void sellStock_allShares_removesFromOwnedSymbols()
     {
-      vm.sellStock("AAPL", 10);
+      vm.selectedSellSymbolProperty().set("AAPL");
+      vm.sellQuantityProperty().set(10);
+      vm.sellStock();
       assertFalse(vm.getOwnedStockSymbols().contains("AAPL"));
     }
 
     @Test void sellStock_transactionIsRecorded()
     {
-      vm.sellStock("AAPL", 4);
+      vm.selectedSellSymbolProperty().set("AAPL");
+      vm.sellQuantityProperty().set(4);
+      vm.sellStock();
       var transactions = transactionDAO.getAll();
       assertEquals(1, transactions.size());
       assertEquals("AAPL", transactions.get(0).getStockSymbol());
@@ -139,22 +154,38 @@ public class SellStockIntegrationTests
 
     @Test void sellStock_moreThanOwned_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.sellStock("AAPL", 10));
+      assertThrows(IllegalArgumentException.class, () -> {
+        vm.selectedSellSymbolProperty().set("AAPL");
+        vm.sellQuantityProperty().set(10);
+        vm.sellStock();
+      });
     }
 
     @Test void sellStock_stockNotOwned_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.sellStock("GOOG", 1));
+      assertThrows(IllegalArgumentException.class, () -> {
+        vm.selectedSellSymbolProperty().set("GOOG");
+        vm.sellQuantityProperty().set(10);
+        vm.sellStock();
+      });
     }
 
     @Test void sellStock_bankruptStock_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.sellStock("DEAD", 1));
+      assertThrows(IllegalArgumentException.class, () -> {
+        vm.selectedSellSymbolProperty().set("DEAD");
+        vm.sellQuantityProperty().set(1);
+        vm.sellStock();
+      });
     }
 
     @Test void sellStock_nonExistentStock_throws()
     {
-      assertThrows(IllegalArgumentException.class, () -> vm.sellStock("FAKE", 1));
+      assertThrows(IllegalArgumentException.class, () -> {
+        vm.selectedSellSymbolProperty().set("FAKE");
+        vm.sellQuantityProperty().set(1);
+        vm.sellStock();
+      });
     }
   }
 }

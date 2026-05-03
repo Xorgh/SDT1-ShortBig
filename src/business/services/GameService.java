@@ -144,7 +144,7 @@ public class GameService
     try
     {
 
-      stockDAO.create(new Stock("AAPL", "Apple", 10, StockState.STEADY));
+      stockDAO.create(new Stock("AAPL", "Apple", 20000, StockState.STEADY));
       stockDAO.create(new Stock("GOOG", "Google", 0, StockState.STEADY));
       stockDAO.create(new Stock("MSFT", "Microsoft", 10, StockState.GROWING));
       stockDAO.create(new Stock("NVDA", "Nvidia", 10, StockState.DECLINING));

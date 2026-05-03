@@ -24,6 +24,8 @@ public enum AppConfig
   // General configuration
   private final String dataDirectory;
   private final String testDataDirectory;
+  private final String logFileDirectory;
+  private final String minimumFileLogLevel;
   private final int startingBalance;
   private final double transactionFeePercent;
   private final double transactionFeeFlat;
@@ -67,11 +69,23 @@ public enum AppConfig
     return testDataDirectory;
   }
 
+  public String getLogFileDirectory()
+  {
+    return logFileDirectory;
+  }
+
+  public String getMinimumFileLogLevel()
+  {
+    return minimumFileLogLevel;
+  }
+
   AppConfig()
   {
     // General configuration
     this.dataDirectory = "data/prd/";
     this.testDataDirectory = "data/test/";
+    this.logFileDirectory = "data/logs/";
+    this.minimumFileLogLevel = "INFO";
     this.startingBalance = 10000;
     this.transactionFeePercent = 0.05;
     this.transactionFeeFlat = 10;

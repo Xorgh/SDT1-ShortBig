@@ -3,11 +3,15 @@ import entities.*;
 import persistence.fileimplementation.*;
 import persistence.interfaces.*;
 import shared.configuration.AppConfig;
+import shared.logging.FileLogOutputAdapter;
+import shared.logging.Logger;
 
 public class RunApp
 {
   public static void main(String[] args)
   {
+    // Switch logger to file output
+    Logger.getInstance().setOutput(new FileLogOutputAdapter());
 
     FileUnitOfWork uow = new FileUnitOfWork(AppConfig.INSTANCE.getTestDataDirectory());
 

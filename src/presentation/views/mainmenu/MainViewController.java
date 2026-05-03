@@ -8,8 +8,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import presentation.core.ViewManager;
 import presentation.core.notification.AlertNotificationManager;
+import presentation.core.notification.CustomAlertBoxAdapter;
 import presentation.core.notification.NotificationType;
 import presentation.core.notification.StatusBarNotificationManager;
+import provided.CustomAlertBox;
 
 public class MainViewController
 {
@@ -33,7 +35,10 @@ public class MainViewController
   @FXML public void initialize()
   {
     ViewManager.setNotificationManager(new StatusBarNotificationManager(statusBar, statusText));
-    ViewManager.setAlertNotificationManager(new AlertNotificationManager());
+//    ViewManager.setAlertNotificationManager(new AlertNotificationManager());
+
+    // Testing CustomAlertBox
+    ViewManager.setAlertNotificationManager(new CustomAlertBoxAdapter(new CustomAlertBox()));
 
     buildSettingsMenu();
     currentTab = tabMarket;

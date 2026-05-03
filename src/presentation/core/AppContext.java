@@ -22,6 +22,8 @@ import presentation.views.portfolio.PortfolioViewModel;
 import presentation.views.stockmarket.MarketViewModel;
 import presentation.views.transactions.TransactionViewModel;
 import shared.configuration.AppConfig;
+import shared.logging.FileLogOutputAdapter;
+import shared.logging.Logger;
 
 public class AppContext
 {
@@ -47,6 +49,9 @@ public class AppContext
 
   private void initialize()
   {
+    // Switch logger to file output
+    Logger.getInstance().setOutput(new FileLogOutputAdapter());
+
     FileUnitOfWork gameUow = createFileUnitOfWork();
     StockDAO stockDAO = createStockDAO(gameUow);
     PortfolioDAO portfolioDAO = createPortfolioDAO(gameUow);

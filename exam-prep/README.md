@@ -11,9 +11,12 @@ Use Codex with prompts like:
 3. "Quiz me on the stock market simulation design, one question at a time."
 4. "Turn my weak areas into a cram sheet in `exam-prep/weak-spots.md`."
 5. "Compare the requirements with the current implementation and explain gaps without changing code."
+6. "Pick question 4 from `eksamensspørgsmål.md` and prepare a 15-minute answer outline with file references."
+7. "Run a mock oral exam on question 6 and challenge me with follow-up questions."
 
 ## Useful source areas in this repo
 
+- `exam-prep/eksamensspørgsmål.md`
 - `documentation/Requirements.md`
 - `documentation/session01/`
 - `documentation/session02/`
@@ -25,6 +28,9 @@ Use Codex with prompts like:
 ## Suggested artifacts
 
 - `topic-map.md`
+- `question-map.md`
+- `presentation-template.md`
+- `answer-outline-question-1.md`
 - `flashcards.md`
 - `oral-exam-questions.md`
 - `weak-spots.md`

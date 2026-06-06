@@ -1,4 +1,3 @@
-```markdown
 # SDT Eksamensspørgsmål
 
 Mød venligst op til Teams-mødet 30 minutter tidligere end din planlagte tid i tilfælde af aflysninger.
@@ -70,4 +69,3 @@ b) Vis hvordan du har implementeret mønstret, og hvor/hvordan det er brugt
 ## 8. Strategy Design Mønster
 a) Forklar mønstret, herunder formål og det generelle UML-diagram  
 b) Vis hvordan du har implementeret mønstret, og hvor/hvordan det er brugt
-```

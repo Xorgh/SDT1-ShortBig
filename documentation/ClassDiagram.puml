@@ -55,7 +55,8 @@ package entities {
     - totalAmount: double
     - fee: double
     - timestamp: LocalDateTime
-    + Transaction(portfolioId, stockSymbol, type, quantity, pricePerShare)
+    + Transaction(portfolioId, stockSymbol, type, quantity, pricePerShare, fee)
+    + Transaction(id, portfolioId, stockSymbol, type, quantity, pricePerShare, totalAmount, fee, timestamp)
   }
 
   class StockPriceHistory {
@@ -324,6 +325,11 @@ package business.stockmarket.simulation {
     + getNextState(currentState: LiveStockState, ticks: int): LiveStockState
   }
 
+  class StockStateMapper {
+    + {static} toStockState(liveState: LiveStockState): StockState
+    + {static} toLiveStockState(stockState: StockState): LiveStockState
+  }
+
   class SteadyState implements LiveStockState
   class GrowingState implements LiveStockState
   class DecliningState implements LiveStockState
@@ -332,6 +338,9 @@ package business.stockmarket.simulation {
 
   LiveStock *-- LiveStockState : currentState
   LiveStock *-- TransitionManager
+  LiveStock ..> StockStateMapper : maps state
+  StockStateMapper ..> LiveStockState
+  StockStateMapper ..> StockState
 }
 
 
@@ -444,6 +453,28 @@ package business.services.queries {
 
 
 ' ========================================================
+' PACKAGE: business.fees
+' ========================================================
+package business.fees {
+
+  interface IFeeStrategy {
+    + calculate(pricePerShare: double, numberOfShares: int): double
+  }
+
+  class FlatFeeStrategy {
+    + calculate(pricePerShare: double, numberOfShares: int): double
+  }
+
+  class PercentageFeeStrategy {
+    + calculate(pricePerShare: double, numberOfShares: int): double
+  }
+
+  FlatFeeStrategy ..|> IFeeStrategy
+  PercentageFeeStrategy ..|> IFeeStrategy
+}
+
+
+' ========================================================
 ' PACKAGE: business.services.requests
 ' ========================================================
 package business.services.requests {
@@ -454,7 +485,8 @@ package business.services.requests {
     - portfolioDAO: PortfolioDAO
     - ownedStockDAO: OwnedStockDAO
     - transactionDAO: TransactionDAO
-    + BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO)
+    - feeStrategy: IFeeStrategy
+    + BuyStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy)
     + handleBuyStockRequest(request: BuyStockRequest): void
   }
 
@@ -464,9 +496,13 @@ package business.services.requests {
     - portfolioDAO: PortfolioDAO
     - ownedStockDAO: OwnedStockDAO
     - transactionDAO: TransactionDAO
-    + SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO)
+    - feeStrategy: IFeeStrategy
+    + SellStockService(uow, stockDAO, portfolioDAO, ownedStockDAO, transactionDAO, feeStrategy)
     + handleSellStockRequest(request: SellStockRequest): void
   }
+
+  BuyStockService --> IFeeStrategy
+  SellStockService --> IFeeStrategy
 }
 
 
@@ -476,6 +512,7 @@ package business.services.requests {
 package presentation.core {
 
   class AppContext <<singleton>> {
+    - feeStrategy: IFeeStrategy
     + getInstance(): AppContext
     + getGameService(): GameService
     + getMarketViewModel(): MarketViewModel
@@ -532,8 +569,40 @@ package presentation.core.notification {
     + notify(message, type): void
   }
 
+  class CustomAlertBoxAdapter {
+    - adaptee: CustomAlertBox
+    + CustomAlertBoxAdapter(adaptee: CustomAlertBox)
+    + notify(message: String, type: NotificationType): void
+  }
+
   StatusBarNotificationManager ..|> NotificationManager
   AlertNotificationManager ..|> NotificationManager
+  CustomAlertBoxAdapter ..|> NotificationManager
+}
+
+
+' ========================================================
+' PACKAGE: provided
+' ========================================================
+package provided {
+
+  class CustomAlertBox {
+    + showAlert(message: String, title: String, type: AlertType): void
+  }
+
+  enum AlertType {
+    INFO
+    WARNING
+    ERROR
+  }
+
+  class FileLogOutputter {
+    + logInfo(message: String): void
+    + logWarning(message: String): void
+    + logError(message: String): void
+  }
+
+  CustomAlertBox --> AlertType
 }
 
 
@@ -633,6 +702,11 @@ package presentation.views.portfolio {
     + state: StockState
   }
 
+  class PortfolioHoldingCell {
+    + PortfolioHoldingCell()
+    # updateItem(row: PortfolioHoldingRow, empty: boolean): void
+  }
+
   PortfolioViewController ..|> ArgumentReceiver
   PortfolioViewController *-- PortfolioViewModel
   PortfolioViewModel *-- PortfolioQueryService
@@ -640,6 +714,8 @@ package presentation.views.portfolio {
   PortfolioViewModel *-- StockQueryService
   PortfolioViewModel *-- BuyStockService
   PortfolioViewModel *-- SellStockService
+  PortfolioHoldingCell --|> "ListCell<PortfolioHoldingRow>"
+  PortfolioHoldingCell ..> PortfolioHoldingRow
 }
 
 
@@ -663,15 +739,27 @@ package presentation.views.transactions {
 
 
 ' ========================================================
-' PACKAGE: shared
+' PACKAGE: shared.logging
 ' ========================================================
-package shared {
+package shared.logging {
 
   class Logger <<singleton>> {
     - {static} instance: Logger
     - output: LogOutput
     + {static} getInstance(): Logger
     + setOutput(output: LogOutput): void
+    + log(logLevel: LogLevel, message: String): void
+  }
+
+  class ConsoleLogOutput {
+    + log(logLevel: LogLevel, message: String): void
+  }
+
+  class FileLogOutputAdapter {
+    - adaptee: FileLogOutputter
+    - logFilePath: String
+    - minimumLogLevel: String
+    + FileLogOutputAdapter()
     + log(logLevel: LogLevel, message: String): void
   }
 
@@ -686,21 +774,43 @@ package shared {
     ERROR
   }
 
+  Logger *-- LogOutput
+  Logger --> LogLevel
+  ConsoleLogOutput ..|> LogOutput
+  FileLogOutputAdapter ..|> LogOutput
+}
+
+
+' ========================================================
+' PACKAGE: shared.configuration
+' ========================================================
+package shared.configuration {
+
   enum AppConfig <<singleton>> {
     INSTANCE
+    - dataDirectory: String
+    - testDataDirectory: String
+    - logFileDirectory: String
+    - minimumFileLogLevel: String
     - startingBalance: int
-    - transactionFee: double
+    - transactionFeePercent: double
+    - transactionFeeFlat: double
     - updateFrequencyInMs: int
     - stockResetValue: double
     - bankruptStateTimeoutTicks: int
+    - stateTransitionIncrementPerTick: double
+    - maxConsecutiveTicksBeforeForceTransition: int
+    + getDataDirectory(): String
+    + getTestDataDirectory(): String
+    + getLogFileDirectory(): String
+    + getMinimumFileLogLevel(): String
     + getStartingBalance(): int
-    + getTransactionFee(): double
+    + getTransactionFeePercent(): double
+    + getTransactionFeeFlat(): double
     + getUpdateFrequencyInMs(): int
     + getStockResetValue(): double
+    + getBankruptStateTimeoutTicks(): int
   }
-
-  Logger *-- LogOutput
-  Logger --> LogLevel
 }
 
 ' ========================================================
@@ -709,6 +819,8 @@ package shared {
 
 ' AppContext wires everything
 AppContext --> GameService : creates
+AppContext ..> PercentageFeeStrategy : creates default strategy
+AppContext ..> FileLogOutputAdapter : creates
 AppContext ..> MarketViewModel : creates
 AppContext ..> PortfolioViewModel : creates
 AppContext ..> TransactionViewModel : creates
@@ -727,5 +839,16 @@ StockAlertService ..> StockBankruptcyEvent : handles
 StockAlertService ..> StockResetEvent : handles
 StockResetService ..> StockResetEvent : handles
 
-@enduml
+' Strategy pattern — buy/sell services calculate fees through an interface
+BuyStockService ..> IFeeStrategy : calculates fee
+SellStockService ..> IFeeStrategy : calculates fee
+FlatFeeStrategy ..> AppConfig : reads flat fee
+PercentageFeeStrategy ..> AppConfig : reads percent fee
 
+' Adapter pattern — project interfaces wrap provided components
+FileLogOutputAdapter o-- FileLogOutputter : adaptee
+FileLogOutputAdapter ..> AppConfig : reads log settings
+CustomAlertBoxAdapter o-- CustomAlertBox : adaptee
+MainViewController ..> CustomAlertBoxAdapter : creates
+
+@enduml

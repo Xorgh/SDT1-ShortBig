@@ -11,8 +11,10 @@ This repository is often used for exam preparation and study support in addition
 ## Reading priorities
 
 - Prioritize `documentation/` before `src/` when the user is studying concepts, assignments, architecture, or delivery requirements.
+- Treat `exam-prep/eksamensspørgsmål.md` as a primary source for oral-exam preparation, question selection, and answer planning.
 - Use `test/` to explain expected behavior and examples when helpful.
 - Only dive deeply into `src/` when the study question depends on implementation details.
+- When preparing an answer to a specific exam question, map it to the most relevant files in `documentation/`, `src/`, and `test/`.
 
 ## Response style for study sessions
 
@@ -25,3 +27,4 @@ This repository is often used for exam preparation and study support in addition
 
 - Treat `exam-prep/` as the place for study artifacts, prompts, summaries, and revision notes.
 - When creating new exam-prep material, write it under `exam-prep/` unless the user asks for a different location.
+- Reuse `exam-prep/eksamensspørgsmål.md` as the canonical list of exam topics unless the user provides a newer source.

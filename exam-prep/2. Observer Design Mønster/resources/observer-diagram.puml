@@ -1,0 +1,83 @@
+@startuml Question2ObserverDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title Observer Design Mønster i ShortBig
+
+class AppContext
+
+package "Subject" {
+  class StockMarket {
+    + onStockPriceChange : List<Consumer<StockPriceUpdateEvent>>
+    + onStockStateChange : List<Consumer<StockStateUpdateEvent>>
+    + onStockBankruptcy : List<Consumer<StockBankruptcyEvent>>
+    + onStockReset : List<Consumer<StockResetEvent>>
+    --
+    + updateAllLiveStocks()
+  }
+}
+
+package "Events" {
+  class StockPriceUpdateEvent
+  class StockStateUpdateEvent
+  class StockBankruptcyEvent
+  class StockResetEvent
+}
+
+package "Observers" {
+  class StockListenerService {
+    + handlePriceChange(event)
+    + handleStateChange(event)
+  }
+
+  class StockBankruptService {
+    + handleBankruptcy(event)
+  }
+
+  class StockResetService {
+    + handleStockReset(event)
+  }
+
+  class StockAlertService {
+    + handleBankruptcyAlert(event)
+    + handleStockResetAlert(event)
+  }
+}
+
+AppContext ..> StockMarket : registrerer observers
+AppContext ..> StockListenerService : opretter
+AppContext ..> StockBankruptService : opretter
+AppContext ..> StockResetService : opretter
+AppContext ..> StockAlertService : opretter
+
+StockMarket ..> StockPriceUpdateEvent : udsender
+StockMarket ..> StockStateUpdateEvent : udsender
+StockMarket ..> StockBankruptcyEvent : udsender
+StockMarket ..> StockResetEvent : udsender
+
+StockListenerService ..> StockPriceUpdateEvent : observerer
+StockListenerService ..> StockStateUpdateEvent : observerer
+StockBankruptService ..> StockBankruptcyEvent : observerer
+StockResetService ..> StockResetEvent : observerer
+StockAlertService ..> StockBankruptcyEvent : observerer
+StockAlertService ..> StockResetEvent : observerer
+
+note top of StockMarket
+  Subject i projektet.
+  Kender kun sine lister af listeners
+  og ikke de konkrete services.
+end note
+
+note bottom of AppContext
+  Composition root:
+  wiring sker her, ikke i Subject.
+end note
+
+legend bottom
+  Stiplet pil = registrering eller event-afhængighed
+endlegend
+
+@enduml

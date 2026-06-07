@@ -1,0 +1,65 @@
+@startuml Question1PackageDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title Tre-lagsarkitektur i ShortBig
+
+package "Presentation Layer" {
+  class AppContext
+  class PortfolioViewModel
+}
+
+package "Business Layer" {
+  class BuyStockService
+  class PortfolioQueryService
+}
+
+package "Persistence Layer" {
+  interface UnitOfWork
+  interface PortfolioDAO
+  interface OwnedStockDAO
+
+  class FileUnitOfWork
+  class PortfolioFileDAO
+  class OwnedStockFileDAO
+}
+
+PortfolioViewModel --> BuyStockService : køb/salg use case
+PortfolioViewModel --> PortfolioQueryService : læser porteføljedata
+
+BuyStockService --> UnitOfWork
+BuyStockService --> PortfolioDAO
+BuyStockService --> OwnedStockDAO
+PortfolioQueryService --> PortfolioDAO
+PortfolioQueryService --> OwnedStockDAO
+
+FileUnitOfWork ..|> UnitOfWork
+PortfolioFileDAO ..|> PortfolioDAO
+OwnedStockFileDAO ..|> OwnedStockDAO
+
+AppContext ..> PortfolioViewModel : sammensætter
+AppContext ..> BuyStockService : sammensætter
+AppContext ..> PortfolioQueryService : sammensætter
+AppContext ..> FileUnitOfWork : vælger implementation
+AppContext ..> PortfolioFileDAO : vælger implementation
+AppContext ..> OwnedStockFileDAO : vælger implementation
+
+note top of AppContext
+  Kun composition root:
+  opretter og forbinder objekter
+end note
+
+note bottom of BuyStockService
+  Transaction Script-eksempel:
+  én metode håndterer én hel use case
+end note
+
+legend bottom
+  Fuld optrukket pil = normalt runtime-flow
+  Stiplet pil = wiring / dependency injection
+endlegend
+
+@enduml

@@ -30,11 +30,20 @@ Use Codex with prompts like:
 - `topic-map.md`
 - `question-map.md`
 - `presentation-template.md`
+- `html-slide-workflow.md`
 - `answer-outline-question-1.md`
 - `flashcards.md`
 - `oral-exam-questions.md`
 - `weak-spots.md`
 - `cram-sheet.md`
+
+## HTML slide workflow
+
+If you are using the markdown-to-HTML presentation approach, see `html-slide-workflow.md` for the current conventions on:
+- per-slide markdown authoring
+- Danish `Talepunkter` in markdown only
+- examiner-facing HTML slide output
+- shared slide theme reuse
 
 ## Good standing instruction for study mode
 

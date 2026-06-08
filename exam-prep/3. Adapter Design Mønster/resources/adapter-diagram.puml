@@ -1,0 +1,81 @@
+@startuml Question3AdapterDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title Adapter Design Mønster i mit projekt
+
+package "Client" {
+  class MainViewController {
+    + initialize()
+  }
+
+  class ViewManager {
+    + setAlertNotificationManager(manager)
+    + getAlertNotificationManager()
+  }
+}
+
+package "Target" {
+  interface NotificationManager {
+    + notify(message, type)
+  }
+
+  enum NotificationType {
+    SUCCESS
+    INFO
+    WARNING
+    ERROR
+  }
+}
+
+package "Adapter" {
+  class CustomAlertBoxAdapter {
+    - adaptee : CustomAlertBox
+    + CustomAlertBoxAdapter(adaptee)
+    + notify(message, type)
+  }
+}
+
+package "Adaptee" {
+  class CustomAlertBox {
+    + showAlert(message, title, alertType)
+  }
+
+  enum AlertType {
+    INFO
+    WARNING
+    ERROR
+  }
+}
+
+MainViewController ..> CustomAlertBoxAdapter : opretter
+MainViewController ..> ViewManager : registrerer adapter
+ViewManager --> NotificationManager : bruger target-interface
+
+CustomAlertBoxAdapter ..|> NotificationManager
+CustomAlertBoxAdapter o--> CustomAlertBox : holder adaptee
+CustomAlertBoxAdapter ..> NotificationType : modtager
+CustomAlertBoxAdapter ..> AlertType : oversætter til
+CustomAlertBoxAdapter --> CustomAlertBox : showAlert(...)
+
+note right of CustomAlertBoxAdapter
+  Adapteren oversætter fra
+  notify(message, type)
+  til showAlert(message, title, alertType)
+end note
+
+note bottom of NotificationManager
+  Resten af systemet kender kun
+  dette interface og ikke den
+  konkrete alert-komponent.
+end note
+
+legend bottom
+  Fuld optrukket pil = runtime-kald
+  Stiplet pil = oprettelse eller afhængighed
+endlegend
+
+@enduml

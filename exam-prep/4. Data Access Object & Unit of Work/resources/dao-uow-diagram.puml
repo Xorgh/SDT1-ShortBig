@@ -1,0 +1,57 @@
+@startuml Question4DaoUnitOfWorkDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title DAO og Unit of Work i ShortBig
+
+package "Business" {
+  class BuyStockService
+}
+
+package "Interfaces" {
+  interface UnitOfWork
+  interface StockDAO
+  interface PortfolioDAO
+  interface OwnedStockDAO
+  interface TransactionDAO
+}
+
+package "File Persistence" {
+  class FileUnitOfWork
+  class StockFileDAO
+  class PortfolioFileDAO
+  class OwnedStockFileDAO
+  class TransactionFileDAO
+}
+
+BuyStockService --> UnitOfWork : begin/commit/rollback
+BuyStockService --> StockDAO
+BuyStockService --> PortfolioDAO
+BuyStockService --> OwnedStockDAO
+BuyStockService --> TransactionDAO
+
+FileUnitOfWork ..|> UnitOfWork
+StockFileDAO ..|> StockDAO
+PortfolioFileDAO ..|> PortfolioDAO
+OwnedStockFileDAO ..|> OwnedStockDAO
+TransactionFileDAO ..|> TransactionDAO
+
+StockFileDAO --> FileUnitOfWork
+PortfolioFileDAO --> FileUnitOfWork
+OwnedStockFileDAO --> FileUnitOfWork
+TransactionFileDAO --> FileUnitOfWork
+
+note top of BuyStockService
+  Én use case
+  bruger flere DAO'er
+end note
+
+note bottom of FileUnitOfWork
+  Fælles Unit of Work
+  for flere DAO'er
+end note
+
+@enduml

@@ -1,0 +1,65 @@
+@startuml Question6MvvmDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title MVVM i ShortBig
+
+package "View" {
+  class MarketViewController
+  class PortfolioViewController
+}
+
+package "ViewModel" {
+  class MarketViewModel {
+    + selectedStockProperty()
+    + getStocks()
+  }
+
+  class PortfolioViewModel {
+    + selectedBuySymbolProperty()
+    + buyStock()
+    + sellStock()
+  }
+}
+
+package "Model" {
+  class StockQueryService
+  class PortfolioQueryService
+  class BuyStockService
+  class SellStockService
+  class StockDTO
+}
+
+MarketViewController --> MarketViewModel : binder / kalder
+PortfolioViewController --> PortfolioViewModel : binder / kalder
+
+MarketViewModel --> StockQueryService : læser data
+MarketViewModel --> StockDTO : eksponerer data
+
+PortfolioViewModel --> PortfolioQueryService : læser data
+PortfolioViewModel --> BuyStockService : udfører køb
+PortfolioViewModel --> SellStockService : udfører salg
+
+note bottom of MarketViewController
+  View viser data
+  og sender brugerinput videre.
+end note
+
+note bottom of PortfolioViewModel
+  ViewModel holder UI-tilstand,
+  properties og handlinger.
+end note
+
+note bottom of StockQueryService
+  Wiring sker i AppContext /
+  ControllerFactory uden for selve flowet.
+end note
+
+legend bottom
+  Fuld pil = kald / dataflow
+endlegend
+
+@enduml

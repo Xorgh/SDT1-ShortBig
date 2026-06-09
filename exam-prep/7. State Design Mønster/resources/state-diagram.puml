@@ -1,0 +1,70 @@
+@startuml Question7StateDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title State Design Mønster i ShortBig
+
+package "Context" {
+  class LiveStock {
+    - currentState : LiveStockState
+    + updatePrice()
+  }
+}
+
+package "State" {
+  interface LiveStockState {
+    + calculateNewPrice(currentPrice)
+    + getName()
+  }
+}
+
+package "Concrete states" {
+  class SteadyState
+  class GrowingState
+  class DecliningState
+  class BankruptState
+  class ResetState
+}
+
+package "Transition" {
+  class TransitionManager {
+    + getNextState(currentState, ticks)
+  }
+}
+
+LiveStock *-- LiveStockState : holder state
+LiveStock --> LiveStockState : delegerer adfaerd til
+LiveStock *-- TransitionManager : bruger til skift
+
+SteadyState ..|> LiveStockState
+GrowingState ..|> LiveStockState
+DecliningState ..|> LiveStockState
+BankruptState ..|> LiveStockState
+ResetState ..|> LiveStockState
+
+TransitionManager ..> SteadyState : returnerer
+TransitionManager ..> GrowingState : returnerer
+TransitionManager ..> DecliningState : returnerer
+TransitionManager ..> BankruptState : returnerer
+TransitionManager ..> ResetState : returnerer
+
+note right of LiveStock
+  Context skifter adfaerd
+  ved at skifte state-objekt.
+end note
+
+note bottom of TransitionManager
+  Overgange er samlet her,
+  saa state-klasserne ikke
+  kender alle andre states.
+end note
+
+legend bottom
+  Fuld pil = runtime-kald
+  Stiplet pil = implementering eller afhængighed
+endlegend
+
+@enduml

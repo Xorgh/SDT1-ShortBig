@@ -1,0 +1,43 @@
+@startuml Question8StrategyDiagram
+left to right direction
+skinparam linetype ortho
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+title Strategy Design Mønster
+
+package "Context" {
+  class BuyStockService {
+    - feeStrategy : IFeeStrategy
+    + handleBuyStockRequest()
+  }
+}
+
+package "Strategy" {
+  interface IFeeStrategy {
+    + calculate(pricePerShare, numberOfShares)
+  }
+}
+
+package "Concrete strategies" {
+  class FlatFeeStrategy
+  class PercentageFeeStrategy
+}
+
+BuyStockService --> IFeeStrategy : bruger
+FlatFeeStrategy ..|> IFeeStrategy
+PercentageFeeStrategy ..|> IFeeStrategy
+
+note bottom of BuyStockService
+  Context kalder strategien
+  gennem interfacet.
+end note
+
+legend bottom
+  Context = bruger adfærden
+  Strategy = fælles interface
+  Concrete strategies = udskiftelige varianter
+endlegend
+
+@enduml
